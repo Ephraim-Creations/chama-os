@@ -1,0 +1,7 @@
+DROP POLICY IF EXISTS "chamas insert by platform admin" ON public.chamas;
+
+CREATE POLICY "chamas insert by creator"
+ON public.chamas
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = created_by);
