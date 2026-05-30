@@ -52,7 +52,7 @@ function Privacy() {
                       <li>• Email address</li>
                       <li>• First name and last name</li>
                       <li>• Phone number</li>
-                      <li>• Address, State, Province, ZIP/Postal code, City</li>
+                      <li>• Address, City/town</li>
                       <li>• Chama group information</li>
                       <li>• Financial transaction records (within your chama)</li>
                     </ul>

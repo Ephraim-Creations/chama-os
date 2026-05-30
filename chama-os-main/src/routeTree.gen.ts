@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StartRouteImport } from './routes/start'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +20,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AppCreateRouteImport } from './routes/app.create'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
@@ -44,6 +46,11 @@ const TermsRoute = TermsRouteImport.update({
 const StartRoute = StartRouteImport.update({
   id: '/start',
   path: '/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SetupRoute = SetupRouteImport.update({
@@ -83,6 +90,11 @@ const AuthedRoute = AuthedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppCreateRoute = AppCreateRouteImport.update({
@@ -174,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
+  '/signup': typeof SignupRoute
   '/start': typeof StartRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
@@ -192,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
   '/app/create': typeof AppCreateRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -201,6 +215,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
+  '/signup': typeof SignupRoute
   '/start': typeof StartRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
@@ -219,6 +234,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
   '/app/create': typeof AppCreateRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -230,6 +246,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
+  '/signup': typeof SignupRoute
   '/start': typeof StartRoute
   '/terms': typeof TermsRoute
   '/_authed/billing': typeof AuthedBillingRoute
@@ -248,6 +265,7 @@ export interface FileRoutesById {
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/transparency': typeof AuthedTransparencyRoute
   '/app/create': typeof AppCreateRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -259,6 +277,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/privacy'
     | '/setup'
+    | '/signup'
     | '/start'
     | '/terms'
     | '/billing'
@@ -277,6 +296,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transparency'
     | '/app/create'
+    | '/auth/reset-password'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -286,6 +306,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/privacy'
     | '/setup'
+    | '/signup'
     | '/start'
     | '/terms'
     | '/billing'
@@ -304,6 +325,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transparency'
     | '/app/create'
+    | '/auth/reset-password'
   id:
     | '__root__'
     | '/'
@@ -314,6 +336,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/privacy'
     | '/setup'
+    | '/signup'
     | '/start'
     | '/terms'
     | '/_authed/billing'
@@ -332,6 +355,7 @@ export interface FileRouteTypes {
     | '/_authed/settings'
     | '/_authed/transparency'
     | '/app/create'
+    | '/auth/reset-password'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -343,8 +367,10 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   SetupRoute: typeof SetupRoute
+  SignupRoute: typeof SignupRoute
   StartRoute: typeof StartRoute
   TermsRoute: typeof TermsRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -361,6 +387,13 @@ declare module '@tanstack/react-router' {
       path: '/start'
       fullPath: '/start'
       preLoaderRoute: typeof StartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/setup': {
@@ -417,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/create': {
@@ -592,8 +632,10 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   SetupRoute: SetupRoute,
+  SignupRoute: SignupRoute,
   StartRoute: StartRoute,
   TermsRoute: TermsRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

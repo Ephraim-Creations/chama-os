@@ -20,6 +20,7 @@ function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    mobile: "",
     subject: "",
     message: "",
   });
@@ -35,7 +36,7 @@ function Contact() {
     // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setFormState("success");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setFormData({ name: "", email: "", mobile: "", subject: "", message: "" });
     setTimeout(() => setFormState("idle"), 3000);
   };
 
@@ -44,15 +45,15 @@ function Contact() {
       icon: Mail,
       title: "Email",
       description: "Send us a message anytime",
-      value: "hello@ephraimcreations.co.ke",
-      href: "mailto:hello@ephraimcreations.co.ke",
+      value: "info@ephraimcreations.co.ke",
+      href: "mailto:info@ephraimcreations.co.ke",
     },
     {
       icon: Phone,
       title: "Phone",
       description: "Call us during business hours",
-      value: "+254 700 000 000",
-      href: "tel:+254700000000",
+      value: "+254 112 268 873",
+      href: "tel:+254112268873",
     },
     {
       icon: MapPin,
@@ -134,7 +135,7 @@ function Contact() {
                   onChange={handleChange}
                   required
                   className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="John Doe"
+                  placeholder="Mary M..."
                 />
               </div>
               <div>
@@ -146,22 +147,36 @@ function Contact() {
                   onChange={handleChange}
                   required
                   className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="john@example.com"
+                  placeholder="johnexample@gmail.com"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Subject</label>
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                required
-                className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="How can we help?"
-              />
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Mobile Number</label>
+                <input
+                  type="tel"
+                  name="mobile"
+                  value={formData.mobile}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="+254 712 345 678"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Subject</label>
+                <input
+                  type="text"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="How can we help?"
+                />
+              </div>
             </div>
 
             <div>

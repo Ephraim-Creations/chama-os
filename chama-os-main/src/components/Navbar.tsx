@@ -23,6 +23,7 @@ export function Navbar() {
             <a href="/#pricing" className="hover:text-foreground">Pricing</a>
             <a href="/#solution" className="hover:text-foreground">Why Chama-OS</a>
             <a href="/about" className="hover:text-foreground">About</a>
+            <a href="/contact" className="hover:text-foreground">Contact</a>
           </nav>
 
           <div className="flex items-center gap-2">

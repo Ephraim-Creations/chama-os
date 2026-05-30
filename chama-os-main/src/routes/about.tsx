@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
+import logoImage from "@/assets/chama-OS-logo.png";
 import { ArrowRight, CheckCircle2, Heart, Zap, Users, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
@@ -23,7 +24,7 @@ function About() {
 
   const team = [
     { name: "Ephraim", role: "Founder & Visionary", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" },
-    { name: "Evans", role: "Co-Founder & Lead Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop" },
+    { name: "Evans", role: "Co-Founder & Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop" },
   ];
 
   return (
@@ -73,8 +74,8 @@ function About() {
             </div>
             <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 border border-border aspect-square flex items-center justify-center">
               <img
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=500&fit=crop"
-                alt="Team collaboration"
+             src={logoImage}
+                alt="Chama-OS-logo"
                 className="w-full h-full object-cover"
               />
             </div>
