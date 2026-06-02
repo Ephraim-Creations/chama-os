@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { ChamaProvider } from "@/context/chama-context";
 import { ThemeProvider } from "next-themes";
+import { Preloader } from "@/components/Preloader";
 
 import appCss from "../styles.css?url";
 import logoImage from "@/assets/chama-OS-logo.png";
@@ -127,6 +128,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
         <ChamaProvider>
+          <Preloader />
           <Outlet />
         </ChamaProvider>
       </ThemeProvider>
