@@ -1,0 +1,25 @@
+-- 1. Feed comments: allow author/chair delete, author update
+CREATE POLICY "comments delete by author or chair"
+ON public.feed_comments
+FOR DELETE
+USING (
+  auth.uid() = author_id
+  OR EXISTS (
+    SELECT 1 FROM public.feed_posts p
+    WHERE p.id = feed_comments.post_id
+      AND public.has_chama_role(p.chama_id, auth.uid(), 'chairperson'::app_role)
+  )
+);
+
+CREATE POLICY "comments update by author"
+ON public.feed_comments
+FOR UPDATE
+USING (auth.uid() = author_id);
+
+-- 2. Memberships: remove self-join, require chairperson or server-side admin insert
+DROP POLICY IF EXISTS "memberships insert by chair or self-join" ON public.memberships;
+
+CREATE POLICY "memberships insert by chair"
+ON public.memberships
+FOR INSERT
+WITH CHECK (public.has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role));

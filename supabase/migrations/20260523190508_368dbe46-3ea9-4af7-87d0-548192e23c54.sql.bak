@@ -1,0 +1,39 @@
+
+create type public.invite_status as enum ('pending','accepted','revoked');
+
+create table public.chama_invites (
+  id uuid primary key default gen_random_uuid(),
+  chama_id uuid not null references public.chamas(id) on delete cascade,
+  email text not null,
+  role public.app_role not null default 'member',
+  token text not null unique default gen_random_uuid()::text,
+  status public.invite_status not null default 'pending',
+  invited_by uuid not null,
+  created_at timestamptz not null default now(),
+  accepted_at timestamptz
+);
+
+create index idx_chama_invites_email on public.chama_invites (lower(email));
+create index idx_chama_invites_chama on public.chama_invites (chama_id);
+
+alter table public.chama_invites enable row level security;
+
+create policy "invites read by chama members"
+  on public.chama_invites for select
+  using (public.is_member_of(chama_id, auth.uid()));
+
+create policy "invites read by invitee email"
+  on public.chama_invites for select
+  using (lower(email) = lower(coalesce(auth.jwt() ->> 'email','')));
+
+create policy "invites insert by chair"
+  on public.chama_invites for insert
+  with check (public.has_chama_role(chama_id, auth.uid(), 'chairperson') and invited_by = auth.uid());
+
+create policy "invites update by chair"
+  on public.chama_invites for update
+  using (public.has_chama_role(chama_id, auth.uid(), 'chairperson'));
+
+create policy "invites update by invitee email"
+  on public.chama_invites for update
+  using (lower(email) = lower(coalesce(auth.jwt() ->> 'email','')));

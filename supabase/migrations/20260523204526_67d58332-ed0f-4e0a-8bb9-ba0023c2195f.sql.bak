@@ -1,0 +1,61 @@
+
+-- 1) Tighten chama_invites read policy
+DROP POLICY IF EXISTS "invites read by chama members" ON public.chama_invites;
+CREATE POLICY "invites read by chair or invitee"
+  ON public.chama_invites FOR SELECT
+  USING (
+    public.has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role)
+    OR lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+
+-- 2) Prevent role escalation via self-join
+DROP POLICY IF EXISTS "memberships insert by chair or self-join" ON public.memberships;
+CREATE POLICY "memberships insert by chair or self-join"
+  ON public.memberships FOR INSERT
+  WITH CHECK (
+    public.has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role)
+    OR (auth.uid() = user_id AND role = 'member'::app_role)
+  );
+
+-- 3) Move phone to a private, self-only table
+CREATE TABLE IF NOT EXISTS public.profile_private (
+  id uuid PRIMARY KEY,
+  phone text,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.profile_private ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "private self read" ON public.profile_private;
+CREATE POLICY "private self read" ON public.profile_private
+  FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "private self insert" ON public.profile_private;
+CREATE POLICY "private self insert" ON public.profile_private
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "private self update" ON public.profile_private;
+CREATE POLICY "private self update" ON public.profile_private
+  FOR UPDATE USING (auth.uid() = id);
+
+INSERT INTO public.profile_private (id, phone)
+  SELECT id, phone FROM public.profiles WHERE phone IS NOT NULL
+  ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.profiles DROP COLUMN IF EXISTS phone;
+
+-- 4) DELETE policies for contributions and investments
+DROP POLICY IF EXISTS "contributions delete by treasurer or chair" ON public.contributions;
+CREATE POLICY "contributions delete by treasurer or chair"
+  ON public.contributions FOR DELETE
+  USING (
+    public.has_chama_role(chama_id, auth.uid(), 'treasurer'::app_role)
+    OR public.has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role)
+  );
+
+DROP POLICY IF EXISTS "investments delete by treasurer or chair" ON public.investments;
+CREATE POLICY "investments delete by treasurer or chair"
+  ON public.investments FOR DELETE
+  USING (
+    public.has_chama_role(chama_id, auth.uid(), 'treasurer'::app_role)
+    OR public.has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role)
+  );

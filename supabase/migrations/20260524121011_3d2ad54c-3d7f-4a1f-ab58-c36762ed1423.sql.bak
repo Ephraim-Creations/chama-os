@@ -1,0 +1,32 @@
+
+-- 1. Restrict chama creation at DB level to platform admin
+DROP POLICY IF EXISTS "chamas insert by authed" ON public.chamas;
+CREATE POLICY "chamas insert by platform admin"
+ON public.chamas
+FOR INSERT
+WITH CHECK (
+  auth.uid() = created_by
+  AND lower(coalesce(auth.jwt() ->> 'email', '')) = 'ephraimcreations254@gmail.com'
+);
+
+-- 2. Allow chairpersons to delete meetings
+CREATE POLICY "meetings delete by chair"
+ON public.meetings
+FOR DELETE
+USING (has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role));
+
+-- 3. Prevent chairperson from updating their own membership row,
+--    and prevent promoting anyone (else) to chairperson via RLS.
+DROP POLICY IF EXISTS "memberships update by chair" ON public.memberships;
+CREATE POLICY "memberships update by chair limited"
+ON public.memberships
+FOR UPDATE
+USING (
+  has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role)
+  AND user_id <> auth.uid()
+)
+WITH CHECK (
+  has_chama_role(chama_id, auth.uid(), 'chairperson'::app_role)
+  AND user_id <> auth.uid()
+  AND role <> 'chairperson'::app_role
+);
