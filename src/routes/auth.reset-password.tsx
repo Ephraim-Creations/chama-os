@@ -136,12 +136,12 @@ function ResetPasswordPage() {
               </div>
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              {step === "email" ? "Check your email" : "Password reset!"}
+              {sessionVerified ? "Password reset!" : "Check your email"}
             </h1>
             <p className="mt-4 text-muted-foreground">
-              {step === "email"
-                ? "We've sent a password reset link to your email. Click it to reset your password."
-                : "Your password has been reset successfully. You can now sign in with your new password."}
+              {sessionVerified
+                ? "Your password has been reset successfully. You can now sign in with your new password."
+                : "We've sent a password reset link to your email. Click it to reset your password."}
             </p>
             <Button
               onClick={() => navigate({ to: "/login" })}
