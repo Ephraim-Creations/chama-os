@@ -25,7 +25,7 @@ function Privacy() {
       </section>
 
       {/* Content */}
-      <section className="py-16 md:py-24 px-4 md:px-8">
+      <section className="py-20 md:py-28 px-4 md:px-8">
         <div className="mx-auto max-w-3xl">
           <div className="space-y-12">
             <section>

@@ -46,7 +46,7 @@ function About() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 md:py-24 px-4 md:px-8 border-b border-border bg-muted/30">
+      <section className="py-20 md:py-28 px-4 md:px-8 border-b border-border bg-muted/30">
         <div className="mx-auto max-w-4xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -84,7 +84,7 @@ function About() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 md:py-24 px-4 md:px-8">
+      <section className="py-20 md:py-28 px-4 md:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Values</h2>
@@ -107,7 +107,7 @@ function About() {
       </section>
 
       {/* Team Section */}
-      <section className="py-16 md:py-24 px-4 md:px-8 border-t border-border bg-muted/30">
+      <section className="py-20 md:py-28 px-4 md:px-8 border-t border-border bg-muted/30">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Meet the Team</h2>
@@ -134,7 +134,7 @@ function About() {
       </section>
 
       {/* Story Section */}
-      <section className="py-16 md:py-24 px-4 md:px-8">
+      <section className="py-20 md:py-28 px-4 md:px-8">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">Why We Started</h2>
           <div className="space-y-6 text-lg text-muted-foreground">
@@ -155,7 +155,7 @@ function About() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 px-4 md:px-8 border-t border-border bg-gradient-to-b from-primary/10 to-background">
+      <section className="py-20 md:py-28 px-4 md:px-8 border-t border-border bg-gradient-to-b from-primary/10 to-background">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Digitize Your Chama?</h2>
           <p className="text-lg text-muted-foreground mb-8">
