@@ -83,6 +83,9 @@ export function Navbar() {
                 <a href="/about" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
                   About
                 </a>
+                <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
+                  Contact
+                </a>
               </div>
 
               <div className="mt-12 space-y-4">
