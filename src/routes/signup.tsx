@@ -95,7 +95,7 @@ function SignupPage() {
       }
 
       // Create profile
-      const { error: profileError } = await supabase
+      const { error: profileError } = await (supabase as any)
         .from("profiles")
         .insert({
           id: authData.user.id,
