@@ -163,18 +163,18 @@ function About() {
             Join hundreds of chamas already using Chama-OS to manage their finances transparently.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/#"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90"
+            <Link
+              to="/start"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Get Started <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 font-semibold text-foreground hover:bg-muted"
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 font-semibold text-foreground hover:bg-muted transition-colors"
             >
               Contact Us
-            </a>
+            </Link>
           </div>
         </div>
       </section>
