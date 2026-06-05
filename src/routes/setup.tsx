@@ -54,7 +54,7 @@ function SetupPage() {
 
       for (const table of tables) {
         try {
-          const { error } = await supabase
+          const { error } = await (supabase as any)
             .from(table)
             .select('id', { count: 'exact' })
             .limit(1);

@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
 import logoImage from "@/assets/chama-OS-logo.png";
+import ephFounderImage from "@/assets/Eph-Founder.png";
 import { ArrowRight, CheckCircle2, Heart, Zap, Users, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
@@ -23,15 +24,15 @@ function About() {
   ];
 
   const team = [
-    { name: "Ephraim", role: "Founder & Visionary", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" },
-    { name: "Evans", role: "Co-Founder & Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop" },
+    { name: "Ephraim", role: "Founder & Visionary", image: ephFounderImage },
+    { name: "Evans", role: "Co-Founder & Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop" },
   ];
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
       {/* Header Section */}
-      <section className="border-b border-border pt-20 pb-12 md:pt-28 md:pb-16 px-4 md:px-0">
+      <section className="border-b border-border pt-20 pb-12 md:pt-28 md:pb-16 px-4 md:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 inline-block rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
             Our Story
@@ -46,7 +47,7 @@ function About() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 md:py-24 px-4 md:px-0 border-b border-border bg-muted/30">
+      <section className="py-20 md:py-28 px-4 md:px-8 border-b border-border bg-muted/30">
         <div className="mx-auto max-w-4xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -72,11 +73,11 @@ function About() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 border border-border aspect-square flex items-center justify-center">
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 border border-border aspect-square flex items-center justify-center p-12">
               <img
-             src={logoImage}
-                alt="Chama-OS-logo"
-                className="w-full h-full object-cover"
+                src={logoImage}
+                alt="Chama-OS logo"
+                className="w-full h-full object-contain"
               />
             </div>
           </div>
@@ -84,7 +85,7 @@ function About() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 md:py-24 px-4 md:px-0">
+      <section className="py-20 md:py-28 px-4 md:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Values</h2>
@@ -107,7 +108,7 @@ function About() {
       </section>
 
       {/* Team Section */}
-      <section className="py-16 md:py-24 px-4 md:px-0 border-t border-border bg-muted/30">
+      <section className="py-20 md:py-28 px-4 md:px-8 border-t border-border bg-muted/30">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Meet the Team</h2>
@@ -134,7 +135,7 @@ function About() {
       </section>
 
       {/* Story Section */}
-      <section className="py-16 md:py-24 px-4 md:px-0">
+      <section className="py-20 md:py-28 px-4 md:px-8">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">Why We Started</h2>
           <div className="space-y-6 text-lg text-muted-foreground">
@@ -155,25 +156,25 @@ function About() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 px-4 md:px-0 border-t border-border bg-gradient-to-b from-primary/10 to-background">
+      <section className="py-20 md:py-28 px-4 md:px-8 border-t border-border bg-gradient-to-b from-primary/10 to-background">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Digitize Your Chama?</h2>
           <p className="text-lg text-muted-foreground mb-8">
             Join hundreds of chamas already using Chama-OS to manage their finances transparently.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/#"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90"
+            <Link
+              to="/start"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Get Started <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 font-semibold text-foreground hover:bg-muted"
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 font-semibold text-foreground hover:bg-muted transition-colors"
             >
               Contact Us
-            </a>
+            </Link>
           </div>
         </div>
       </section>

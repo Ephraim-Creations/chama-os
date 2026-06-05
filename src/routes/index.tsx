@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import {
-  Sprout, ShieldCheck, Wallet, HandCoins, CalendarDays, MessageSquare,
-  Users, TrendingUp, ArrowRight, CheckCircle2, Check, Menu, X,
+  ShieldCheck, Wallet, HandCoins, CalendarDays, MessageSquare,
+  Users, TrendingUp, ArrowRight, CheckCircle2, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroDark from "@/assets/hero-dark.png";
 import heroLight from "@/assets/hero-light.jpg";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -69,116 +69,7 @@ function ProductOfEphraimCreations() {
   );
 }
 
-function Nav() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  return (
-    <>
-      <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
-          <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-            <div className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-lg sm:rounded-xl bg-primary text-primary-foreground">
-              <Sprout className="h-4 w-4 sm:h-5 sm:w-5" />
-            </div>
-            <div className="font-bold tracking-tight text-sm sm:text-base truncate">Chama-OS</div>
-          </Link>
-
-          <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
-            <a href="#features" className="hover:text-foreground">Features</a>
-            <a href="#how" className="hover:text-foreground">How it works</a>
-            <a href="#pricing" className="hover:text-foreground">Pricing</a>
-            <a href="#solution" className="hover:text-foreground">Why Chama-OS</a>
-            <a href="/about" className="hover:text-foreground">About</a>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground md:hidden"
-              aria-label="Open menu"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
-              <Link to="/login">Sign in</Link>
-            </Button>
-            <Button asChild className="hidden h-10 rounded-xl font-semibold md:inline-flex">
-              <Link to="/start">
-                Create my Chama <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background text-foreground">
-          <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-border px-4 py-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="grid h-10 w-10 place-items-center rounded-2xl bg-primary text-primary-foreground">
-                  <Sprout className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 text-lg font-bold tracking-tight truncate">Chama-OS</div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground"
-                aria-label="Close menu"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-8">
-              <div className="space-y-6 text-xl font-semibold">
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
-                  Features
-                </a>
-                <a href="#how" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
-                  How it works
-                </a>
-                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
-                  Pricing
-                </a>
-                <a href="#solution" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
-                  Why Chama-OS
-                </a>
-                    <a href="/about" onClick={() => setMobileMenuOpen(false)} className="block text-foreground hover:text-primary">
-                      About
-                    </a>
-              </div>
-
-              <div className="mt-12 space-y-4">
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  to="/start"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-2xl bg-primary px-5 py-4 text-center font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  Create my Chama
-                </Link>
-              </div>
-            </div>
-
-            <div className="border-t border-border px-6 py-5 text-center text-sm text-muted-foreground">
-              Powered by Ephraim Creations
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
+// (Legacy inline Nav() removed — we use the shared <Navbar /> component.)
 
 function Hero() {
   const { resolvedTheme } = useTheme();
@@ -193,20 +84,26 @@ function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,color-mix(in_oklab,var(--color-primary)_18%,transparent),transparent)]" />
+      <div className="absolute left-1/2 top-0 -z-10 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <div className="mx-auto max-w-7xl px-4 pb-12 sm:pb-16 pt-16 sm:pt-20 md:px-8 md:pt-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mx-auto max-w-3xl text-center"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 backdrop-blur px-3 py-1 text-xs font-medium text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Records-only · We never hold your money
           </div>
-          <h1 className="mt-4 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+          <h1 className="mt-5 sm:mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
             Transparent records for <span className="text-primary">every chama</span>.
           </h1>
-          <p className="mx-auto mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg text-muted-foreground">
+          <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg text-muted-foreground">
             Track savings, loans, meetings, investments and financial activity in one transparent
             system. Every member sees the same truth — in real time.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild className="h-12 rounded-xl px-6 text-[15px] font-semibold">
+            <Button asChild className="h-12 rounded-xl px-6 text-[15px] font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02]">
               <Link to="/start">
                 Create my Chama <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -215,10 +112,15 @@ function Hero() {
               <Link to="/login">Sign in</Link>
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="relative mx-auto mt-14 max-w-6xl">
-          <div className="rounded-2xl border border-border bg-card p-2 shadow-2xl shadow-primary/10">
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+          className="relative mx-auto mt-14 max-w-6xl"
+        >
+          <div className="rounded-2xl border border-border bg-card p-2 shadow-2xl shadow-primary/10 ring-1 ring-primary/5">
             <img
               src={heroImg}
               alt="Chama-OS dashboard preview showing savings analytics, member contributions and KPIs"
@@ -227,7 +129,7 @@ function Hero() {
               className="rounded-xl"
             />
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -540,35 +442,4 @@ function CTA() {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="border-t border-border bg-muted/30 py-10">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-8">
-        <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground md:flex-row md:gap-2">
-          <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Sprout className="h-4 w-4" />
-            </div>
-            © 2026 Chama-OS · Records-only
-          </div>
-          <span className="hidden md:inline">·</span>
-          <a
-            href="https://www.ephraimcreations.co.ke/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-primary font-semibold"
-          >
-            Powered by Ephraim Creations
-          </a>
-        </div>
-        <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
-          <a href="/about" className="hover:text-foreground">About</a>
-          <a href="/contact" className="hover:text-foreground">Contact</a>
-          <a href="#pricing" className="hover:text-foreground">Pricing</a>
-          <a href="/privacy" className="hover:text-foreground">Privacy</a>
-          <a href="/terms" className="hover:text-foreground">Terms</a>
-        </div>
-      </div>
-    </footer>
-  );
-}
+// (Legacy inline Footer() removed — we use the shared <PageFooter /> component.)
