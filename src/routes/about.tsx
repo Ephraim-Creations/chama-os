@@ -24,8 +24,8 @@ function About() {
   ];
 
   const team = [
-    { name: "Ephraim", role: "Founder & Visionary", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" },
-    { name: "Evans", role: "Co-Founder & Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop" },
+    { name: "Ephraim", role: "Founder & Visionary", image: ephFounderImage },
+    { name: "Evans", role: "Co-Founder & Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop" },
   ];
 
   return (
