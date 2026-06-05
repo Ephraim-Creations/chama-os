@@ -17,7 +17,7 @@ function Privacy() {
     <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
       {/* Header */}
-      <section className="border-b border-border pt-20 pb-12 md:pt-28 md:pb-16 px-4 md:px-0">
+      <section className="border-b border-border pt-20 pb-12 md:pt-28 md:pb-16 px-4 md:px-8">
         <div className="mx-auto max-w-4xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">Privacy Policy</h1>
           <p className="text-muted-foreground text-lg">Last updated: May 25, 2026</p>
@@ -25,7 +25,7 @@ function Privacy() {
       </section>
 
       {/* Content */}
-      <section className="py-16 md:py-24 px-4 md:px-0">
+      <section className="py-16 md:py-24 px-4 md:px-8">
         <div className="mx-auto max-w-3xl">
           <div className="space-y-12">
             <section>

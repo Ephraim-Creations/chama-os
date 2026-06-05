@@ -68,7 +68,7 @@ function Contact() {
     <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
       {/* Header Section */}
-      <section className="border-b border-border pt-20 pb-12 md:pt-28 md:pb-16 px-4 md:px-0">
+      <section className="border-b border-border pt-20 pb-12 md:pt-28 md:pb-16 px-4 md:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 inline-block rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
             Get in Touch
@@ -83,7 +83,7 @@ function Contact() {
       </section>
 
       {/* Contact Methods */}
-      <section className="py-16 md:py-24 px-4 md:px-0 bg-muted/30 border-b border-border">
+      <section className="py-16 md:py-24 px-4 md:px-8 bg-muted/30 border-b border-border">
         <div className="mx-auto max-w-6xl">
           <div className="grid md:grid-cols-3 gap-6">
             {contactMethods.map((method) => (
@@ -105,7 +105,7 @@ function Contact() {
       </section>
 
       {/* Contact Form */}
-      <section className="py-16 md:py-24 px-4 md:px-0">
+      <section className="py-16 md:py-24 px-4 md:px-8">
         <div className="mx-auto max-w-2xl">
           <div className="mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Send us a message</h2>
@@ -210,7 +210,7 @@ function Contact() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24 px-4 md:px-0 border-t border-border bg-muted/30">
+      <section className="py-16 md:py-24 px-4 md:px-8 border-t border-border bg-muted/30">
         <div className="mx-auto max-w-3xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
