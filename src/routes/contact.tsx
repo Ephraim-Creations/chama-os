@@ -115,11 +115,11 @@ function Contact() {
           </div>
 
           {formState === "success" && (
-            <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 p-6 flex items-start gap-4">
-              <CheckCircle2 className="h-6 w-6 text-green-600 mt-0.5 shrink-0" />
+            <div className="mb-6 rounded-2xl border border-success/30 bg-success/10 p-6 flex items-start gap-4">
+              <CheckCircle2 className="h-6 w-6 text-success mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-semibold text-green-900">Message sent successfully!</h3>
-                <p className="text-sm text-green-700">We'll get back to you shortly.</p>
+                <h3 className="font-semibold text-foreground">Message sent successfully!</h3>
+                <p className="text-sm text-muted-foreground">We'll get back to you shortly.</p>
               </div>
             </div>
           )}
