@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import {
-  Sprout, ShieldCheck, Wallet, HandCoins, CalendarDays, MessageSquare,
-  Users, TrendingUp, ArrowRight, CheckCircle2, Check, Menu, X,
+  ShieldCheck, Wallet, HandCoins, CalendarDays, MessageSquare,
+  Users, TrendingUp, ArrowRight, CheckCircle2, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroDark from "@/assets/hero-dark.png";
 import heroLight from "@/assets/hero-light.jpg";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/")({
   component: Landing,
