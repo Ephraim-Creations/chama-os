@@ -84,20 +84,26 @@ function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,color-mix(in_oklab,var(--color-primary)_18%,transparent),transparent)]" />
+      <div className="absolute left-1/2 top-0 -z-10 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <div className="mx-auto max-w-7xl px-4 pb-12 sm:pb-16 pt-16 sm:pt-20 md:px-8 md:pt-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mx-auto max-w-3xl text-center"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 backdrop-blur px-3 py-1 text-xs font-medium text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Records-only · We never hold your money
           </div>
-          <h1 className="mt-4 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+          <h1 className="mt-5 sm:mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
             Transparent records for <span className="text-primary">every chama</span>.
           </h1>
-          <p className="mx-auto mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg text-muted-foreground">
+          <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg text-muted-foreground">
             Track savings, loans, meetings, investments and financial activity in one transparent
             system. Every member sees the same truth — in real time.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild className="h-12 rounded-xl px-6 text-[15px] font-semibold">
+            <Button asChild className="h-12 rounded-xl px-6 text-[15px] font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02]">
               <Link to="/start">
                 Create my Chama <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -106,10 +112,15 @@ function Hero() {
               <Link to="/login">Sign in</Link>
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="relative mx-auto mt-14 max-w-6xl">
-          <div className="rounded-2xl border border-border bg-card p-2 shadow-2xl shadow-primary/10">
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+          className="relative mx-auto mt-14 max-w-6xl"
+        >
+          <div className="rounded-2xl border border-border bg-card p-2 shadow-2xl shadow-primary/10 ring-1 ring-primary/5">
             <img
               src={heroImg}
               alt="Chama-OS dashboard preview showing savings analytics, member contributions and KPIs"
@@ -118,7 +129,7 @@ function Hero() {
               className="rounded-xl"
             />
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
