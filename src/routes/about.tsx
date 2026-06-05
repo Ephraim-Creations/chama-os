@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
 import logoImage from "@/assets/chama-OS-logo.png";
+import ephFounderImage from "@/assets/Eph-Founder.png";
 import { ArrowRight, CheckCircle2, Heart, Zap, Users, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
