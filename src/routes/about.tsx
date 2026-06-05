@@ -73,11 +73,11 @@ function About() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 border border-border aspect-square flex items-center justify-center">
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 border border-border aspect-square flex items-center justify-center p-12">
               <img
-             src={logoImage}
-                alt="Chama-OS-logo"
-                className="w-full h-full object-cover"
+                src={logoImage}
+                alt="Chama-OS logo"
+                className="w-full h-full object-contain"
               />
             </div>
           </div>
