@@ -45,7 +45,7 @@ function formatKpi(k: typeof kpis[number]) {
 }
 
 function Dashboard() {
-  const { active } = useChama();
+  const { active, chamas, loading } = useChama();
   const isChair = active?.role === "chairperson";
   const setupKey = active ? `chamaos.setupDismissed.${active.id}` : null;
   const [setupDismissed, setSetupDismissed] = useState(true);
@@ -60,6 +60,13 @@ function Dashboard() {
     window.localStorage.setItem(setupKey, "1");
     setSetupDismissed(true);
   };
+
+  // Structured onboarding: no chama yet → guide the chair to create one
+  // right from the dashboard instead of bouncing to an interstitial page.
+  if (!loading && !active && chamas.length === 0) {
+    return <DashboardOnboarding />;
+  }
+
 
 
   return (
@@ -319,6 +326,72 @@ function Dashboard() {
               ))}
             </TableBody>
           </Table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardOnboarding() {
+  const steps = [
+    {
+      icon: Sparkles,
+      title: "Name your chama",
+      body: "Add the basics — name, type, location and a short description.",
+    },
+    {
+      icon: Settings2,
+      title: "Set the rules",
+      body: "Contribution amount, frequency, meeting cadence and quorum. Edit anytime.",
+    },
+    {
+      icon: Users,
+      title: "Invite your members",
+      body: "Add treasurer, secretary and members by email. They join when they sign in.",
+    },
+  ];
+  return (
+    <div className="mx-auto max-w-3xl">
+      <PageHeader
+        title="Welcome to Chama-OS"
+        description="You're signed in as the admin. Let's set up your first chama — it takes a couple of minutes."
+      />
+      <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-lg font-semibold">Set up your chama</div>
+            <p className="text-sm text-muted-foreground">
+              You'll become the Chairperson and can invite members right after.
+            </p>
+          </div>
+        </div>
+
+        <ol className="mt-6 space-y-3">
+          {steps.map((s, i) => (
+            <li key={s.title} className="flex gap-4 rounded-xl border border-border bg-background p-4">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-sm font-semibold">
+                {i + 1}
+              </div>
+              <div>
+                <div className="text-[15px] font-semibold">{s.title}</div>
+                <p className="mt-0.5 text-sm text-muted-foreground">{s.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <Button asChild className="h-12 flex-1 rounded-xl text-[15px] font-semibold">
+            <Link to="/app/create">
+              <Plus className="mr-2 h-4 w-4" /> Set up my chama
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-12 flex-1 rounded-xl text-[15px]">
+            <Link to="/app">I was invited — find my chama</Link>
+          </Button>
         </div>
       </div>
     </div>

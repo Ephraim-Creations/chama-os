@@ -121,11 +121,11 @@ function SignupPage() {
 
       setSuccess(true);
       setPendingVerification(false);
-      toast.success("Account created! Setting up your chama...");
-      
-      // Redirect to chama creation flow for first-time users
+      toast.success("Account created! Let's set up your chama.");
+
+      // Land in the dashboard; the structured onboarding lives there.
       setTimeout(() => {
-        navigate({ to: "/app/create" });
+        navigate({ to: "/dashboard" });
       }, 1500);
     } catch (err) {
       toast.error("Sign-up failed. Please try again.");

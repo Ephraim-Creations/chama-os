@@ -4,7 +4,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
-import { useChama } from "@/context/chama-context";
 
 export const Route = createFileRoute("/_authed")({
   component: AppLayout,
@@ -38,11 +37,8 @@ function AppLayout() {
 }
 
 function ChamaGate({ children }: { children: React.ReactNode }) {
-  const { active, loading } = useChama();
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!loading && !active) navigate({ to: "/app" });
-  }, [loading, active, navigate]);
-  if (loading || !active) return null;
+  // No redirect: routes (notably /dashboard) handle the empty-chama state
+  // themselves with a structured onboarding flow. This keeps the chair on
+  // the dashboard instead of bouncing them to an interstitial.
   return <>{children}</>;
 }

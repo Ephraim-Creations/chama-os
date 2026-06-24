@@ -32,7 +32,7 @@ export const Route = createFileRoute("/login")({
 
 function destinationFor(intent?: "create" | "join") {
   if (intent === "create") return "/app/create";
-  return "/app";
+  return "/dashboard";
 }
 
 function LoginPage() {
