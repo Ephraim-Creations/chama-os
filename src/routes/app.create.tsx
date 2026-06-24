@@ -371,6 +371,31 @@ function BasicsStep({
         </div>
       </div>
 
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-[1fr_180px]">
+        <div className="space-y-2">
+          <Label htmlFor="description">Short description (optional)</Label>
+          <Textarea
+            id="description"
+            placeholder="What's the purpose of this chama? (max 500 chars)"
+            value={basics.description}
+            onChange={(e) => setBasics({ ...basics, description: e.target.value.slice(0, 500) })}
+            className="min-h-[88px] rounded-xl text-[15px]"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="founded">Founded year (optional)</Label>
+          <Input
+            id="founded" type="number" min={1900} max={2100} placeholder="e.g. 2024"
+            value={basics.founded_year}
+            onChange={(e) => setBasics({ ...basics, founded_year: e.target.value })}
+            className="h-11 rounded-xl text-[15px]"
+          />
+        </div>
+      </div>
+
       {searching && <p className="text-xs text-muted-foreground">Checking existing chamas…</p>}
     </div>
   );
