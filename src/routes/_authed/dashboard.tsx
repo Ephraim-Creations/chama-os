@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
-  Wallet, TrendingUp, HandCoins, CheckCircle2, Users, Clock, Plus, Download,
+  Wallet, TrendingUp, HandCoins, CheckCircle2, Users, Clock, Plus, Download, Settings2, X,
 } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
   PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from "recharts";
+
 
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
@@ -45,6 +47,20 @@ function formatKpi(k: typeof kpis[number]) {
 function Dashboard() {
   const { active } = useChama();
   const isChair = active?.role === "chairperson";
+  const setupKey = active ? `chamaos.setupDismissed.${active.id}` : null;
+  const [setupDismissed, setSetupDismissed] = useState(true);
+
+  useEffect(() => {
+    if (!setupKey) return;
+    setSetupDismissed(window.localStorage.getItem(setupKey) === "1");
+  }, [setupKey]);
+
+  const dismissSetup = () => {
+    if (!setupKey) return;
+    window.localStorage.setItem(setupKey, "1");
+    setSetupDismissed(true);
+  };
+
 
   return (
     <div className="mx-auto max-w-[1400px]">
@@ -53,6 +69,19 @@ function Dashboard() {
         description="A clear, transparent view of your chama's activity this month."
         actions={
           <>
+            {isChair && active && setupDismissed && (
+              <Button
+                variant="outline"
+                className="h-11 rounded-xl text-[15px]"
+                onClick={() => {
+                  if (!setupKey) return;
+                  window.localStorage.removeItem(setupKey);
+                  setSetupDismissed(false);
+                }}
+              >
+                <Settings2 className="mr-2 h-4 w-4" /> Customize
+              </Button>
+            )}
             <Button variant="outline" className="h-11 rounded-xl text-[15px]">
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
@@ -63,28 +92,39 @@ function Dashboard() {
         }
       />
 
-      {isChair && active && (
-        <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
+      {isChair && active && !setupDismissed && (
+        <div className="relative mb-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+          <button
+            type="button"
+            aria-label="Dismiss setup"
+            onClick={dismissSetup}
+            className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <div className="flex items-start gap-3 pr-8">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-base font-semibold text-foreground">Your chama is ready.</div>
+              <div className="text-base font-semibold text-foreground">Set up your chama</div>
               <div className="text-sm text-muted-foreground">
-                Next step: invite your members by email and assign their roles. They'll sign in with Google
-                and land straight in this dashboard.
+                Invite members by email and assign their roles. You can reopen this anytime via Customize.
               </div>
             </div>
           </div>
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 flex-wrap gap-2">
             <InviteMemberDialog chamaId={active.id} />
             <Button asChild variant="outline" className="h-11 rounded-xl">
               <Link to="/members">Manage members</Link>
             </Button>
+            <Button variant="ghost" className="h-11 rounded-xl" onClick={dismissSetup}>
+              Done
+            </Button>
           </div>
         </div>
       )}
+
 
 
 
