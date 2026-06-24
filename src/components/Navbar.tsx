@@ -19,6 +19,7 @@ export function Navbar() {
   };
 
 
+
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
