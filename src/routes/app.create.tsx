@@ -271,11 +271,19 @@ function Stepper({ current }: { current: number }) {
 
 /* ---------- Step 1: Basics ---------- */
 
+type BasicsState = {
+  name: string;
+  type: string;
+  location: string;
+  description: string;
+  founded_year: string;
+};
+
 function BasicsStep({
   basics, setBasics, myMatches, publicMatches, searching, userEmail, openMine,
 }: {
-  basics: { name: string; type: string; location: string };
-  setBasics: (b: { name: string; type: string; location: string }) => void;
+  basics: BasicsState;
+  setBasics: React.Dispatch<React.SetStateAction<BasicsState>>;
   myMatches: Array<{ id: string; name: string; type: string; location: string | null; role: string }>;
   publicMatches: Suggestion[];
   searching: boolean;
