@@ -6,8 +6,6 @@ import { useState } from "react";
 import logoImage from "@/assets/chama-OS-logo.png";
 import { useAuth } from "@/hooks/use-auth";
 
-
-
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
@@ -17,8 +15,6 @@ export function Navbar() {
     await signOut();
     navigate({ to: "/login" });
   };
-
-
 
   return (
     <>
