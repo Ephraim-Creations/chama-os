@@ -107,25 +107,25 @@ export function Navbar() {
               </div>
 
               <div className="mt-12 space-y-4">
-              {user ? (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleSignOut();
-                  }}
-                  className="block w-full rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
-                >
-                  Sign out
-                </button>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
-                >
-                  Sign in
-                </Link>
-              )}
+                {user ? (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleSignOut();
+                    }}
+                    className="block w-full rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
+                  >
+                    Sign out
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
+                  >
+                    Sign in
+                  </Link>
+                )}
                 <Link
                   to="/start"
                   onClick={() => setMobileMenuOpen(false)}
