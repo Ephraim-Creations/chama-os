@@ -371,10 +371,8 @@ function BasicsStep({
         </div>
       </div>
 
-        </div>
-      </div>
-
       <div className="grid gap-5 sm:grid-cols-[1fr_180px]">
+
         <div className="space-y-2">
           <Label htmlFor="description">Short description (optional)</Label>
           <Textarea
