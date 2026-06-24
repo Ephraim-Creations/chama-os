@@ -4,7 +4,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
-import { useChama } from "@/context/chama-context";
 
 export const Route = createFileRoute("/_authed")({
   component: AppLayout,
