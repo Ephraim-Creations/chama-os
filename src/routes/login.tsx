@@ -132,8 +132,9 @@ function LoginPage() {
           <p className="mt-2 text-[15px] text-muted-foreground">{sub}</p>
 
           {formError && (
-            <Alert className="mt-6 border-destructive bg-destructive/10 text-destructive-foreground">
-              <AlertDescription>{formError}</AlertDescription>
+            <Alert className="mt-6 border-destructive bg-destructive/10">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <AlertDescription className="text-destructive font-medium">{formError}</AlertDescription>
             </Alert>
           )}
 
