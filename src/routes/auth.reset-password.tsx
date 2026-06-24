@@ -45,16 +45,28 @@ function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Check if user has a valid session (from email link)
+  // Detect recovery session — Supabase puts tokens in the URL hash and fires PASSWORD_RECOVERY
   useEffect(() => {
-    const verifySession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && type === "recovery") {
-        setSessionVerified(true);
-        setStep("reset");
-      }
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    const isRecoveryUrl = type === "recovery" || hash.includes("type=recovery") || hash.includes("access_token");
+
+    const enterResetMode = () => {
+      setSessionVerified(true);
+      setStep("reset");
     };
-    verifySession();
+
+    if (isRecoveryUrl) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) enterResetMode();
+      });
+    }
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (isRecoveryUrl && session)) {
+        enterResetMode();
+      }
+    });
+    return () => sub.subscription.unsubscribe();
   }, [type]);
 
   const handleRequestReset = async (e: React.FormEvent) => {
