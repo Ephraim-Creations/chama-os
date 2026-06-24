@@ -47,6 +47,20 @@ function formatKpi(k: typeof kpis[number]) {
 function Dashboard() {
   const { active } = useChama();
   const isChair = active?.role === "chairperson";
+  const setupKey = active ? `chamaos.setupDismissed.${active.id}` : null;
+  const [setupDismissed, setSetupDismissed] = useState(true);
+
+  useEffect(() => {
+    if (!setupKey) return;
+    setSetupDismissed(window.localStorage.getItem(setupKey) === "1");
+  }, [setupKey]);
+
+  const dismissSetup = () => {
+    if (!setupKey) return;
+    window.localStorage.setItem(setupKey, "1");
+    setSetupDismissed(true);
+  };
+
 
   return (
     <div className="mx-auto max-w-[1400px]">
