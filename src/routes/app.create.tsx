@@ -54,7 +54,13 @@ function CreateChamaPage() {
   const [busy, setBusy] = useState(false);
 
   // Step 1: Basics
-  const [basics, setBasics] = useState({ name: "", type: "investment", location: "" });
+  const [basics, setBasics] = useState({
+    name: "",
+    type: "investment",
+    location: "",
+    description: "",
+    founded_year: "" as string,
+  });
   const [publicMatches, setPublicMatches] = useState<Suggestion[]>([]);
   const [searching, setSearching] = useState(false);
 
@@ -68,6 +74,9 @@ function CreateChamaPage() {
     meeting_day: "Last Saturday",
     quorum_percent: 60,
     loan_approval_threshold: 60,
+    joining_fee: 0,
+    loan_interest_rate: 5,
+    loan_max_multiplier: 3,
   });
 
   // Step 3: Invites
