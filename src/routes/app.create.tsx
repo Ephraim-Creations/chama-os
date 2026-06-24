@@ -473,6 +473,24 @@ function RulesStep({
             onChange={(e) => setRules({ ...rules, loan_approval_threshold: Number(e.target.value) || 0 })}
             className="h-11 rounded-xl" />
         </div>
+        <div className="space-y-2">
+          <Label>One-time joining fee</Label>
+          <Input type="number" min={0} value={rules.joining_fee}
+            onChange={(e) => setRules({ ...rules, joining_fee: Number(e.target.value) || 0 })}
+            className="h-11 rounded-xl" />
+        </div>
+        <div className="space-y-2">
+          <Label>Loan interest rate (% per month)</Label>
+          <Input type="number" min={0} max={100} step="0.5" value={rules.loan_interest_rate}
+            onChange={(e) => setRules({ ...rules, loan_interest_rate: Number(e.target.value) || 0 })}
+            className="h-11 rounded-xl" />
+        </div>
+        <div className="space-y-2">
+          <Label>Max loan (× member's contributions)</Label>
+          <Input type="number" min={0} max={20} step="0.5" value={rules.loan_max_multiplier}
+            onChange={(e) => setRules({ ...rules, loan_max_multiplier: Number(e.target.value) || 0 })}
+            className="h-11 rounded-xl" />
+        </div>
       </div>
     </div>
   );
