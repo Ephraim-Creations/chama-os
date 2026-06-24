@@ -1,12 +1,20 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import logoImage from "@/assets/chama-OS-logo.png";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/login" });
+  };
 
   return (
     <>
@@ -36,9 +44,15 @@ export function Navbar() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
-              <Link to="/login">Sign in</Link>
-            </Button>
+            {user ? (
+              <Button variant="ghost" onClick={handleSignOut} className="hidden h-10 rounded-xl md:inline-flex">
+                <LogOut className="mr-1.5 h-4 w-4" /> Sign out
+              </Button>
+            ) : (
+              <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
+                <Link to="/login">Sign in</Link>
+              </Button>
+            )}
             <Button asChild className="hidden h-10 rounded-xl font-semibold md:inline-flex">
               <Link to="/start">
                 Create my Chama <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -89,13 +103,25 @@ export function Navbar() {
               </div>
 
               <div className="mt-12 space-y-4">
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
-                >
-                  Sign in
-                </Link>
+                {user ? (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleSignOut();
+                    }}
+                    className="block w-full rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
+                  >
+                    Sign out
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-2xl border border-border bg-card px-5 py-4 text-center font-semibold text-foreground hover:border-primary"
+                  >
+                    Sign in
+                  </Link>
+                )}
                 <Link
                   to="/start"
                   onClick={() => setMobileMenuOpen(false)}
