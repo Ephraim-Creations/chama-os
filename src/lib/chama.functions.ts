@@ -98,6 +98,12 @@ const rulesSchema = z.object({
   quorum_percent: z.number().min(1).max(100).default(50),
   loan_approval_threshold: z.number().min(1).max(100).default(50),
   currency: z.string().min(2).max(8).default("KES"),
+  // Extended optional fields surfaced in the create-chama onboarding.
+  description: z.string().max(500).default(""),
+  founded_year: z.number().int().min(1900).max(2100).optional().nullable(),
+  joining_fee: z.number().min(0).max(10_000_000).default(0),
+  loan_interest_rate: z.number().min(0).max(100).default(0),
+  loan_max_multiplier: z.number().min(0).max(20).default(3),
 }).partial();
 
 const inviteSeedSchema = z.object({

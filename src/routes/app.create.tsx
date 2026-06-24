@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -53,7 +54,13 @@ function CreateChamaPage() {
   const [busy, setBusy] = useState(false);
 
   // Step 1: Basics
-  const [basics, setBasics] = useState({ name: "", type: "investment", location: "" });
+  const [basics, setBasics] = useState({
+    name: "",
+    type: "investment",
+    location: "",
+    description: "",
+    founded_year: "" as string,
+  });
   const [publicMatches, setPublicMatches] = useState<Suggestion[]>([]);
   const [searching, setSearching] = useState(false);
 
@@ -67,6 +74,9 @@ function CreateChamaPage() {
     meeting_day: "Last Saturday",
     quorum_percent: 60,
     loan_approval_threshold: 60,
+    joining_fee: 0,
+    loan_interest_rate: 5,
+    loan_max_multiplier: 3,
   });
 
   // Step 3: Invites
@@ -143,12 +153,19 @@ function CreateChamaPage() {
         .map((i) => ({ email: i.email.trim().toLowerCase(), role: i.role }))
         .filter((i) => i.email.length > 0);
 
+      const foundedYear = basics.founded_year.trim()
+        ? Number(basics.founded_year.trim())
+        : null;
       const res = await createChama({
         data: {
           name: basics.name.trim(),
           type: basics.type as any,
           location: basics.location.trim() || null,
-          rules,
+          rules: {
+            ...rules,
+            description: basics.description.trim(),
+            founded_year: foundedYear ?? undefined,
+          },
           invites: cleanInvites,
         },
       });
@@ -254,11 +271,19 @@ function Stepper({ current }: { current: number }) {
 
 /* ---------- Step 1: Basics ---------- */
 
+type BasicsState = {
+  name: string;
+  type: string;
+  location: string;
+  description: string;
+  founded_year: string;
+};
+
 function BasicsStep({
   basics, setBasics, myMatches, publicMatches, searching, userEmail, openMine,
 }: {
-  basics: { name: string; type: string; location: string };
-  setBasics: (b: { name: string; type: string; location: string }) => void;
+  basics: BasicsState;
+  setBasics: React.Dispatch<React.SetStateAction<BasicsState>>;
   myMatches: Array<{ id: string; name: string; type: string; location: string | null; role: string }>;
   publicMatches: Suggestion[];
   searching: boolean;
@@ -346,6 +371,29 @@ function BasicsStep({
         </div>
       </div>
 
+      <div className="grid gap-5 sm:grid-cols-[1fr_180px]">
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Short description (optional)</Label>
+          <Textarea
+            id="description"
+            placeholder="What's the purpose of this chama? (max 500 chars)"
+            value={basics.description}
+            onChange={(e) => setBasics({ ...basics, description: e.target.value.slice(0, 500) })}
+            className="min-h-[88px] rounded-xl text-[15px]"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="founded">Founded year (optional)</Label>
+          <Input
+            id="founded" type="number" min={1900} max={2100} placeholder="e.g. 2024"
+            value={basics.founded_year}
+            onChange={(e) => setBasics({ ...basics, founded_year: e.target.value })}
+            className="h-11 rounded-xl text-[15px]"
+          />
+        </div>
+      </div>
+
       {searching && <p className="text-xs text-muted-foreground">Checking existing chamas…</p>}
     </div>
   );
@@ -360,6 +408,7 @@ function RulesStep({
     currency: string; contribution_amount: number; contribution_frequency: "weekly" | "biweekly" | "monthly" | "quarterly";
     late_penalty: number; meeting_cadence: "weekly" | "biweekly" | "monthly" | "quarterly";
     meeting_day: string; quorum_percent: number; loan_approval_threshold: number;
+    joining_fee: number; loan_interest_rate: number; loan_max_multiplier: number;
   };
   setRules: (r: any) => void;
 }) {
@@ -422,6 +471,24 @@ function RulesStep({
           <Label>Loan approval threshold (%)</Label>
           <Input type="number" min={1} max={100} value={rules.loan_approval_threshold}
             onChange={(e) => setRules({ ...rules, loan_approval_threshold: Number(e.target.value) || 0 })}
+            className="h-11 rounded-xl" />
+        </div>
+        <div className="space-y-2">
+          <Label>One-time joining fee</Label>
+          <Input type="number" min={0} value={rules.joining_fee}
+            onChange={(e) => setRules({ ...rules, joining_fee: Number(e.target.value) || 0 })}
+            className="h-11 rounded-xl" />
+        </div>
+        <div className="space-y-2">
+          <Label>Loan interest rate (% per month)</Label>
+          <Input type="number" min={0} max={100} step="0.5" value={rules.loan_interest_rate}
+            onChange={(e) => setRules({ ...rules, loan_interest_rate: Number(e.target.value) || 0 })}
+            className="h-11 rounded-xl" />
+        </div>
+        <div className="space-y-2">
+          <Label>Max loan (× member's contributions)</Label>
+          <Input type="number" min={0} max={20} step="0.5" value={rules.loan_max_multiplier}
+            onChange={(e) => setRules({ ...rules, loan_max_multiplier: Number(e.target.value) || 0 })}
             className="h-11 rounded-xl" />
         </div>
       </div>
@@ -488,7 +555,7 @@ function InvitesStep({
 function ReviewStep({
   basics, rules, invites,
 }: {
-  basics: { name: string; type: string; location: string };
+  basics: BasicsState;
   rules: any;
   invites: InviteRow[];
 }) {
@@ -502,13 +569,18 @@ function ReviewStep({
         <Row k="Name" v={basics.name} />
         <Row k="Type" v={basics.type.replace(/_/g, " ")} />
         <Row k="Location" v={basics.location || "—"} />
+        <Row k="Founded" v={basics.founded_year || "—"} />
+        {basics.description && <Row k="Description" v={basics.description} />}
       </Section>
       <Section title="Rules">
         <Row k="Contribution" v={`${rules.currency} ${rules.contribution_amount} · ${rules.contribution_frequency}`} />
         <Row k="Late penalty" v={`${rules.currency} ${rules.late_penalty}`} />
+        <Row k="Joining fee" v={`${rules.currency} ${rules.joining_fee}`} />
         <Row k="Meetings" v={`${rules.meeting_cadence} · ${rules.meeting_day || "—"}`} />
         <Row k="Quorum" v={`${rules.quorum_percent}%`} />
         <Row k="Loan approval" v={`${rules.loan_approval_threshold}% vote`} />
+        <Row k="Loan interest" v={`${rules.loan_interest_rate}% / month`} />
+        <Row k="Max loan" v={`${rules.loan_max_multiplier}× contributions`} />
       </Section>
       <Section title={`Invites (${invites.length})`}>
         {invites.length === 0 ? (
