@@ -7,6 +7,7 @@ import logoImage from "@/assets/chama-OS-logo.png";
 import { useAuth } from "@/hooks/use-auth";
 
 
+
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
