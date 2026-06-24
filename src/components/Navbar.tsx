@@ -1,9 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import logoImage from "@/assets/chama-OS-logo.png";
+import { useAuth } from "@/hooks/use-auth";
+
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
