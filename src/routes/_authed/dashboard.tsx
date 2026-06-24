@@ -45,7 +45,7 @@ function formatKpi(k: typeof kpis[number]) {
 }
 
 function Dashboard() {
-  const { active } = useChama();
+  const { active, chamas, loading } = useChama();
   const isChair = active?.role === "chairperson";
   const setupKey = active ? `chamaos.setupDismissed.${active.id}` : null;
   const [setupDismissed, setSetupDismissed] = useState(true);
@@ -60,6 +60,13 @@ function Dashboard() {
     window.localStorage.setItem(setupKey, "1");
     setSetupDismissed(true);
   };
+
+  // Structured onboarding: no chama yet → guide the chair to create one
+  // right from the dashboard instead of bouncing to an interstitial page.
+  if (!loading && !active && chamas.length === 0) {
+    return <DashboardOnboarding />;
+  }
+
 
 
   return (
