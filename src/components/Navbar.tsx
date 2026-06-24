@@ -46,9 +46,15 @@ export function Navbar() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
-              <Link to="/login">Sign in</Link>
-            </Button>
+            {user ? (
+              <Button variant="ghost" onClick={handleSignOut} className="hidden h-10 rounded-xl md:inline-flex">
+                <LogOut className="mr-1.5 h-4 w-4" /> Sign out
+              </Button>
+            ) : (
+              <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
+                <Link to="/login">Sign in</Link>
+              </Button>
+            )}
             <Button asChild className="hidden h-10 rounded-xl font-semibold md:inline-flex">
               <Link to="/start">
                 Create my Chama <ArrowRight className="ml-1.5 h-4 w-4" />
