@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
-  Wallet, TrendingUp, HandCoins, CheckCircle2, Users, Clock, Plus, Download,
+  Wallet, TrendingUp, HandCoins, CheckCircle2, Users, Clock, Plus, Download, Settings2, X,
 } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
   PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from "recharts";
+
 
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
