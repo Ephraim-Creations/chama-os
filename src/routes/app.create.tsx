@@ -408,6 +408,7 @@ function RulesStep({
     currency: string; contribution_amount: number; contribution_frequency: "weekly" | "biweekly" | "monthly" | "quarterly";
     late_penalty: number; meeting_cadence: "weekly" | "biweekly" | "monthly" | "quarterly";
     meeting_day: string; quorum_percent: number; loan_approval_threshold: number;
+    joining_fee: number; loan_interest_rate: number; loan_max_multiplier: number;
   };
   setRules: (r: any) => void;
 }) {
