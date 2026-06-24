@@ -153,12 +153,19 @@ function CreateChamaPage() {
         .map((i) => ({ email: i.email.trim().toLowerCase(), role: i.role }))
         .filter((i) => i.email.length > 0);
 
+      const foundedYear = basics.founded_year.trim()
+        ? Number(basics.founded_year.trim())
+        : null;
       const res = await createChama({
         data: {
           name: basics.name.trim(),
           type: basics.type as any,
           location: basics.location.trim() || null,
-          rules,
+          rules: {
+            ...rules,
+            description: basics.description.trim(),
+            founded_year: foundedYear ?? undefined,
+          },
           invites: cleanInvites,
         },
       });
