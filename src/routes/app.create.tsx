@@ -555,7 +555,7 @@ function InvitesStep({
 function ReviewStep({
   basics, rules, invites,
 }: {
-  basics: { name: string; type: string; location: string };
+  basics: BasicsState;
   rules: any;
   invites: InviteRow[];
 }) {
@@ -569,13 +569,18 @@ function ReviewStep({
         <Row k="Name" v={basics.name} />
         <Row k="Type" v={basics.type.replace(/_/g, " ")} />
         <Row k="Location" v={basics.location || "—"} />
+        <Row k="Founded" v={basics.founded_year || "—"} />
+        {basics.description && <Row k="Description" v={basics.description} />}
       </Section>
       <Section title="Rules">
         <Row k="Contribution" v={`${rules.currency} ${rules.contribution_amount} · ${rules.contribution_frequency}`} />
         <Row k="Late penalty" v={`${rules.currency} ${rules.late_penalty}`} />
+        <Row k="Joining fee" v={`${rules.currency} ${rules.joining_fee}`} />
         <Row k="Meetings" v={`${rules.meeting_cadence} · ${rules.meeting_day || "—"}`} />
         <Row k="Quorum" v={`${rules.quorum_percent}%`} />
         <Row k="Loan approval" v={`${rules.loan_approval_threshold}% vote`} />
+        <Row k="Loan interest" v={`${rules.loan_interest_rate}% / month`} />
+        <Row k="Max loan" v={`${rules.loan_max_multiplier}× contributions`} />
       </Section>
       <Section title={`Invites (${invites.length})`}>
         {invites.length === 0 ? (
