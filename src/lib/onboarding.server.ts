@@ -36,15 +36,19 @@ export async function sendSetupInvite(rawEmail: string): Promise<{
     return { sent: true, link: null, alreadyActive: false };
   }
 
-  // Already registered — send a set-password (recovery) link instead.
-  const { data: link, error: recErr } = await supabaseAdmin.auth.admin.generateLink({
+  // Already registered — send a set-password (recovery) email instead.
+  const { error: resetErr } = await supabaseAdmin.auth.resetPasswordForEmail(email, { redirectTo });
+  const { data: link } = await supabaseAdmin.auth.admin.generateLink({
     type: "recovery",
     email,
     options: { redirectTo },
   });
-  if (recErr) {
-    console.error("[onboarding.server] sendSetupInvite", inviteErr, recErr);
-    return { sent: false, link: null, alreadyActive: true };
+  if (resetErr) {
+    console.error("[onboarding.server] sendSetupInvite", inviteErr, resetErr);
   }
-  return { sent: true, link: link?.properties?.action_link ?? null, alreadyActive: true };
+  return {
+    sent: !resetErr,
+    link: link?.properties?.action_link ?? null,
+    alreadyActive: true,
+  };
 }
