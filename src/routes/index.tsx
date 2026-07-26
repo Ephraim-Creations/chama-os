@@ -11,6 +11,7 @@ import heroLight from "@/assets/hero-light.jpg";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { listPricingPlans } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/")({
   component: Landing,
