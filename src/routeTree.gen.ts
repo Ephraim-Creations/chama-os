@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
@@ -47,6 +48,11 @@ import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
+  '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
   '/contributions': typeof AuthedContributionsRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
+  '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
   '/contributions': typeof AuthedContributionsRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
+  '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
   '/_authed/billing': typeof AuthedBillingRoute
   '/_authed/contributions': typeof AuthedContributionsRoute
@@ -330,6 +339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/privacy'
+    | '/set-password'
     | '/terms'
     | '/billing'
     | '/contributions'
@@ -364,6 +374,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/privacy'
+    | '/set-password'
     | '/terms'
     | '/billing'
     | '/contributions'
@@ -400,6 +411,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/privacy'
+    | '/set-password'
     | '/terms'
     | '/_authed/billing'
     | '/_authed/contributions'
@@ -437,6 +449,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
   PrivacyRoute: typeof PrivacyRoute
+  SetPasswordRoute: typeof SetPasswordRoute
   TermsRoute: typeof TermsRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   JoinApplyRoute: typeof JoinApplyRoute
@@ -450,6 +463,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -756,6 +776,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
   PrivacyRoute: PrivacyRoute,
+  SetPasswordRoute: SetPasswordRoute,
   TermsRoute: TermsRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   JoinApplyRoute: JoinApplyRoute,
