@@ -16,7 +16,7 @@ import { createChama, findSimilarChamas } from "@/lib/chama.functions";
 import { useChama } from "@/context/chama-context";
 import { useAuth } from "@/hooks/use-auth";
 
-export const Route = createFileRoute("/app/create")({
+export const Route = createFileRoute("/_authed/create-chama")({
   component: CreateChamaPage,
   head: () => ({ meta: [{ title: "Create chama — Chama-OS" }] }),
 });
@@ -218,7 +218,7 @@ function CreateChamaPage() {
         <Button
           variant="outline"
           className="h-11 rounded-xl"
-          onClick={step === 0 ? () => navigate({ to: "/app" }) : back}
+          onClick={step === 0 ? () => navigate({ to: "/dashboard" }) : back}
           disabled={busy}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -690,22 +690,15 @@ function SuccessScreen({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-dvh bg-background">
-      <header className="border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 md:px-8">
-          <Link to="/app" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Link>
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Sprout className="h-5 w-5" />
-            </div>
-            <div className="font-bold tracking-tight">Chama-OS</div>
-          </Link>
-          <div className="w-12" />
-        </div>
-      </header>
-      <main className="mx-auto max-w-3xl px-4 py-10 md:px-8 md:py-14">{children}</main>
+    <div className="mx-auto max-w-3xl">
+      <Link
+        to="/dashboard"
+        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back to dashboard
+      </Link>
+      <div className="mt-6">{children}</div>
     </div>
   );
 }
+

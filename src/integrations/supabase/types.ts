@@ -46,6 +46,54 @@ export type Database = {
           },
         ]
       }
+      chair_applications: {
+        Row: {
+          chama_name: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          location: string | null
+          note: string | null
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          chama_name: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          location?: string | null
+          note?: string | null
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          chama_name?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          location?: string | null
+          note?: string | null
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       chama_invites: {
         Row: {
           accepted_at: string | null
@@ -512,6 +560,24 @@ export type Database = {
           },
         ]
       }
+      platform_admins: {
+        Row: {
+          created_at: string
+          email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_private: {
         Row: {
           id: string
@@ -606,6 +672,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_create_chama: {
+        Args: { _email: string; _user: string }
+        Returns: boolean
+      }
       get_chama_invite_code: { Args: { _chama: string }; Returns: string }
       has_chama_role: {
         Args: {
@@ -619,6 +689,7 @@ export type Database = {
         Args: { _chama: string; _user: string }
         Returns: boolean
       }
+      is_platform_admin: { Args: { _user: string }; Returns: boolean }
     }
     Enums: {
       app_role: "chairperson" | "treasurer" | "secretary" | "member"
