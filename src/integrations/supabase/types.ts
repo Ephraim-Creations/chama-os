@@ -578,6 +578,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_plans: {
+        Row: {
+          amount_kes: number
+          created_at: string
+          description: string | null
+          features: Json
+          highlight: boolean
+          id: string
+          name: string
+          period: string
+          price_label: string
+          published: boolean
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amount_kes?: number
+          created_at?: string
+          description?: string | null
+          features?: Json
+          highlight?: boolean
+          id?: string
+          name: string
+          period?: string
+          price_label: string
+          published?: boolean
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_kes?: number
+          created_at?: string
+          description?: string | null
+          features?: Json
+          highlight?: boolean
+          id?: string
+          name?: string
+          period?: string
+          price_label?: string
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_private: {
         Row: {
           id: string
