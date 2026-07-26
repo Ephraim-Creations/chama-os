@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/")({
   component: Landing,
+  loader: () => listPricingPlans(),
   head: () => ({
     meta: [
       { title: "Chama-OS — Transparent records for every chama" },
