@@ -296,8 +296,10 @@ function HowItWorks() {
   );
 }
 
+type PricingPlan = Awaited<ReturnType<typeof listPricingPlans>>[number];
+
 function Pricing() {
-  const plans = Route.useLoaderData();
+  const plans = Route.useLoaderData() as PricingPlan[];
   const tiers = (plans ?? [])
     .filter((p) => p.published)
     .map((p) => ({
@@ -305,7 +307,7 @@ function Pricing() {
       price: p.price_label,
       suffix: p.amount_kes > 0 ? `/ ${p.period}` : undefined,
       tagline: p.description ?? "",
-      features: (p.features as string[]) ?? [],
+      features: ((p.features as string[]) ?? []) as string[],
       cta: p.amount_kes > 0 ? `Choose ${p.name}` : "Get started",
       highlight: p.highlight,
     }));
