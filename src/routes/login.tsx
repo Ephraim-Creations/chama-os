@@ -318,6 +318,95 @@ function LoginPage() {
             {magicBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
             Email me a one-time sign-in link
           </Button>
+          </>
+          )}
+
+          {mode === "pin" && (
+            <div className="mt-8">
+              <div className="space-y-2">
+                <label htmlFor="pin-email" className="text-sm font-medium text-foreground">
+                  Email address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="pin-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-11 pl-10"
+                    disabled={pinBusy}
+                  />
+                </div>
+                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+              </div>
+
+              <div className="mt-6 flex justify-center gap-3" aria-label="PIN entry">
+                {[0, 1, 2, 3].map((i) => (
+                  <span
+                    key={i}
+                    className={`h-4 w-4 rounded-full border-2 transition-colors ${
+                      pin.length > i ? "border-primary bg-primary" : "border-border bg-transparent"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="mx-auto mt-6 grid max-w-xs grid-cols-3 gap-3">
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => pressKey(d)}
+                    disabled={pinBusy}
+                    className="h-14 rounded-xl border border-border bg-card text-xl font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                  >
+                    {d}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setPin("")}
+                  disabled={pinBusy}
+                  className="h-14 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pressKey("0")}
+                  disabled={pinBusy}
+                  className="h-14 rounded-xl border border-border bg-card text-xl font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  0
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPin((p) => p.slice(0, -1))}
+                  disabled={pinBusy}
+                  className="grid h-14 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                  aria-label="Delete last digit"
+                >
+                  <Delete className="h-5 w-5" />
+                </button>
+              </div>
+
+              <Button
+                type="button"
+                disabled={pinBusy || pin.length !== 4}
+                onClick={() => void handlePinSignIn(pin)}
+                className="mt-6 h-11 w-full rounded-xl text-[15px] font-semibold"
+              >
+                {pinBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {pinBusy ? "Signing in..." : "Sign in with PIN"}
+              </Button>
+
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Set your PIN in Settings after your first password sign-in.
+              </p>
+            </div>
+          )}
 
           <div className="mt-6 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">First time here?</span> Chama-OS is invite-only —
