@@ -21,6 +21,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JoinApplyRouteImport } from './routes/join.apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AppCreateRouteImport } from './routes/app.create'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
@@ -97,6 +98,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const JoinApplyRoute = JoinApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => JoinRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/auth/reset-password',
@@ -189,7 +195,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
-  '/join': typeof JoinRoute
+  '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
@@ -213,13 +219,14 @@ export interface FileRoutesByFullPath {
   '/transparency': typeof AuthedTransparencyRoute
   '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/join/apply': typeof JoinApplyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
-  '/join': typeof JoinRoute
+  '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/transparency': typeof AuthedTransparencyRoute
   '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/join/apply': typeof JoinApplyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -251,7 +259,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
-  '/join': typeof JoinRoute
+  '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_authed/transparency': typeof AuthedTransparencyRoute
   '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/join/apply': typeof JoinApplyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/app/create'
     | '/auth/reset-password'
+    | '/join/apply'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/app/create'
     | '/auth/reset-password'
+    | '/join/apply'
   id:
     | '__root__'
     | '/'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/_authed/transparency'
     | '/app/create'
     | '/auth/reset-password'
+    | '/join/apply'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -376,7 +388,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AppRoute: typeof AppRouteWithChildren
   ContactRoute: typeof ContactRoute
-  JoinRoute: typeof JoinRoute
+  JoinRoute: typeof JoinRouteWithChildren
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   SetupRoute: typeof SetupRoute
@@ -471,6 +483,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/join/apply': {
+      id: '/join/apply'
+      path: '/apply'
+      fullPath: '/join/apply'
+      preLoaderRoute: typeof JoinApplyRouteImport
+      parentRoute: typeof JoinRoute
     }
     '/auth/reset-password': {
       id: '/auth/reset-password'
@@ -643,13 +662,23 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface JoinRouteChildren {
+  JoinApplyRoute: typeof JoinApplyRoute
+}
+
+const JoinRouteChildren: JoinRouteChildren = {
+  JoinApplyRoute: JoinApplyRoute,
+}
+
+const JoinRouteWithChildren = JoinRoute._addFileChildren(JoinRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   AboutRoute: AboutRoute,
   AppRoute: AppRouteWithChildren,
   ContactRoute: ContactRoute,
-  JoinRoute: JoinRoute,
+  JoinRoute: JoinRouteWithChildren,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   SetupRoute: SetupRoute,
