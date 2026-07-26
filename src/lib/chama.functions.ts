@@ -126,9 +126,20 @@ export const createChama = createServerFn({ method: "POST" })
     const { userId, claims } = context;
     const email = String((claims as any)?.email ?? "").toLowerCase();
 
-    // Any signed-in user may create a chama and becomes its chairperson.
-    // Use admin client for the bootstrap: the chair must exist as a membership
-    // row before any chair-scoped RLS policy will allow further writes.
+    // Only an approved chairperson applicant (or a platform admin) may open a
+    // chama. Checked here because the bootstrap below uses the admin client.
+    const { data: eligible, error: eligErr } = await supabaseAdmin.rpc("can_create_chama", {
+      _user: userId,
+      _email: email,
+    });
+    if (eligErr) fail(eligErr, "Could not verify your access.");
+    if (!eligible) {
+      throw new Error(
+        "Your account isn't approved to open a chama yet. Apply at /join/apply and we'll review it.",
+      );
+    }
+
+
     const { data: chama, error } = await supabaseAdmin
       .from("chamas")
       .insert({
