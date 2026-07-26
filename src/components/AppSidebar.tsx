@@ -63,7 +63,7 @@ export function AppSidebar() {
 
   const systemItems = visible(secondary, role);
   if (isPlatformAdmin) {
-    systemItems.unshift({ title: "Chair applications", url: "/admin/applications", icon: Inbox });
+    systemItems.unshift({ title: "Platform admin", url: "/admin", icon: Inbox });
   }
 
   const sections: Array<[string, NavItem[]]> = [
