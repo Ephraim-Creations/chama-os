@@ -1,5 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Mail, Lock, Loader2, Eye, EyeOff, Sprout, Wand2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Mail,
+  Lock,
+  Loader2,
+  Eye,
+  EyeOff,
+  Sprout,
+  Wand2,
+  Delete,
+  KeyRound,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -8,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { pinSignIn } from "@/lib/pins.functions";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
@@ -49,6 +61,43 @@ function LoginPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [magicSent, setMagicSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [mode, setMode] = useState<"pin" | "email">("email");
+  const [pin, setPin] = useState("");
+  const [pinBusy, setPinBusy] = useState(false);
+
+  const handlePinSignIn = async (code: string) => {
+    setFormError(null);
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) {
+      setErrors({ email: parsed.error.errors[0].message });
+      return;
+    }
+    setPinBusy(true);
+    try {
+      const { tokenHash } = await pinSignIn({ data: { email: parsed.data, pin: code } });
+      const { error } = await supabase.auth.verifyOtp({ type: "magiclink", token_hash: tokenHash });
+      if (error) {
+        setFormError("Could not start your session. Please use your password.");
+        setPin("");
+        return;
+      }
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Email or PIN is not correct.");
+      setPin("");
+    } finally {
+      setPinBusy(false);
+    }
+  };
+
+  const pressKey = (digit: string) => {
+    if (pinBusy) return;
+    const next = (pin + digit).slice(0, 4);
+    setPin(next);
+    if (next.length === 4) void handlePinSignIn(next);
+  };
+
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -180,6 +229,30 @@ function LoginPage() {
             </Alert>
           )}
 
+          <div className="mt-8 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            {(["pin", "email"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  setMode(m);
+                  setFormError(null);
+                  setPin("");
+                }}
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
+                  mode === m
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m === "pin" ? <KeyRound className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
+                {m === "pin" ? "Touch PIN" : "Email"}
+              </button>
+            ))}
+          </div>
+
+          {mode === "email" && (
+          <>
           <Button
             type="button"
             variant="outline"
@@ -269,6 +342,95 @@ function LoginPage() {
             {magicBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
             Email me a one-time sign-in link
           </Button>
+          </>
+          )}
+
+          {mode === "pin" && (
+            <div className="mt-8">
+              <div className="space-y-2">
+                <label htmlFor="pin-email" className="text-sm font-medium text-foreground">
+                  Email address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="pin-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-11 pl-10"
+                    disabled={pinBusy}
+                  />
+                </div>
+                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+              </div>
+
+              <div className="mt-6 flex justify-center gap-3" aria-label="PIN entry">
+                {[0, 1, 2, 3].map((i) => (
+                  <span
+                    key={i}
+                    className={`h-4 w-4 rounded-full border-2 transition-colors ${
+                      pin.length > i ? "border-primary bg-primary" : "border-border bg-transparent"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="mx-auto mt-6 grid max-w-xs grid-cols-3 gap-3">
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => pressKey(d)}
+                    disabled={pinBusy}
+                    className="h-14 rounded-xl border border-border bg-card text-xl font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                  >
+                    {d}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setPin("")}
+                  disabled={pinBusy}
+                  className="h-14 rounded-xl border border-border text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pressKey("0")}
+                  disabled={pinBusy}
+                  className="h-14 rounded-xl border border-border bg-card text-xl font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  0
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPin((p) => p.slice(0, -1))}
+                  disabled={pinBusy}
+                  className="grid h-14 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                  aria-label="Delete last digit"
+                >
+                  <Delete className="h-5 w-5" />
+                </button>
+              </div>
+
+              <Button
+                type="button"
+                disabled={pinBusy || pin.length !== 4}
+                onClick={() => void handlePinSignIn(pin)}
+                className="mt-6 h-11 w-full rounded-xl text-[15px] font-semibold"
+              >
+                {pinBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {pinBusy ? "Signing in..." : "Sign in with PIN"}
+              </Button>
+
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Set your PIN in Settings after your first password sign-in.
+              </p>
+            </div>
+          )}
 
           <div className="mt-6 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">First time here?</span> Chama-OS is invite-only —

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
@@ -24,6 +25,7 @@ import { Route as JoinApplyRouteImport } from './routes/join/apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminPricingRouteImport } from './routes/admin/pricing'
 import { Route as AdminChamasRouteImport } from './routes/admin/chamas'
+import { Route as AdminBillingRouteImport } from './routes/admin/billing'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
@@ -46,6 +48,11 @@ import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -115,6 +122,11 @@ const AdminPricingRoute = AdminPricingRouteImport.update({
 const AdminChamasRoute = AdminChamasRouteImport.update({
   id: '/chamas',
   path: '/chamas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBillingRoute = AdminBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
@@ -216,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
+  '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
   '/contributions': typeof AuthedContributionsRoute
@@ -235,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/transparency': typeof AuthedTransparencyRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -249,6 +263,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
+  '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
   '/contributions': typeof AuthedContributionsRoute
@@ -268,6 +283,7 @@ export interface FileRoutesByTo {
   '/transparency': typeof AuthedTransparencyRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -285,6 +301,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
+  '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
   '/_authed/billing': typeof AuthedBillingRoute
   '/_authed/contributions': typeof AuthedContributionsRoute
@@ -304,6 +321,7 @@ export interface FileRoutesById {
   '/_authed/transparency': typeof AuthedTransparencyRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -321,6 +339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/privacy'
+    | '/set-password'
     | '/terms'
     | '/billing'
     | '/contributions'
@@ -340,6 +359,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/admin/announcements'
     | '/admin/applications'
+    | '/admin/billing'
     | '/admin/chamas'
     | '/admin/pricing'
     | '/auth/reset-password'
@@ -354,6 +374,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/privacy'
+    | '/set-password'
     | '/terms'
     | '/billing'
     | '/contributions'
@@ -373,6 +394,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/admin/announcements'
     | '/admin/applications'
+    | '/admin/billing'
     | '/admin/chamas'
     | '/admin/pricing'
     | '/auth/reset-password'
@@ -389,6 +411,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/privacy'
+    | '/set-password'
     | '/terms'
     | '/_authed/billing'
     | '/_authed/contributions'
@@ -408,6 +431,7 @@ export interface FileRouteTypes {
     | '/_authed/transparency'
     | '/admin/announcements'
     | '/admin/applications'
+    | '/admin/billing'
     | '/admin/chamas'
     | '/admin/pricing'
     | '/auth/reset-password'
@@ -425,6 +449,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
   PrivacyRoute: typeof PrivacyRoute
+  SetPasswordRoute: typeof SetPasswordRoute
   TermsRoute: typeof TermsRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   JoinApplyRoute: typeof JoinApplyRoute
@@ -438,6 +463,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -536,6 +568,13 @@ declare module '@tanstack/react-router' {
       path: '/chamas'
       fullPath: '/admin/chamas'
       preLoaderRoute: typeof AdminChamasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/billing': {
+      id: '/admin/billing'
+      path: '/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof AdminBillingRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/applications': {
@@ -711,6 +750,7 @@ const AuthedRouteWithChildren =
 interface AdminRouteChildren {
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminBillingRoute: typeof AdminBillingRoute
   AdminChamasRoute: typeof AdminChamasRoute
   AdminPricingRoute: typeof AdminPricingRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -719,6 +759,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminBillingRoute: AdminBillingRoute,
   AdminChamasRoute: AdminChamasRoute,
   AdminPricingRoute: AdminPricingRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -735,6 +776,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
   PrivacyRoute: PrivacyRoute,
+  SetPasswordRoute: SetPasswordRoute,
   TermsRoute: TermsRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   JoinApplyRoute: JoinApplyRoute,

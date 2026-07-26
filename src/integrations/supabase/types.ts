@@ -147,6 +147,7 @@ export type Database = {
           location: string | null
           name: string
           rules: Json
+          status: string
           type: Database["public"]["Enums"]["chama_type"]
           updated_at: string
         }
@@ -158,6 +159,7 @@ export type Database = {
           location?: string | null
           name: string
           rules?: Json
+          status?: string
           type?: Database["public"]["Enums"]["chama_type"]
           updated_at?: string
         }
@@ -169,6 +171,7 @@ export type Database = {
           location?: string | null
           name?: string
           rules?: Json
+          status?: string
           type?: Database["public"]["Enums"]["chama_type"]
           updated_at?: string
         }
@@ -714,6 +717,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_pins: {
+        Row: {
+          created_at: string
+          failed_attempts: number
+          locked_until: string | null
+          pin_hash: string
+          salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_attempts?: number
+          locked_until?: string | null
+          pin_hash: string
+          salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          failed_attempts?: number
+          locked_until?: string | null
+          pin_hash?: string
+          salt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

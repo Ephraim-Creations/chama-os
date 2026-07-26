@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, LayoutDashboard, Building2, Tags, Megaphone, Inbox, ArrowLeft } from "lucide-react";
+import { Loader2, LayoutDashboard, Building2, Tags, Megaphone, Inbox, ArrowLeft, CreditCard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAccessStatus } from "@/lib/access.functions";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -19,9 +19,10 @@ export const Route = createFileRoute("/admin")({
 
 const nav = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
-  { to: "/admin/chamas", label: "Chamas", icon: Building2 },
+  { to: "/admin/chamas", label: "Groups", icon: Building2 },
   { to: "/admin/applications", label: "Applications", icon: Inbox },
   { to: "/admin/pricing", label: "Pricing", icon: Tags },
+  { to: "/admin/billing", label: "Billing", icon: CreditCard },
   { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
 ];
 

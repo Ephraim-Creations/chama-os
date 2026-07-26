@@ -1,56 +1,39 @@
-## Goal
+# Admin control, email onboarding and PIN sign-in
 
-One clear way in: **you can only use the app if an admin (chama chair) added your email, or if your chair application was approved.** Everything else gets removed.
+Three connected pieces: a group-only admin console, real onboarding emails, and a fast email+PIN sign-in inspired by the POS touch panel (our own layout and branding — the POS sidebar is reference only).
 
-## The two journeys
+## 1. Admin console at /admin — groups, not people
 
-```text
-MEMBER
-landing → "Join" → explainer page ("only your chair can add you")
-       → Sign in (email+password or Google)
-       → email found on a chama's member list  → dashboard
-       → email not found                       → "Talk to your admin" page
+Privacy rule applied throughout: the platform admin sees each chama as a single unit. No member names, no member emails, no per-member figures anywhere in /admin.
 
-CHAIR
-landing → "Join" → explainer → "I'm a chama chair, apply"
-       → short form: full name, phone, email, chama name, county/location
-       → "Application received" screen
-       → you review it in-app and approve/reject
-       → on approval they can sign in and set up their chama
-```
+Changes:
+- **Overview**: remove the "Members" and money-total cards (those aggregate member data). Keep groups count, pending applications, plans, and add plan-mix and new-groups-this-month counts.
+- **Chamas tab → group cards/table**: group name, type, location, created date, member *count* only, current plan, status (active / suspended). Search + filter by plan and status. No drill-down into member records.
+- **Plans & billing (new focus)**: assign a pricing plan to any group directly from the group row — a plan dropdown writing to `billing_subscriptions`, with status (active, trialing, past_due, cancelled) and renewal date. A "Billing" tab lists every group's subscription with plan changes applied instantly.
+- **Suspend / reactivate a group**: blocks sign-in for that group's members, shown as a status badge.
+- **Applications**: unchanged review queue, but approving now fires the onboarding email (below).
+- Keep the existing top-nav admin layout, restyled for density: Overview · Groups · Applications · Plans · Billing · Announcements.
 
-## What gets removed
+## 2. Onboarding emails (built-in sender)
 
-- `/signup` (public self-registration) — deleted. Accounts are only created by invite or approved application.
-- `/start` and `/setup` explainer pages — folded into one `/join` page.
-- `/app` and `/app/create` gateway pages — chama setup moves onto the dashboard onboarding card, which already exists.
-- Invite-code joining (already partly gone) — email-based only.
+Using the built-in default sender now; branded sender can be added later once a domain is set up.
 
-## What gets built
+- **Chair approval**: approving an application creates the auth account (if new) and emails an invitation link. The chair clicks it, lands on a "Set your password" page, then goes straight to creating their chama.
+- **Member invite**: when a chair adds a member email on the Members page, that person immediately receives the same set-password invitation. Accepting the link confirms the email, sets the password, and auto-joins them to the chama through the existing pending-invite conversion.
+- **Resend / copy link** buttons for both, so nobody is stuck waiting on an email.
+- A single `/set-password` page handles both invite and recovery links, then routes to the PIN setup step.
 
-1. **`/join`** — plain-language page explaining admin-only access, with two actions: "Sign in" and "I'm a chama chair — apply".
-2. **`/join/apply`** — the application form (name, phone, email, chama name, location), with validation and a confirmation screen.
-3. **`/login`** — the single auth page: email + password, Google sign-in, and a working "Forgot password?" link. Post-login it checks membership and routes accordingly.
-4. **`/no-access`** — the friendly blocked page: "We couldn't find <email> on any chama's member list", what to do (ask your chair to add this exact email, or apply as a chair), and a sign-out button.
-5. **`/admin/applications`** — owner-only review queue (approve / reject, with the applicant's contact details visible). Approval marks them eligible to create a chama.
-6. **Member first sign-in** — a chair adds a member's email; the member signs in with Google or requests a magic link, then sets a password. No accounts pre-created.
+## 3. Email + PIN sign-in
 
-## Data reset
-
-- Delete all rows in every app table and all auth accounts **except ephraimcreations254@gmail.com** (kept as the platform owner).
-- New tables: `chair_applications` (contact details + status) and `platform_admins` (who can review applications), both with strict access rules.
-- Keep existing chama tables; the pending-invite table becomes the sole source of truth for "is this email allowed in".
+- After setting a password, the user is prompted to create a 4-digit PIN (skippable, changeable later in Profile).
+- **Login page** gets two tabs: **PIN** (email + touch keypad) and **Password** — same visual language as the rest of Chama-OS, dark-mode aware.
+- **Security**: the PIN is never stored in plain form — it is salted and hashed server-side, verified only on the server, and never checked in the browser. Because 4 digits are weak on their own, sign-in enforces: max 5 attempts, then a 15-minute lock on that account; attempts are throttled per IP; every failed and successful PIN sign-in is written to the transparency log. Users can always fall back to password or the emailed one-time link.
+- **Users tab in the chairperson's app** (not /admin): the chair sees their members' invite status and can reset a member's PIN — they can never view it.
 
 ## Technical notes
 
-- Google sign-in goes through the Lovable OAuth broker (`lovable.auth.signInWithOAuth`) and the Google provider gets enabled the same turn, so first sign-in doesn't error.
-- Access checking happens in an authenticated server function (JWT email claim), not in the browser — so it can't be bypassed by editing client state.
-- The gate lives in the `_authed` layout: signed in but no membership and not an approved chair → redirect to `/no-access`.
-- Row-level security: applications are insert-only for anyone (public form), readable/updatable only by platform admins. Membership lookup stays scoped to `auth.uid()`.
-- Password reset keeps the existing `/auth/reset-password` route; I'll verify the recovery-link flow end to end.
-- Route deletions require regenerating the route tree; I'll restart the dev server after so Vite doesn't cache the removed modules.
-
-## Risks
-
-- Deleting auth users is irreversible — only your account survives.
-- Magic-link and password-reset emails use the default sending setup; if the volume limit bites we can raise it or attach a custom sending domain later.
+- New table `user_pins` (user_id, pin_hash, salt, failed_attempts, locked_until) with self-only RLS; hashing and verification live in a server function using Web Crypto PBKDF2.
+- PIN sign-in server function verifies the hash, then mints a one-time sign-in token via the admin auth API; the browser exchanges it for a session. No password or PIN ever crosses the wire in a reusable form.
+- `chama_status` column on `chamas` (active/suspended) plus `billing_subscriptions` gains `status` and `renews_at`.
+- Onboarding emails use the auth invite/recovery links from the admin auth API, sent server-side from the approval and invite server functions.
+- Admin server functions are re-scoped so no member-identifying column is ever selected for the platform admin.
