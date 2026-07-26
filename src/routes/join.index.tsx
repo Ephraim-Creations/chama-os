@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
 
-export const Route = createFileRoute("/join")({
+export const Route = createFileRoute("/join/")({
   component: JoinPage,
   head: () => ({
     meta: [
