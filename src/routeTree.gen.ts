@@ -40,6 +40,7 @@ import { Route as AuthedFeedRouteImport } from './routes/_authed/feed'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
 import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
+import { Route as AuthedAdminApplicationsRouteImport } from './routes/_authed/admin.applications'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -195,6 +196,11 @@ const AuthedBillingRoute = AuthedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminApplicationsRoute = AuthedAdminApplicationsRouteImport.update({
+  id: '/admin/applications',
+  path: '/admin/applications',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/_authed/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/app/create'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/admin/applications'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/app/create'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/admin/applications'
   id:
     | '__root__'
     | '/'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/app/create'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/_authed/admin/applications'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -630,6 +642,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedBillingRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/applications': {
+      id: '/_authed/admin/applications'
+      path: '/admin/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AuthedAdminApplicationsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -649,6 +668,7 @@ interface AuthedRouteChildren {
   AuthedSecretaryRoute: typeof AuthedSecretaryRoute
   AuthedSettingsRoute: typeof AuthedSettingsRoute
   AuthedTransparencyRoute: typeof AuthedTransparencyRoute
+  AuthedAdminApplicationsRoute: typeof AuthedAdminApplicationsRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -667,6 +687,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedSecretaryRoute: AuthedSecretaryRoute,
   AuthedSettingsRoute: AuthedSettingsRoute,
   AuthedTransparencyRoute: AuthedTransparencyRoute,
+  AuthedAdminApplicationsRoute: AuthedAdminApplicationsRoute,
 }
 
 const AuthedRouteWithChildren =
