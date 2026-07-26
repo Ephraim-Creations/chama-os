@@ -1,7 +1,45 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertPlatformAdmin, broadcast, loadChamas, loadOverview } from "@/lib/admin.server";
+import {
+  assertPlatformAdmin,
+  broadcast,
+  loadChamas,
+  loadOverview,
+  setChamaPlan as applyPlan,
+  setChamaStatus as applyStatus,
+} from "@/lib/admin.server";
+
+export const setChamaPlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        chamaId: z.string().uuid(),
+        plan: z.string().trim().min(2).max(40),
+        status: z.enum(["active", "trialing", "past_due", "cancelled"]).default("active"),
+        renewsAt: z.string().nullable().default(null),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    await assertPlatformAdmin(userId);
+    return applyPlan(data);
+  });
+
+export const setChamaStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({ chamaId: z.string().uuid(), status: z.enum(["active", "suspended"]) })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    await assertPlatformAdmin(userId);
+    return applyStatus(data.chamaId, data.status);
+  });
 
 export const getPlatformOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
