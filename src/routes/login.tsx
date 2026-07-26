@@ -229,6 +229,30 @@ function LoginPage() {
             </Alert>
           )}
 
+          <div className="mt-8 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            {(["pin", "email"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  setMode(m);
+                  setFormError(null);
+                  setPin("");
+                }}
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors ${
+                  mode === m
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m === "pin" ? <KeyRound className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
+                {m === "pin" ? "Touch PIN" : "Email"}
+              </button>
+            ))}
+          </div>
+
+          {mode === "email" && (
+          <>
           <Button
             type="button"
             variant="outline"
