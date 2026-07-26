@@ -390,7 +390,7 @@ function DashboardOnboarding() {
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-12 flex-1 rounded-xl text-[15px]">
-            <Link to="/app">I was invited — find my chama</Link>
+            <Link to="/members">Add members</Link>
           </Button>
         </div>
       </div>
