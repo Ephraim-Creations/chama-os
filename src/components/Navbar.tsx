@@ -54,7 +54,7 @@ export function Navbar() {
               </Button>
             )}
             <Button asChild className="hidden h-10 rounded-xl font-semibold md:inline-flex">
-              <Link to="/start">
+              <Link to="/join">
                 Create my Chama <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
@@ -123,7 +123,7 @@ export function Navbar() {
                   </Link>
                 )}
                 <Link
-                  to="/start"
+                  to="/join"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block rounded-2xl bg-primary px-5 py-4 text-center font-semibold text-primary-foreground hover:bg-primary/90"
                 >

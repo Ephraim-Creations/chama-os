@@ -66,7 +66,7 @@ export function AppHeader() {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild><Link to="/app/create"><Plus className="mr-2 h-4 w-4" /> Create a new chama</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><Link to="/create-chama"><Plus className="mr-2 h-4 w-4" /> Create a new chama</Link></DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -111,7 +111,7 @@ export function AppHeader() {
           <DropdownMenuLabel>My account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild><Link to="/settings">Profile & Settings</Link></DropdownMenuItem>
-          <DropdownMenuItem asChild><Link to="/app">Switch chama</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><Link to="/dashboard">Switch chama</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><Link to="/help">Help Center</Link></DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>

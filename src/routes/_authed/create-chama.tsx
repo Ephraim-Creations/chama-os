@@ -16,7 +16,7 @@ import { createChama, findSimilarChamas } from "@/lib/chama.functions";
 import { useChama } from "@/context/chama-context";
 import { useAuth } from "@/hooks/use-auth";
 
-export const Route = createFileRoute("/app/create")({
+export const Route = createFileRoute("/_authed/create-chama")({
   component: CreateChamaPage,
   head: () => ({ meta: [{ title: "Create chama — Chama-OS" }] }),
 });
@@ -218,7 +218,7 @@ function CreateChamaPage() {
         <Button
           variant="outline"
           className="h-11 rounded-xl"
-          onClick={step === 0 ? () => navigate({ to: "/app" }) : back}
+          onClick={step === 0 ? () => navigate({ to: "/dashboard" }) : back}
           disabled={busy}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

@@ -104,7 +104,7 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild className="h-12 rounded-xl px-6 text-[15px] font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02]">
-              <Link to="/start">
+              <Link to="/join">
                 Create my Chama <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -401,7 +401,7 @@ function Pricing() {
                 variant={t.highlight ? "default" : "outline"}
                 className="mt-auto h-11 rounded-xl font-semibold"
               >
-                <Link to="/start">{t.cta}</Link>
+                <Link to="/join">{t.cta}</Link>
               </Button>
             </div>
           ))}
@@ -429,7 +429,7 @@ function CTA() {
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Button asChild className="h-12 rounded-xl px-6 text-[15px] font-semibold">
-            <Link to="/start">
+            <Link to="/join">
               Create my Chama <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

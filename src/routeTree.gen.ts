@@ -10,21 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as StartRouteImport } from './routes/start'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SetupRouteImport } from './routes/setup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AppRouteImport } from './routes/app'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JoinApplyRouteImport } from './routes/join.apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
-import { Route as AppCreateRouteImport } from './routes/app.create'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedSecretaryRouteImport } from './routes/_authed/secretary'
@@ -38,6 +33,7 @@ import { Route as AuthedInvestmentsRouteImport } from './routes/_authed/investme
 import { Route as AuthedHelpRouteImport } from './routes/_authed/help'
 import { Route as AuthedFeedRouteImport } from './routes/_authed/feed'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedCreateChamaRouteImport } from './routes/_authed/create-chama'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
 import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
 import { Route as AuthedAdminApplicationsRouteImport } from './routes/_authed/admin.applications'
@@ -45,21 +41,6 @@ import { Route as AuthedAdminApplicationsRouteImport } from './routes/_authed/ad
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StartRoute = StartRouteImport.update({
-  id: '/start',
-  path: '/start',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SetupRoute = SetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -87,11 +68,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -115,11 +91,6 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/auth/reset-password',
   path: '/auth/reset-password',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppCreateRoute = AppCreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => AppRoute,
 } as any)
 const AuthedTransparencyRoute = AuthedTransparencyRouteImport.update({
   id: '/transparency',
@@ -186,6 +157,11 @@ const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedCreateChamaRoute = AuthedCreateChamaRouteImport.update({
+  id: '/create-chama',
+  path: '/create-chama',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedContributionsRoute = AuthedContributionsRouteImport.update({
   id: '/contributions',
   path: '/contributions',
@@ -205,18 +181,15 @@ const AuthedAdminApplicationsRoute = AuthedAdminApplicationsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
   '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
-  '/setup': typeof SetupRoute
-  '/signup': typeof SignupRoute
-  '/start': typeof StartRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
   '/contributions': typeof AuthedContributionsRoute
+  '/create-chama': typeof AuthedCreateChamaRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/feed': typeof AuthedFeedRoute
   '/help': typeof AuthedHelpRoute
@@ -230,7 +203,6 @@ export interface FileRoutesByFullPath {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
-  '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
   '/admin/applications': typeof AuthedAdminApplicationsRoute
@@ -238,18 +210,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
   '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
-  '/setup': typeof SetupRoute
-  '/signup': typeof SignupRoute
-  '/start': typeof StartRoute
   '/terms': typeof TermsRoute
   '/billing': typeof AuthedBillingRoute
   '/contributions': typeof AuthedContributionsRoute
+  '/create-chama': typeof AuthedCreateChamaRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/feed': typeof AuthedFeedRoute
   '/help': typeof AuthedHelpRoute
@@ -263,7 +232,6 @@ export interface FileRoutesByTo {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
-  '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
   '/admin/applications': typeof AuthedAdminApplicationsRoute
@@ -273,18 +241,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
   '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
-  '/setup': typeof SetupRoute
-  '/signup': typeof SignupRoute
-  '/start': typeof StartRoute
   '/terms': typeof TermsRoute
   '/_authed/billing': typeof AuthedBillingRoute
   '/_authed/contributions': typeof AuthedContributionsRoute
+  '/_authed/create-chama': typeof AuthedCreateChamaRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/feed': typeof AuthedFeedRoute
   '/_authed/help': typeof AuthedHelpRoute
@@ -298,7 +263,6 @@ export interface FileRoutesById {
   '/_authed/secretary': typeof AuthedSecretaryRoute
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/transparency': typeof AuthedTransparencyRoute
-  '/app/create': typeof AppCreateRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
   '/_authed/admin/applications': typeof AuthedAdminApplicationsRoute
@@ -308,18 +272,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/app'
     | '/contact'
     | '/join'
     | '/login'
     | '/no-access'
     | '/privacy'
-    | '/setup'
-    | '/signup'
-    | '/start'
     | '/terms'
     | '/billing'
     | '/contributions'
+    | '/create-chama'
     | '/dashboard'
     | '/feed'
     | '/help'
@@ -333,7 +294,6 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
-    | '/app/create'
     | '/auth/reset-password'
     | '/join/apply'
     | '/admin/applications'
@@ -341,18 +301,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/app'
     | '/contact'
     | '/join'
     | '/login'
     | '/no-access'
     | '/privacy'
-    | '/setup'
-    | '/signup'
-    | '/start'
     | '/terms'
     | '/billing'
     | '/contributions'
+    | '/create-chama'
     | '/dashboard'
     | '/feed'
     | '/help'
@@ -366,7 +323,6 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
-    | '/app/create'
     | '/auth/reset-password'
     | '/join/apply'
     | '/admin/applications'
@@ -375,18 +331,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/about'
-    | '/app'
     | '/contact'
     | '/join'
     | '/login'
     | '/no-access'
     | '/privacy'
-    | '/setup'
-    | '/signup'
-    | '/start'
     | '/terms'
     | '/_authed/billing'
     | '/_authed/contributions'
+    | '/_authed/create-chama'
     | '/_authed/dashboard'
     | '/_authed/feed'
     | '/_authed/help'
@@ -400,7 +353,6 @@ export interface FileRouteTypes {
     | '/_authed/secretary'
     | '/_authed/settings'
     | '/_authed/transparency'
-    | '/app/create'
     | '/auth/reset-password'
     | '/join/apply'
     | '/_authed/admin/applications'
@@ -410,15 +362,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
   AboutRoute: typeof AboutRoute
-  AppRoute: typeof AppRouteWithChildren
   ContactRoute: typeof ContactRoute
   JoinRoute: typeof JoinRouteWithChildren
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
   PrivacyRoute: typeof PrivacyRoute
-  SetupRoute: typeof SetupRoute
-  SignupRoute: typeof SignupRoute
-  StartRoute: typeof StartRoute
   TermsRoute: typeof TermsRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
@@ -430,27 +378,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/start': {
-      id: '/start'
-      path: '/start'
-      fullPath: '/start'
-      preLoaderRoute: typeof StartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/setup': {
-      id: '/setup'
-      path: '/setup'
-      fullPath: '/setup'
-      preLoaderRoute: typeof SetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -488,13 +415,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -529,13 +449,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/app/create': {
-      id: '/app/create'
-      path: '/create'
-      fullPath: '/app/create'
-      preLoaderRoute: typeof AppCreateRouteImport
-      parentRoute: typeof AppRoute
     }
     '/_authed/transparency': {
       id: '/_authed/transparency'
@@ -628,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/create-chama': {
+      id: '/_authed/create-chama'
+      path: '/create-chama'
+      fullPath: '/create-chama'
+      preLoaderRoute: typeof AuthedCreateChamaRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/contributions': {
       id: '/_authed/contributions'
       path: '/contributions'
@@ -655,6 +575,7 @@ declare module '@tanstack/react-router' {
 interface AuthedRouteChildren {
   AuthedBillingRoute: typeof AuthedBillingRoute
   AuthedContributionsRoute: typeof AuthedContributionsRoute
+  AuthedCreateChamaRoute: typeof AuthedCreateChamaRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedFeedRoute: typeof AuthedFeedRoute
   AuthedHelpRoute: typeof AuthedHelpRoute
@@ -674,6 +595,7 @@ interface AuthedRouteChildren {
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedBillingRoute: AuthedBillingRoute,
   AuthedContributionsRoute: AuthedContributionsRoute,
+  AuthedCreateChamaRoute: AuthedCreateChamaRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedFeedRoute: AuthedFeedRoute,
   AuthedHelpRoute: AuthedHelpRoute,
@@ -693,16 +615,6 @@ const AuthedRouteChildren: AuthedRouteChildren = {
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
-interface AppRouteChildren {
-  AppCreateRoute: typeof AppCreateRoute
-}
-
-const AppRouteChildren: AppRouteChildren = {
-  AppCreateRoute: AppCreateRoute,
-}
-
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
-
 interface JoinRouteChildren {
   JoinApplyRoute: typeof JoinApplyRoute
 }
@@ -717,15 +629,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   AboutRoute: AboutRoute,
-  AppRoute: AppRouteWithChildren,
   ContactRoute: ContactRoute,
   JoinRoute: JoinRouteWithChildren,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
   PrivacyRoute: PrivacyRoute,
-  SetupRoute: SetupRoute,
-  SignupRoute: SignupRoute,
-  StartRoute: StartRoute,
   TermsRoute: TermsRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
 }
