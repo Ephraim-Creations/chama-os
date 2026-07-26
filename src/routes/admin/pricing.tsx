@@ -103,7 +103,7 @@ function Page() {
       <PageHeader
         title="Pricing"
         description="These plans power the public pricing section on the website."
-        action={
+        actions={
           <Button onClick={() => setDraft(empty)} className="h-11 rounded-xl font-semibold">
             <Plus className="mr-2 h-4 w-4" /> New plan
           </Button>
