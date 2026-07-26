@@ -61,6 +61,43 @@ function LoginPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [magicSent, setMagicSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [mode, setMode] = useState<"pin" | "email">("email");
+  const [pin, setPin] = useState("");
+  const [pinBusy, setPinBusy] = useState(false);
+
+  const handlePinSignIn = async (code: string) => {
+    setFormError(null);
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) {
+      setErrors({ email: parsed.error.errors[0].message });
+      return;
+    }
+    setPinBusy(true);
+    try {
+      const { tokenHash } = await pinSignIn({ data: { email: parsed.data, pin: code } });
+      const { error } = await supabase.auth.verifyOtp({ type: "magiclink", token_hash: tokenHash });
+      if (error) {
+        setFormError("Could not start your session. Please use your password.");
+        setPin("");
+        return;
+      }
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Email or PIN is not correct.");
+      setPin("");
+    } finally {
+      setPinBusy(false);
+    }
+  };
+
+  const pressKey = (digit: string) => {
+    if (pinBusy) return;
+    const next = (pin + digit).slice(0, 4);
+    setPin(next);
+    if (next.length === 4) void handlePinSignIn(next);
+  };
+
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
