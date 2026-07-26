@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { decideChairApplication, listChairApplications } from "@/lib/access.functions";
 
-export const Route = createFileRoute("/_authed/admin/applications")({
+export const Route = createFileRoute("/admin/applications")({
   component: ApplicationsPage,
   head: () => ({
     meta: [

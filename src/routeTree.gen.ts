@@ -14,12 +14,18 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JoinIndexRouteImport } from './routes/join/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as JoinApplyRouteImport } from './routes/join/apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as AdminPricingRouteImport } from './routes/admin/pricing'
+import { Route as AdminChamasRouteImport } from './routes/admin/chamas'
+import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedSecretaryRouteImport } from './routes/_authed/secretary'
@@ -36,7 +42,6 @@ import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedCreateChamaRouteImport } from './routes/_authed/create-chama'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
 import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
-import { Route as AuthedAdminApplicationsRouteImport } from './routes/_authed/admin.applications'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -63,6 +68,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -82,6 +92,11 @@ const JoinIndexRoute = JoinIndexRouteImport.update({
   path: '/join/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const JoinApplyRoute = JoinApplyRouteImport.update({
   id: '/join/apply',
   path: '/join/apply',
@@ -91,6 +106,26 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/auth/reset-password',
   path: '/auth/reset-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChamasRoute = AdminChamasRouteImport.update({
+  id: '/chamas',
+  path: '/chamas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthedTransparencyRoute = AuthedTransparencyRouteImport.update({
   id: '/transparency',
@@ -172,15 +207,11 @@ const AuthedBillingRoute = AuthedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedAdminApplicationsRoute = AuthedAdminApplicationsRouteImport.update({
-  id: '/admin/applications',
-  path: '/admin/applications',
-  getParentRoute: () => AuthedRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
@@ -202,10 +233,14 @@ export interface FileRoutesByFullPath {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/chamas': typeof AdminChamasRoute
+  '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/admin/': typeof AdminIndexRoute
   '/join/': typeof JoinIndexRoute
-  '/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -231,16 +266,21 @@ export interface FileRoutesByTo {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/chamas': typeof AdminChamasRoute
+  '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/admin': typeof AdminIndexRoute
   '/join': typeof JoinIndexRoute
-  '/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
@@ -262,16 +302,21 @@ export interface FileRoutesById {
   '/_authed/secretary': typeof AuthedSecretaryRoute
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/transparency': typeof AuthedTransparencyRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/chamas': typeof AdminChamasRoute
+  '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/admin/': typeof AdminIndexRoute
   '/join/': typeof JoinIndexRoute
-  '/_authed/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/login'
     | '/no-access'
@@ -293,10 +338,14 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
+    | '/admin/announcements'
+    | '/admin/applications'
+    | '/admin/chamas'
+    | '/admin/pricing'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/admin/'
     | '/join/'
-    | '/admin/applications'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -322,15 +371,20 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
+    | '/admin/announcements'
+    | '/admin/applications'
+    | '/admin/chamas'
+    | '/admin/pricing'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/admin'
     | '/join'
-    | '/admin/applications'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/login'
     | '/no-access'
@@ -352,16 +406,21 @@ export interface FileRouteTypes {
     | '/_authed/secretary'
     | '/_authed/settings'
     | '/_authed/transparency'
+    | '/admin/announcements'
+    | '/admin/applications'
+    | '/admin/chamas'
+    | '/admin/pricing'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/admin/'
     | '/join/'
-    | '/_authed/admin/applications'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
@@ -409,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -437,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/join/apply': {
       id: '/join/apply'
       path: '/join/apply'
@@ -450,6 +523,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chamas': {
+      id: '/admin/chamas'
+      path: '/chamas'
+      fullPath: '/admin/chamas'
+      preLoaderRoute: typeof AdminChamasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_authed/transparency': {
       id: '/_authed/transparency'
@@ -563,13 +664,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedBillingRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/admin/applications': {
-      id: '/_authed/admin/applications'
-      path: '/admin/applications'
-      fullPath: '/admin/applications'
-      preLoaderRoute: typeof AuthedAdminApplicationsRouteImport
-      parentRoute: typeof AuthedRoute
-    }
   }
 }
 
@@ -590,7 +684,6 @@ interface AuthedRouteChildren {
   AuthedSecretaryRoute: typeof AuthedSecretaryRoute
   AuthedSettingsRoute: typeof AuthedSettingsRoute
   AuthedTransparencyRoute: typeof AuthedTransparencyRoute
-  AuthedAdminApplicationsRoute: typeof AuthedAdminApplicationsRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -610,16 +703,34 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedSecretaryRoute: AuthedSecretaryRoute,
   AuthedSettingsRoute: AuthedSettingsRoute,
   AuthedTransparencyRoute: AuthedTransparencyRoute,
-  AuthedAdminApplicationsRoute: AuthedAdminApplicationsRoute,
 }
 
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
+interface AdminRouteChildren {
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminChamasRoute: typeof AdminChamasRoute
+  AdminPricingRoute: typeof AdminPricingRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminChamasRoute: AdminChamasRoute,
+  AdminPricingRoute: AdminPricingRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
