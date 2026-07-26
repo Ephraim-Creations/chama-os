@@ -1,13 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  Wallet, TrendingUp, HandCoins, CheckCircle2, Users, Clock, Plus, Download, Settings2, X,
+  Wallet, TrendingUp, HandCoins, Users, Clock, Plus, Download, Settings2, X,
+  Sparkles, CalendarDays, UserPlus, FileBarChart, PiggyBank, ArrowRight, CheckCircle2,
 } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
   PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from "recharts";
-
 
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
@@ -19,34 +19,32 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  ksh, kpis, savingsGrowth, contributionBreakdown, loanAnalytics,
-  recentContributions, topContributors,
+  ksh, savingsGrowth, contributionBreakdown, loanAnalytics,
+  recentContributions, topContributors, meetings as upcomingMeetings,
+  notifications as feedNotifications,
 } from "@/lib/mock-data";
 import { useChama } from "@/context/chama-context";
+import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
+import { ROLE_LABELS } from "@/lib/permissions";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
-import { Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/dashboard")({
   component: Dashboard,
 });
 
-
-const iconMap = { wallet: Wallet, trending: TrendingUp, loan: HandCoins, check: CheckCircle2, users: Users, clock: Clock };
-const accentMap: Record<string, "primary" | "info" | "warning" | "destructive" | "navy"> = {
-  savings: "primary", monthly: "info", loans: "warning",
-  repay: "primary", members: "navy", pending: "destructive",
-};
-
-function formatKpi(k: typeof kpis[number]) {
-  if (k.isPercent) return `${k.value}%`;
-  if (k.isCount) return k.value.toLocaleString();
-  return ksh(k.value);
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
 }
 
 function Dashboard() {
   const { active, chamas, loading } = useChama();
-  const isChair = active?.role === "chairperson";
+  const { user } = useAuth();
+  const { role, can, isChair } = usePermissions();
+
   const setupKey = active ? `chamaos.setupDismissed.${active.id}` : null;
   const [setupDismissed, setSetupDismissed] = useState(true);
 
@@ -61,46 +59,68 @@ function Dashboard() {
     setSetupDismissed(true);
   };
 
-  // Structured onboarding: no chama yet → guide the chair to create one
-  // right from the dashboard instead of bouncing to an interstitial page.
   if (!loading && !active && chamas.length === 0) {
     return <DashboardOnboarding />;
   }
 
+  const firstName =
+    (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ??
+    user?.email?.split("@")[0] ??
+    "there";
 
+  const quickActions = [
+    { label: "Add contribution", icon: Plus, to: "/contributions", show: can("finance.manage") },
+    { label: "Add member", icon: UserPlus, to: "/members", show: can("members.manage") },
+    { label: "Create meeting", icon: CalendarDays, to: "/meetings", show: can("meetings.manage") },
+    { label: "Issue loan", icon: HandCoins, to: "/loans", show: can("loans.manage") },
+    { label: "Record investment", icon: PiggyBank, to: "/investments", show: can("investments.manage") },
+    { label: "Download report", icon: FileBarChart, to: "/reports", show: can("reports.view") },
+  ].filter((a) => a.show);
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <PageHeader
-        title={active ? active.name : "Dashboard"}
-        description="A clear, transparent view of your chama's activity this month."
-        actions={
-          <>
-            {isChair && active && setupDismissed && (
-              <Button
-                variant="outline"
-                className="h-11 rounded-xl text-[15px]"
-                onClick={() => {
-                  if (!setupKey) return;
-                  window.localStorage.removeItem(setupKey);
-                  setSetupDismissed(false);
-                }}
-              >
-                <Settings2 className="mr-2 h-4 w-4" /> Customize
-              </Button>
+      {/* Welcome banner */}
+      <div className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-border bg-gradient-to-r from-primary/10 via-card to-card p-5 sm:flex sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-sm font-medium text-muted-foreground">
+            {greeting()}, {firstName} 👋
+          </div>
+          <h1 className="mt-1 truncate text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+            {active?.name ?? "Your chama"}
+          </h1>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {role && (
+              <Badge className="bg-primary/10 font-semibold text-primary hover:bg-primary/10">
+                {ROLE_LABELS[role]}
+              </Badge>
             )}
-            <Button variant="outline" className="h-11 rounded-xl text-[15px]">
-              <Download className="mr-2 h-4 w-4" /> Export
+            <span className="text-sm text-muted-foreground">
+              Here is how your group is doing this month.
+            </span>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {isChair && active && setupDismissed && (
+            <Button
+              variant="outline"
+              className="h-11 rounded-xl"
+              onClick={() => {
+                if (!setupKey) return;
+                window.localStorage.removeItem(setupKey);
+                setSetupDismissed(false);
+              }}
+            >
+              <Settings2 className="mr-2 h-4 w-4" /> Customize
             </Button>
-            <Button className="h-11 rounded-xl text-[15px] font-semibold">
-              <Plus className="mr-2 h-4 w-4" /> Record contribution
-            </Button>
-          </>
-        }
-      />
+          )}
+          <Button variant="outline" className="h-11 rounded-xl">
+            <Download className="mr-2 h-4 w-4" /> Export
+          </Button>
+        </div>
+      </div>
 
       {isChair && active && !setupDismissed && (
-        <div className="relative mb-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="relative mb-6 flex flex-col gap-4 rounded-2xl border border-primary/30 bg-card p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <button
             type="button"
             aria-label="Dismiss setup"
@@ -116,7 +136,7 @@ function Dashboard() {
             <div>
               <div className="text-base font-semibold text-foreground">Set up your chama</div>
               <div className="text-sm text-muted-foreground">
-                Invite members by email and assign their roles. You can reopen this anytime via Customize.
+                Invite members by email and assign their roles. Reopen anytime via Customize.
               </div>
             </div>
           </div>
@@ -132,35 +152,48 @@ function Dashboard() {
         </div>
       )}
 
-
-
+      {/* Quick actions */}
+      {quickActions.length > 0 && (
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {quickActions.map((a) => (
+            <Button
+              key={a.label}
+              asChild
+              variant="outline"
+              className="h-auto justify-start rounded-2xl border-border px-4 py-4 text-left"
+            >
+              <Link to={a.to}>
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <a.icon className="h-4 w-4" />
+                  </span>
+                  <span className="truncate text-sm font-semibold">{a.label}</span>
+                </span>
+              </Link>
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {kpis.map((k) => (
-          <KpiCard
-            key={k.key}
-            label={k.label}
-            value={formatKpi(k)}
-            trend={k.trend}
-            icon={iconMap[k.icon as keyof typeof iconMap]}
-            accent={accentMap[k.key]}
-          />
-        ))}
+        <KpiCard label="Members" value="42" trend={5} icon={Users} accent="navy" />
+        <KpiCard label="Total savings" value={ksh(2_540_000)} trend={12} icon={Wallet} accent="primary" />
+        <KpiCard label="Active loans" value={ksh(540_000)} trend={-4} icon={HandCoins} accent="warning" />
+        <KpiCard label="Investments" value={ksh(890_000)} trend={9} icon={TrendingUp} accent="info" />
+        <KpiCard label="Monthly collection" value={ksh(320_000)} trend={6} icon={CheckCircle2} accent="primary" />
+        <KpiCard label="Pending approvals" value="4" icon={Clock} accent="destructive" />
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Savings growth */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Savings growth</h2>
-              <p className="text-sm text-muted-foreground">Total savings across the last 7 months</p>
-            </div>
-            <Badge className="bg-success/10 font-semibold text-success hover:bg-success/10">+12.4%</Badge>
-          </div>
-          <div className="mt-5 h-72">
+        <Panel
+          title="Monthly contributions"
+          subtitle="Collections across the last 7 months"
+          className="lg:col-span-2"
+          right={<Badge className="bg-success/10 font-semibold text-success hover:bg-success/10">+12.4%</Badge>}
+        >
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={savingsGrowth} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
@@ -181,13 +214,10 @@ function Dashboard() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Panel>
 
-        {/* Breakdown */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-xl font-semibold text-foreground">Contribution breakdown</h2>
-          <p className="text-sm text-muted-foreground">Where your money goes</p>
-          <div className="mt-3 h-56">
+        <Panel title="Money distribution" subtitle="Where the group's money sits">
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={contributionBreakdown} dataKey="value" nameKey="name"
@@ -209,23 +239,13 @@ function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
       </div>
 
-      {/* Loans + Top contributors */}
+      {/* Loans + goals */}
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Loan analytics</h2>
-              <p className="text-sm text-muted-foreground">Active vs. repaid loans by month</p>
-            </div>
-            <div className="hidden gap-4 text-sm sm:flex">
-              <Stat label="Outstanding" value={ksh(380_000)} tone="warning" />
-              <Stat label="Repayment rate" value="94%" tone="success" />
-            </div>
-          </div>
-          <div className="mt-5 h-72">
+        <Panel title="Loan repayment" subtitle="Active vs. repaid by month" className="lg:col-span-2">
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={loanAnalytics} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -238,16 +258,84 @@ function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Panel>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Top contributors</h2>
-              <p className="text-sm text-muted-foreground">By total savings</p>
-            </div>
+        <Panel title="Goals & health" subtitle="Financial health score 92% — excellent">
+          <div className="space-y-5">
+            <GoalBar label="Buy land" current={720_000} target={1_000_000} />
+            <GoalBar label="Purchase bus" current={400_000} target={1_000_000} />
+            <GoalBar label="Emergency fund" current={320_000} target={500_000} />
           </div>
-          <div className="mt-4 space-y-4">
+          <div className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
+            <div className="text-sm font-semibold text-foreground">Insights</div>
+            <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+              <li>Contributions increased by 18% this quarter.</li>
+              <li>Loan defaults reduced by 6%.</li>
+              <li>Emergency fund is below target.</li>
+            </ul>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Activity + meetings + notifications */}
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Panel title="Recent activity" subtitle="What happened lately">
+          <div className="space-y-4">
+            {recentContributions.slice(0, 5).map((c) => (
+              <div key={c.id} className="flex items-start gap-3">
+                <Avatar className="h-9 w-9 border border-border">
+                  <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                    {c.initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-foreground">
+                    {c.member} paid {ksh(c.amount)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{c.type} · {c.date}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Upcoming meetings" subtitle="RSVP and agenda">
+          <div className="space-y-3">
+            {upcomingMeetings.slice(0, 4).map((m: any) => (
+              <div key={m.id ?? m.title} className="rounded-xl border border-border p-3">
+                <div className="text-sm font-semibold text-foreground">{m.title}</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  {m.date} {m.time ? `· ${m.time}` : ""} {m.location ? `· ${m.location}` : ""}
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button asChild variant="ghost" className="mt-4 h-10 w-full rounded-xl">
+            <Link to="/meetings">
+              View calendar <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </Panel>
+
+        <Panel title="Notifications" subtitle="Things needing attention">
+          <div className="space-y-3">
+            {feedNotifications.slice(0, 5).map((n: any, i: number) => (
+              <div key={n.id ?? i} className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                <div className="min-w-0">
+                  <div className="text-sm text-foreground">{n.title ?? n.text ?? n.message}</div>
+                  {n.time && <div className="text-xs text-muted-foreground">{n.time}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      {/* Top contributors */}
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Panel title="Top contributors" subtitle="By total savings">
+          <div className="space-y-4">
             {topContributors.map((m, i) => {
               const max = topContributors[0].savings;
               return (
@@ -259,11 +347,9 @@ function Dashboard() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="truncate text-sm font-semibold text-foreground">
-                          {i + 1}. {m.name}
-                        </div>
-                        <div className="text-sm font-semibold tabular-nums text-foreground">{ksh(m.savings)}</div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="truncate text-sm font-semibold text-foreground">{i + 1}. {m.name}</div>
+                        <div className="shrink-0 text-sm font-semibold tabular-nums text-foreground">{ksh(m.savings)}</div>
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">{m.role}</div>
                     </div>
@@ -273,60 +359,101 @@ function Dashboard() {
               );
             })}
           </div>
+        </Panel>
+
+        {/* Recent transactions */}
+        <div className="rounded-2xl border border-border bg-card shadow-sm lg:col-span-2">
+          <div className="flex items-center justify-between gap-3 p-5">
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-foreground">Recent transactions</h2>
+              <p className="text-sm text-muted-foreground">Latest entries from your members</p>
+            </div>
+            <Button asChild variant="outline" className="h-10 shrink-0 rounded-xl">
+              <Link to="/contributions">View all</Link>
+            </Button>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="text-foreground">Member</TableHead>
+                  <TableHead className="text-foreground">Type</TableHead>
+                  <TableHead className="text-foreground">Date</TableHead>
+                  <TableHead className="text-right text-foreground">Amount</TableHead>
+                  <TableHead className="text-foreground">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentContributions.map((c) => (
+                  <TableRow key={c.id} className="text-[15px]">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 border border-border">
+                          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                            {c.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-foreground">{c.member}</div>
+                          <div className="text-xs text-muted-foreground">{c.id}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell><TypeBadge type={c.type} /></TableCell>
+                    <TableCell className="text-muted-foreground">{c.date}</TableCell>
+                    <TableCell className="text-right font-semibold tabular-nums">{ksh(c.amount)}</TableCell>
+                    <TableCell>
+                      <Badge className={c.status === "Confirmed"
+                        ? "bg-success/10 text-success hover:bg-success/10"
+                        : "bg-warning/15 text-warning hover:bg-warning/15"}>
+                        {c.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Recent contributions */}
-      <div className="mt-6 rounded-2xl border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between p-5">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">Recent contributions</h2>
-            <p className="text-sm text-muted-foreground">Latest entries from your chama members</p>
-          </div>
-          <Button variant="outline" className="h-10 rounded-xl">View all</Button>
+function Panel({
+  title, subtitle, children, right, className,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  right?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-2xl border border-border bg-card p-5 shadow-sm ${className ?? ""}`}>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold text-foreground">{title}</h2>
+          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/40 hover:bg-muted/40">
-                <TableHead className="text-foreground">Member</TableHead>
-                <TableHead className="text-foreground">Type</TableHead>
-                <TableHead className="text-foreground">Date</TableHead>
-                <TableHead className="text-right text-foreground">Amount</TableHead>
-                <TableHead className="text-foreground">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentContributions.map((c) => (
-                <TableRow key={c.id} className="text-[15px]">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border border-border">
-                        <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                          {c.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium text-foreground">{c.member}</div>
-                        <div className="text-xs text-muted-foreground">{c.id}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell><TypeBadge type={c.type} /></TableCell>
-                  <TableCell className="text-muted-foreground">{c.date}</TableCell>
-                  <TableCell className="text-right font-semibold tabular-nums">{ksh(c.amount)}</TableCell>
-                  <TableCell>
-                    <Badge className={c.status === "Confirmed"
-                      ? "bg-success/10 text-success hover:bg-success/10"
-                      : "bg-warning/15 text-warning hover:bg-warning/15"}>
-                      {c.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        {right}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function GoalBar({ label, current, target }: { label: string; current: number; target: number }) {
+  const pct = Math.min(100, Math.round((current / target) * 100));
+  return (
+    <div>
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium text-foreground">{label}</span>
+        <span className="tabular-nums text-muted-foreground">{pct}%</span>
+      </div>
+      <Progress value={pct} className="mt-2 h-2" />
+      <div className="mt-1 text-xs text-muted-foreground">
+        {ksh(current)} of {ksh(target)}
       </div>
     </div>
   );
@@ -334,21 +461,9 @@ function Dashboard() {
 
 function DashboardOnboarding() {
   const steps = [
-    {
-      icon: Sparkles,
-      title: "Name your chama",
-      body: "Add the basics — name, type, location and a short description.",
-    },
-    {
-      icon: Settings2,
-      title: "Set the rules",
-      body: "Contribution amount, frequency, meeting cadence and quorum. Edit anytime.",
-    },
-    {
-      icon: Users,
-      title: "Invite your members",
-      body: "Add treasurer, secretary and members by email. They join when they sign in.",
-    },
+    { icon: Sparkles, title: "Name your chama", body: "Add the basics — name, type, location and a short description." },
+    { icon: Settings2, title: "Set the rules", body: "Contribution amount, frequency, meeting cadence and quorum. Edit anytime." },
+    { icon: Users, title: "Invite your members", body: "Add treasurer, secretary and members by email. They join when they sign in." },
   ];
   return (
     <div className="mx-auto max-w-3xl">
@@ -372,7 +487,7 @@ function DashboardOnboarding() {
         <ol className="mt-6 space-y-3">
           {steps.map((s, i) => (
             <li key={s.title} className="flex gap-4 rounded-xl border border-border bg-background p-4">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-sm font-semibold">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
                 {i + 1}
               </div>
               <div>
@@ -394,16 +509,6 @@ function DashboardOnboarding() {
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: { label: string; value: string; tone: "warning" | "success" }) {
-  const cls = tone === "warning" ? "text-warning" : "text-success";
-  return (
-    <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`text-base font-bold ${cls}`}>{value}</div>
     </div>
   );
 }
