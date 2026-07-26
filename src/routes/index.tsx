@@ -297,65 +297,21 @@ function HowItWorks() {
 }
 
 function Pricing() {
-  const tiers = [
-    {
-      name: "Essential",
-      price: "Free",
-      tagline: "For new chamas finding their feet.",
-      features: [
-        "Up to 15 members",
-        "Savings & contribution tracking",
-        "Meeting minutes & attendance",
-        "Transparency log (basic)",
-      ],
-      cta: "Start free",
-      highlight: false,
-    },
-    {
-      name: "Plus",
-      price: "KSh 999",
-      suffix: "/ month",
-      tagline: "For growing chamas that need more structure and accountability.",
-      features: [
-        "Up to 50 members",
-        "Savings & contribution tracking",
-        "Loan tracking",
-        "Meeting minutes & attendance",
-        "Transparency log",
-        "Email invites & member roles",
-      ],
-      cta: "Choose Plus",
-      highlight: false,
-    },
-    {
-      name: "Growth",
-      price: "KSh 1,500",
-      suffix: "/ month",
-      tagline: "For active chamas managing loans and investments.",
-      features: [
-        "Up to 100 members",
-        "Loan applications & guarantors",
-        "Investment tracking",
-        "Full transparency log with edit history",
-        "Email invites & role management",
-      ],
-      cta: "Choose Growth",
-      highlight: true,
-    },
-    {
-      name: "Federation",
-      price: "Custom",
-      tagline: "For SACCOs and multi-chama networks.",
-      features: [
-        "Unlimited members",
-        "Multiple chamas under one roof",
-        "Priority support",
-        "Custom reporting & exports",
-      ],
-      cta: "Talk to us",
-      highlight: false,
-    },
-  ];
+  const plans = Route.useLoaderData();
+  const tiers = (plans ?? [])
+    .filter((p) => p.published)
+    .map((p) => ({
+      name: p.name,
+      price: p.price_label,
+      suffix: p.amount_kes > 0 ? `/ ${p.period}` : undefined,
+      tagline: p.description ?? "",
+      features: (p.features as string[]) ?? [],
+      cta: p.amount_kes > 0 ? `Choose ${p.name}` : "Get started",
+      highlight: p.highlight,
+    }));
+
+  if (!tiers.length) return null;
+
   return (
     <section id="pricing" className="border-t border-border bg-muted/30 py-20">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
