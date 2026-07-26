@@ -35,6 +35,8 @@ export const inviteMember = createServerFn({ method: "POST" })
     await assertChair(data.chamaId, userId);
     const email = data.email.trim().toLowerCase();
 
+    const { sendSetupInvite } = await import("@/lib/onboarding.server");
+
     const { data: existing } = await supabaseAdmin
       .from("chama_invites")
       .select("id, token")
@@ -42,7 +44,10 @@ export const inviteMember = createServerFn({ method: "POST" })
       .ilike("email", email)
       .eq("status", "pending")
       .maybeSingle();
-    if (existing) return { id: existing.id, token: existing.token, alreadyExisted: true };
+    if (existing) {
+      const resent = await sendSetupInvite(email);
+      return { id: existing.id, token: existing.token, alreadyExisted: true, emailed: resent.sent };
+    }
 
     const { data: inv, error } = await supabaseAdmin
       .from("chama_invites")
@@ -50,7 +55,9 @@ export const inviteMember = createServerFn({ method: "POST" })
       .select("id, token")
       .single();
     if (error || !inv) fail(error, "Could not create invite.");
-    return { id: inv.id, token: inv.token, alreadyExisted: false };
+
+    const sent = await sendSetupInvite(email);
+    return { id: inv.id, token: inv.token, alreadyExisted: false, emailed: sent.sent };
   });
 
 export const listChamaInvites = createServerFn({ method: "GET" })
