@@ -13,11 +13,11 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as JoinRouteImport } from './routes/join'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JoinIndexRouteImport } from './routes/join.index'
 import { Route as JoinApplyRouteImport } from './routes/join.apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
@@ -58,11 +58,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JoinRoute = JoinRouteImport.update({
-  id: '/join',
-  path: '/join',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -80,6 +75,11 @@ const AuthedRoute = AuthedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinIndexRoute = JoinIndexRouteImport.update({
+  id: '/join/',
+  path: '/join/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JoinApplyRoute = JoinApplyRouteImport.update({
@@ -182,7 +182,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
@@ -205,13 +204,13 @@ export interface FileRoutesByFullPath {
   '/transparency': typeof AuthedTransparencyRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/join/': typeof JoinIndexRoute
   '/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
@@ -234,6 +233,7 @@ export interface FileRoutesByTo {
   '/transparency': typeof AuthedTransparencyRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/join': typeof JoinIndexRoute
   '/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRoutesById {
@@ -242,7 +242,6 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
@@ -265,6 +264,7 @@ export interface FileRoutesById {
   '/_authed/transparency': typeof AuthedTransparencyRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
+  '/join/': typeof JoinIndexRoute
   '/_authed/admin/applications': typeof AuthedAdminApplicationsRoute
 }
 export interface FileRouteTypes {
@@ -273,7 +273,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
-    | '/join'
     | '/login'
     | '/no-access'
     | '/privacy'
@@ -296,13 +295,13 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/join/'
     | '/admin/applications'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
-    | '/join'
     | '/login'
     | '/no-access'
     | '/privacy'
@@ -325,6 +324,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/join'
     | '/admin/applications'
   id:
     | '__root__'
@@ -332,7 +332,6 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/about'
     | '/contact'
-    | '/join'
     | '/login'
     | '/no-access'
     | '/privacy'
@@ -355,6 +354,7 @@ export interface FileRouteTypes {
     | '/_authed/transparency'
     | '/auth/reset-password'
     | '/join/apply'
+    | '/join/'
     | '/_authed/admin/applications'
   fileRoutesById: FileRoutesById
 }
@@ -363,12 +363,12 @@ export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
-  JoinRoute: typeof JoinRouteWithChildren
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  JoinIndexRoute: typeof JoinIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -401,13 +401,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/join': {
-      id: '/join'
-      path: '/join'
-      fullPath: '/join'
-      preLoaderRoute: typeof JoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -434,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join/': {
+      id: '/join/'
+      path: '/join'
+      fullPath: '/join/'
+      preLoaderRoute: typeof JoinIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/join/apply': {
@@ -615,28 +615,28 @@ const AuthedRouteChildren: AuthedRouteChildren = {
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
-interface JoinRouteChildren {
-  JoinApplyRoute: typeof JoinApplyRoute
-}
-
-const JoinRouteChildren: JoinRouteChildren = {
-  JoinApplyRoute: JoinApplyRoute,
-}
-
-const JoinRouteWithChildren = JoinRoute._addFileChildren(JoinRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
-  JoinRoute: JoinRouteWithChildren,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
+  JoinIndexRoute: JoinIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
