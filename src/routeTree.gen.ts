@@ -17,8 +17,8 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as JoinIndexRouteImport } from './routes/join.index'
-import { Route as JoinApplyRouteImport } from './routes/join.apply'
+import { Route as JoinIndexRouteImport } from './routes/join/index'
+import { Route as JoinApplyRouteImport } from './routes/join/apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
@@ -83,9 +83,9 @@ const JoinIndexRoute = JoinIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const JoinApplyRoute = JoinApplyRouteImport.update({
-  id: '/apply',
-  path: '/apply',
-  getParentRoute: () => JoinRoute,
+  id: '/join/apply',
+  path: '/join/apply',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/auth/reset-password',
@@ -368,6 +368,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  JoinApplyRoute: typeof JoinApplyRoute
   JoinIndexRoute: typeof JoinIndexRoute
 }
 
@@ -438,10 +439,10 @@ declare module '@tanstack/react-router' {
     }
     '/join/apply': {
       id: '/join/apply'
-      path: '/apply'
+      path: '/join/apply'
       fullPath: '/join/apply'
       preLoaderRoute: typeof JoinApplyRouteImport
-      parentRoute: typeof JoinRoute
+      parentRoute: typeof rootRouteImport
     }
     '/auth/reset-password': {
       id: '/auth/reset-password'
@@ -625,6 +626,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
+  JoinApplyRoute: JoinApplyRoute,
   JoinIndexRoute: JoinIndexRoute,
 }
 export const routeTree = rootRouteImport
