@@ -14,6 +14,7 @@ import { Route as StartRouteImport } from './routes/start'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -63,6 +64,11 @@ const SetupRoute = SetupRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoAccessRoute = NoAccessRouteImport.update({
+  id: '/no-access',
+  path: '/no-access',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
   '/signup': typeof SignupRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
   '/signup': typeof SignupRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/join': typeof JoinRouteWithChildren
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
   '/privacy': typeof PrivacyRoute
   '/setup': typeof SetupRoute
   '/signup': typeof SignupRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/join'
     | '/login'
+    | '/no-access'
     | '/privacy'
     | '/setup'
     | '/signup'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/join'
     | '/login'
+    | '/no-access'
     | '/privacy'
     | '/setup'
     | '/signup'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/join'
     | '/login'
+    | '/no-access'
     | '/privacy'
     | '/setup'
     | '/signup'
@@ -390,6 +402,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   JoinRoute: typeof JoinRouteWithChildren
   LoginRoute: typeof LoginRoute
+  NoAccessRoute: typeof NoAccessRoute
   PrivacyRoute: typeof PrivacyRoute
   SetupRoute: typeof SetupRoute
   SignupRoute: typeof SignupRoute
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/no-access': {
+      id: '/no-access'
+      path: '/no-access'
+      fullPath: '/no-access'
+      preLoaderRoute: typeof NoAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -680,6 +700,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   JoinRoute: JoinRouteWithChildren,
   LoginRoute: LoginRoute,
+  NoAccessRoute: NoAccessRoute,
   PrivacyRoute: PrivacyRoute,
   SetupRoute: SetupRoute,
   SignupRoute: SignupRoute,
