@@ -83,17 +83,26 @@ export const decideChairApplication = createServerFn({ method: "POST" })
     const { userId } = context as { userId: string };
     await assertPlatformAdmin(userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { data: row, error } = await supabaseAdmin
       .from("chair_applications")
       .update({
         status: data.decision,
         reviewed_by: userId,
         reviewed_at: new Date().toISOString(),
       })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .select("email")
+      .maybeSingle();
     if (error) {
       console.error("[access.functions] decide application", error);
       throw new Error("Could not update the application.");
     }
-    return { ok: true };
+
+    let emailed = false;
+    if (data.decision === "approved" && row?.email) {
+      const { sendSetupInvite } = await import("@/lib/onboarding.server");
+      const result = await sendSetupInvite(row.email);
+      emailed = result.sent;
+    }
+    return { ok: true, emailed };
   });
