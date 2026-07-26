@@ -1,5 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Mail, Lock, Loader2, Eye, EyeOff, Sprout, Wand2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Mail,
+  Lock,
+  Loader2,
+  Eye,
+  EyeOff,
+  Sprout,
+  Wand2,
+  Delete,
+  KeyRound,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -8,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { pinSignIn } from "@/lib/pins.functions";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
