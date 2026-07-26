@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, Wallet, HandCoins, CalendarDays, FileBarChart,
   Bell, Settings, LifeBuoy, Sprout, ShieldCheck, TrendingUp, MessageSquare,
-  CreditCard, ClipboardList,
+  CreditCard, ClipboardList, Inbox,
 } from "lucide-react";
 
 import {
@@ -11,6 +11,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useChama } from "@/context/chama-context";
+import { useEffect, useState } from "react";
+import { getAccessStatus } from "@/lib/access.functions";
 
 type Role = "chairperson" | "treasurer" | "secretary" | "member";
 
@@ -52,10 +54,22 @@ export function AppSidebar() {
   const { active } = useChama();
   const role = (active?.role ?? null) as Role | null;
 
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+  useEffect(() => {
+    void getAccessStatus()
+      .then((s) => setIsPlatformAdmin(s.isPlatformAdmin))
+      .catch(() => undefined);
+  }, []);
+
+  const systemItems = visible(secondary, role);
+  if (isPlatformAdmin) {
+    systemItems.unshift({ title: "Chair applications", url: "/admin/applications", icon: Inbox });
+  }
+
   const sections: Array<[string, NavItem[]]> = [
     ["Main", visible(primary, role)],
     ["Governance", visible(governance, role)],
-    ["System", visible(secondary, role)],
+    ["System", systemItems],
   ];
 
   return (
