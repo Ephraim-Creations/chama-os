@@ -24,6 +24,7 @@ import { Route as JoinApplyRouteImport } from './routes/join/apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminPricingRouteImport } from './routes/admin/pricing'
 import { Route as AdminChamasRouteImport } from './routes/admin/chamas'
+import { Route as AdminBillingRouteImport } from './routes/admin/billing'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
@@ -115,6 +116,11 @@ const AdminPricingRoute = AdminPricingRouteImport.update({
 const AdminChamasRoute = AdminChamasRouteImport.update({
   id: '/chamas',
   path: '/chamas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBillingRoute = AdminBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/transparency': typeof AuthedTransparencyRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/transparency': typeof AuthedTransparencyRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/_authed/transparency': typeof AuthedTransparencyRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -340,6 +349,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/admin/announcements'
     | '/admin/applications'
+    | '/admin/billing'
     | '/admin/chamas'
     | '/admin/pricing'
     | '/auth/reset-password'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/transparency'
     | '/admin/announcements'
     | '/admin/applications'
+    | '/admin/billing'
     | '/admin/chamas'
     | '/admin/pricing'
     | '/auth/reset-password'
@@ -408,6 +419,7 @@ export interface FileRouteTypes {
     | '/_authed/transparency'
     | '/admin/announcements'
     | '/admin/applications'
+    | '/admin/billing'
     | '/admin/chamas'
     | '/admin/pricing'
     | '/auth/reset-password'
@@ -536,6 +548,13 @@ declare module '@tanstack/react-router' {
       path: '/chamas'
       fullPath: '/admin/chamas'
       preLoaderRoute: typeof AdminChamasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/billing': {
+      id: '/admin/billing'
+      path: '/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof AdminBillingRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/applications': {
@@ -711,6 +730,7 @@ const AuthedRouteWithChildren =
 interface AdminRouteChildren {
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminBillingRoute: typeof AdminBillingRoute
   AdminChamasRoute: typeof AdminChamasRoute
   AdminPricingRoute: typeof AdminPricingRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -719,6 +739,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminBillingRoute: AdminBillingRoute,
   AdminChamasRoute: AdminChamasRoute,
   AdminPricingRoute: AdminPricingRoute,
   AdminIndexRoute: AdminIndexRoute,
