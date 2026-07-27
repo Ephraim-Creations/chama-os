@@ -164,7 +164,9 @@ function Onboarding() {
           invites,
         },
       });
-      await refresh();
+      await refresh().catch((error) => {
+        console.error("[onboarding] refresh after chama creation", error);
+      });
       toast.success(
         invites.length
           ? `Your chama is ready — we emailed ${invites.length} sign-in link${invites.length > 1 ? "s" : ""}.`
