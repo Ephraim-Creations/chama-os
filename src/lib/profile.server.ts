@@ -39,14 +39,14 @@ export async function writeMyProfile(
     markOnboarded?: boolean;
   },
 ) {
-  const patch: Record<string, unknown> = {
+  const patch = {
     id: userId,
     full_name: input.full_name,
     display_name: input.display_name,
     updated_at: new Date().toISOString(),
+    ...(input.avatar_url !== undefined ? { avatar_url: input.avatar_url } : {}),
+    ...(input.markOnboarded ? { onboarded_at: new Date().toISOString() } : {}),
   };
-  if (input.avatar_url !== undefined) patch.avatar_url = input.avatar_url;
-  if (input.markOnboarded) patch.onboarded_at = new Date().toISOString();
 
   const { error } = await supabaseAdmin.from("profiles").upsert(patch, { onConflict: "id" });
   if (error) {
