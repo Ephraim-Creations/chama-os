@@ -651,22 +651,28 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          display_name: string | null
           full_name: string | null
           id: string
+          onboarded_at: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           full_name?: string | null
           id: string
+          onboarded_at?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           full_name?: string | null
           id?: string
+          onboarded_at?: string | null
           updated_at?: string
         }
         Relationships: []
