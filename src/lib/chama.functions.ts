@@ -175,7 +175,14 @@ export const createChama = createServerFn({ method: "POST" })
       }
     }
 
+    // Email each invited person a link to set their password and sign in.
+    if (seeded.length) {
+      const { sendSetupInvite } = await import("@/lib/onboarding.server");
+      await Promise.allSettled(seeded.map((s) => sendSetupInvite(s.email)));
+    }
+
     return { id: chama.id, invites: seeded };
+
   });
 
 export const joinChamaByCode = createServerFn({ method: "POST" })
