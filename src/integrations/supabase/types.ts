@@ -777,6 +777,7 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: { _user: string }; Returns: boolean }
+      shares_chama_with: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       app_role: "chairperson" | "treasurer" | "secretary" | "member"
