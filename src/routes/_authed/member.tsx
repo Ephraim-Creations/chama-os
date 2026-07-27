@@ -1,48 +1,110 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Wallet, HandCoins, TrendingUp, CalendarDays, Loader2, Inbox } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
-import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/EmptyState";
 import { Progress } from "@/components/ui/progress";
-import { Wallet, HandCoins, TrendingUp, CalendarDays, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { ksh } from "@/lib/mock-data";
+import { useAuth } from "@/hooks/use-auth";
+import { useSnapshot } from "@/hooks/use-snapshot";
 
 export const Route = createFileRoute("/_authed/member")({ component: Page });
 
 function Page() {
-  const personalSavings = 185_000;
-  const eligibleLoan = personalSavings * 3;
+  const { user } = useAuth();
+  const { snapshot, loading } = useSnapshot();
+
+  if (loading) {
+    return (
+      <div className="grid min-h-[40vh] place-items-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const me = (snapshot?.members ?? []).find((m) => m.userId === user?.id);
+  const savings = me?.savings ?? 0;
+  const myLoans = (snapshot?.loans ?? []).filter((l) => l.borrowerId === user?.id);
+  const activeLoan = myLoans.find((l) => ["active", "approved", "overdue"].includes(l.status));
+  const myEntries = (snapshot?.contributions ?? []).filter((c) => c.memberId === user?.id);
+  const nextMeeting = (snapshot?.meetings ?? [])
+    .filter((m) => new Date(m.scheduledAt).getTime() >= Date.now())
+    .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt))[0];
+
   return (
     <div className="mx-auto max-w-[1200px]">
       <PageHeader
         title="My chama"
         description="Your personal contributions, loans and meetings at a glance."
-        actions={<Button className="h-11 rounded-xl font-semibold"><Plus className="mr-2 h-4 w-4" /> Apply for loan</Button>}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="My savings" value={ksh(personalSavings)} trend={6.2} icon={Wallet} accent="primary" />
-        <KpiCard label="Loan eligibility" value={ksh(eligibleLoan)} trend={0} icon={HandCoins} accent="info" />
-        <KpiCard label="Active loan" value={ksh(45_000)} trend={-12.5} icon={TrendingUp} accent="warning" />
-        <KpiCard label="Attendance" value="96%" trend={2} icon={CalendarDays} accent="navy" />
+        <KpiCard label="My savings" value={ksh(savings)} icon={Wallet} accent="primary" />
+        <KpiCard label="Loan eligibility" value={ksh(savings * 3)} icon={HandCoins} accent="info" />
+        <KpiCard label="Active loan" value={ksh(activeLoan ? activeLoan.amount - activeLoan.amountRepaid : 0)} icon={TrendingUp} accent="warning" />
+        <KpiCard label="My entries" value={String(myEntries.length)} icon={CalendarDays} accent="navy" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="text-lg font-semibold text-foreground">Loan repayment</div>
-          <p className="text-sm text-muted-foreground">Ksh 35,000 of Ksh 80,000 repaid</p>
-          <Progress value={43} className="mt-4 h-2" />
-          <div className="mt-3 flex justify-between text-sm">
-            <span className="text-muted-foreground">Next due</span>
-            <span className="font-semibold text-foreground">15 Jun 2026 · Ksh 10,000</span>
-          </div>
+          {activeLoan ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                {ksh(activeLoan.amountRepaid)} of {ksh(activeLoan.amount)} repaid
+              </p>
+              <Progress
+                value={activeLoan.amount ? Math.round((activeLoan.amountRepaid / activeLoan.amount) * 100) : 0}
+                className="mt-4 h-2"
+              />
+              <div className="mt-3 flex justify-between text-sm">
+                <span className="text-muted-foreground">Status</span>
+                <Badge className="capitalize">{activeLoan.status.replace("_", " ")}</Badge>
+              </div>
+            </>
+          ) : (
+            <EmptyState icon={HandCoins} title="No active loan" description="You have no outstanding balance." />
+          )}
         </div>
+
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="text-lg font-semibold text-foreground">Next meeting</div>
-          <p className="text-sm text-muted-foreground">Monthly members meeting</p>
-          <div className="mt-4 text-base font-semibold text-foreground">28 May 2026 · 7:00 PM</div>
-          <div className="text-sm text-muted-foreground">KCB Hall, Nairobi</div>
-          <Button variant="outline" className="mt-4 h-10 rounded-xl">Confirm attendance</Button>
+          {nextMeeting ? (
+            <>
+              <p className="text-sm text-muted-foreground">{nextMeeting.title}</p>
+              <div className="mt-4 text-base font-semibold text-foreground">
+                {new Date(nextMeeting.scheduledAt).toLocaleString()}
+              </div>
+              {nextMeeting.location && (
+                <div className="text-sm text-muted-foreground">{nextMeeting.location}</div>
+              )}
+            </>
+          ) : (
+            <EmptyState icon={CalendarDays} title="Nothing scheduled" />
+          )}
         </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="text-lg font-semibold text-foreground">My recent entries</div>
+        {myEntries.length === 0 ? (
+          <EmptyState icon={Inbox} title="No contributions yet" description="Your records appear here once the treasurer adds them." />
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {myEntries.slice(0, 8).map((c) => (
+              <li key={c.id} className="flex items-center justify-between py-3">
+                <div>
+                  <div className="text-[15px] font-medium capitalize text-foreground">{c.type}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(c.recordedAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="font-semibold tabular-nums">{ksh(c.amount)}</div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
