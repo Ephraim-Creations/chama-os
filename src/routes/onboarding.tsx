@@ -165,8 +165,13 @@ function Onboarding() {
         },
       });
       await refresh();
-      toast.success("Your chama is ready");
+      toast.success(
+        invites.length
+          ? `Your chama is ready — we emailed ${invites.length} sign-in link${invites.length > 1 ? "s" : ""}.`
+          : "Your chama is ready",
+      );
       navigate({ to: "/dashboard", replace: true });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create your chama");
     } finally {
