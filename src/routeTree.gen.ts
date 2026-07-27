@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -58,6 +59,11 @@ const SetPasswordRoute = SetPasswordRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoAccessRoute = NoAccessRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/set-password': typeof SetPasswordRoute
   '/terms': typeof TermsRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/no-access'
+    | '/onboarding'
     | '/privacy'
     | '/set-password'
     | '/terms'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/no-access'
+    | '/onboarding'
     | '/privacy'
     | '/set-password'
     | '/terms'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/no-access'
+    | '/onboarding'
     | '/privacy'
     | '/set-password'
     | '/terms'
@@ -448,6 +460,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
+  OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   SetPasswordRoute: typeof SetPasswordRoute
   TermsRoute: typeof TermsRoute
@@ -477,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/no-access': {
@@ -775,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
+  OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   SetPasswordRoute: SetPasswordRoute,
   TermsRoute: TermsRoute,
