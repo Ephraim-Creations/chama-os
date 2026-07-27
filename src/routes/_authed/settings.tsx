@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { Loader2, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { chama, currentUser } from "@/lib/mock-data";
-import { Copy } from "lucide-react";
+import { AvatarUploader } from "@/components/AvatarUploader";
+import { useAuth } from "@/hooks/use-auth";
+import { useChama } from "@/context/chama-context";
+import { getMyProfile, saveMyProfile } from "@/lib/profile.functions";
+import { getPinStatus, setMyPin, removeMyPin } from "@/lib/pins.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authed/settings")({
   component: SettingsPage,
@@ -25,21 +32,24 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Settings" description="Tune the app for how you read and work best." />
+      <PageHeader title="Settings" description="Your profile, security and how the app reads." />
 
-      <Tabs defaultValue="accessibility" className="space-y-5">
+      <Tabs defaultValue="profile" className="space-y-5">
         <TabsList className="h-12 rounded-xl bg-muted p-1">
-          <TabsTrigger value="accessibility" className="h-10 rounded-lg px-4 text-[15px]">Accessibility</TabsTrigger>
           <TabsTrigger value="profile" className="h-10 rounded-lg px-4 text-[15px]">Profile</TabsTrigger>
-          <TabsTrigger value="chama" className="h-10 rounded-lg px-4 text-[15px]">Chama</TabsTrigger>
+          <TabsTrigger value="security" className="h-10 rounded-lg px-4 text-[15px]">Security</TabsTrigger>
+          <TabsTrigger value="accessibility" className="h-10 rounded-lg px-4 text-[15px]">Accessibility</TabsTrigger>
           <TabsTrigger value="notifications" className="h-10 rounded-lg px-4 text-[15px]">Notifications</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="profile"><ProfileCard /></TabsContent>
+        <TabsContent value="security"><SecurityCard /></TabsContent>
 
         <TabsContent value="accessibility">
           <Card title="Display & language" desc="Make the app comfortable to read.">
             <Field label="Font size">
               <RadioGroup value={fontSize} onValueChange={(v) => applyFontSize(v as "base" | "lg" | "xl")} className="flex gap-2">
-                {(["base","lg","xl"] as const).map((s) => (
+                {(["base", "lg", "xl"] as const).map((s) => (
                   <Label key={s} htmlFor={`fs-${s}`}
                     className={`flex h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 ${fontSize === s ? "border-primary bg-primary/5" : "border-border"}`}>
                     <RadioGroupItem id={`fs-${s}`} value={s} />
@@ -47,10 +57,6 @@ function SettingsPage() {
                   </Label>
                 ))}
               </RadioGroup>
-            </Field>
-
-            <Field label="High contrast mode" hint="Higher contrast text and borders.">
-              <Switch />
             </Field>
 
             <Field label="Language">
@@ -62,29 +68,6 @@ function SettingsPage() {
                   <RadioGroupItem id="lang-sw" value="sw" /><span className="font-medium">Kiswahili</span>
                 </Label>
               </RadioGroup>
-            </Field>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="profile">
-          <Card title="Profile" desc="Manage your personal information.">
-            <Field label="Full name"><Input className="h-11 rounded-xl" defaultValue={currentUser.name} /></Field>
-            <Field label="Phone number"><Input className="h-11 rounded-xl" defaultValue="+254 712 345 678" /></Field>
-            <Field label="Email"><Input className="h-11 rounded-xl" defaultValue="wanjiku@umoja.co.ke" /></Field>
-            <div className="pt-2"><Button className="h-11 rounded-xl font-semibold">Save changes</Button></div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="chama">
-          <Card title="Chama information" desc="Visible to all members of your chama.">
-            <Field label="Chama name"><Input className="h-11 rounded-xl" defaultValue={chama.name} /></Field>
-            <Field label="Location"><Input className="h-11 rounded-xl" defaultValue={chama.location} /></Field>
-            <Field label="Monthly contribution (Ksh)"><Input className="h-11 rounded-xl" type="number" defaultValue={chama.monthlyContribution} /></Field>
-            <Field label="Invite code" hint="Share this code with new members.">
-              <div className="flex gap-2">
-                <Input className="h-11 rounded-xl font-mono tracking-widest" defaultValue={chama.inviteCode} readOnly />
-                <Button variant="outline" className="h-11 rounded-xl"><Copy className="mr-2 h-4 w-4" />Copy</Button>
-              </div>
             </Field>
           </Card>
         </TabsContent>
@@ -102,6 +85,198 @@ function SettingsPage() {
   );
 }
 
+function ProfileCard() {
+  const { user } = useAuth();
+  const { active } = useChama();
+  const load = useServerFn(getMyProfile);
+  const save = useServerFn(saveMyProfile);
+
+  const [fullName, setFullName] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void load()
+      .then((p) => {
+        setFullName(p.full_name ?? "");
+        setDisplayName(p.display_name ?? "");
+        setPhone(p.phone ?? "");
+        setAvatar(p.avatar_url ?? null);
+      })
+      .finally(() => setLoading(false));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const submit = async () => {
+    if (fullName.trim().length < 2 || displayName.trim().length < 2) {
+      toast.error("Add your full name and a display name");
+      return;
+    }
+    setBusy(true);
+    try {
+      await save({
+        data: {
+          full_name: fullName.trim(),
+          display_name: displayName.trim(),
+          avatar_url: avatar,
+          phone: phone.trim() || null,
+        },
+      });
+      toast.success("Profile saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="grid place-items-center rounded-2xl border border-border bg-card py-14">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <Card title="Profile" desc="How other members see you in your chama.">
+      <Field label="Photo">
+        <AvatarUploader
+          userId={user?.id ?? ""}
+          name={displayName || fullName}
+          path={avatar}
+          onUploaded={setAvatar}
+        />
+      </Field>
+      <Field label="Full name">
+        <Input className="h-11 rounded-xl" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+      </Field>
+      <Field label="Display name" hint="Shown across the dashboard.">
+        <Input className="h-11 rounded-xl" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+      </Field>
+      <Field label="Phone number">
+        <Input className="h-11 rounded-xl" value={phone} onChange={(e) => setPhone(e.target.value)} />
+      </Field>
+      <Field label="Email" hint="Used to sign in — contact your chairperson to change it.">
+        <Input className="h-11 rounded-xl" value={user?.email ?? ""} readOnly />
+      </Field>
+      {active && (
+        <Field label="Chama" hint="Your current group and role.">
+          <div className="text-[15px] font-medium text-foreground">
+            {active.name} · <span className="capitalize text-muted-foreground">{active.role}</span>
+          </div>
+        </Field>
+      )}
+      <div className="pt-2">
+        <Button className="h-11 rounded-xl font-semibold" disabled={busy} onClick={submit}>
+          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save changes
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function SecurityCard() {
+  const { user } = useAuth();
+  const status = useServerFn(getPinStatus);
+  const savePin = useServerFn(setMyPin);
+  const clearPin = useServerFn(removeMyPin);
+
+  const [hasPin, setHasPin] = useState<boolean | null>(null);
+  const [pin, setPin] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void status()
+      .then((s) => setHasPin(s.hasPin))
+      .catch(() => setHasPin(false));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onSavePin = async () => {
+    if (!/^\d{4}$/.test(pin)) {
+      toast.error("Your PIN must be 4 digits");
+      return;
+    }
+    setBusy(true);
+    try {
+      await savePin({ data: { pin } });
+      setPin("");
+      setHasPin(true);
+      toast.success("PIN saved — you can now sign in with it");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save PIN");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onClearPin = async () => {
+    setBusy(true);
+    try {
+      await clearPin();
+      setHasPin(false);
+      toast.success("PIN removed");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not remove PIN");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const sendReset = async () => {
+    if (!user?.email) return;
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else toast.success("Check your email for the reset link");
+  };
+
+  return (
+    <Card title="Security" desc="Your own PIN and password — nobody else can change them.">
+      <Field
+        label="Quick sign-in PIN"
+        hint={hasPin ? "A 4-digit PIN is active on your account." : "Set a 4-digit PIN for faster sign-in."}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            className="h-11 w-32 rounded-xl text-center tracking-[0.5em]"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="••••"
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          />
+          <Button className="h-11 rounded-xl font-semibold" disabled={busy} onClick={onSavePin}>
+            <KeyRound className="mr-2 h-4 w-4" /> {hasPin ? "Change PIN" : "Set PIN"}
+          </Button>
+          {hasPin && (
+            <Button variant="outline" className="h-11 rounded-xl" disabled={busy} onClick={onClearPin}>
+              Remove PIN
+            </Button>
+          )}
+        </div>
+      </Field>
+
+      <Field label="Password" hint="We email you a secure link to set a new password.">
+        <Button variant="outline" className="h-11 rounded-xl" disabled={busy} onClick={sendReset}>
+          <Mail className="mr-2 h-4 w-4" /> Send reset link
+        </Button>
+      </Field>
+
+      <Field label="Account protection" hint="Your PIN is stored hashed and never shown to anyone.">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <ShieldCheck className="h-4 w-4 text-success" /> Protected
+        </div>
+      </Field>
+    </Card>
+  );
+}
+
 function Card({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -114,7 +289,7 @@ function Card({ title, desc, children }: { title: string; desc: string; children
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 gap-2 border-t border-border pt-5 sm:grid-cols-[1fr_2fr] sm:items-center first:border-0 first:pt-0">
+    <div className="grid grid-cols-1 gap-2 border-t border-border pt-5 first:border-0 first:pt-0 sm:grid-cols-[1fr_2fr] sm:items-center">
       <div>
         <div className="text-[15px] font-semibold text-foreground">{label}</div>
         {hint && <div className="text-xs text-muted-foreground">{hint}</div>}

@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { getAccessStatus } from "@/lib/access.functions";
+import { getMyProfile } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/_authed")({
   component: AppLayout,
@@ -21,17 +22,30 @@ function AppLayout() {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
 
-  // Access gate: you may be here only if a chair added you to a chama, or you
-  // were approved to open one. Decided server-side from the JWT email claim.
+  // Access gate: platform admin goes to the admin console, brand new people go
+  // through onboarding, everyone else must have been added to a chama.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    void getAccessStatus()
-      .then((s) => {
+    void Promise.all([getAccessStatus(), getMyProfile()])
+      .then(([s, p]) => {
         if (cancelled) return;
+        if (s.isPlatformAdmin) {
+          navigate({ to: "/admin", replace: true });
+          return;
+        }
         const ok = s.memberships > 0 || s.canCreateChama;
-        setAllowed(ok);
-        if (!ok) navigate({ to: "/no-access", replace: true });
+        if (!ok) {
+          setAllowed(false);
+          navigate({ to: "/no-access", replace: true });
+          return;
+        }
+        if (!p.onboarded || (s.memberships === 0 && s.canCreateChama)) {
+          setAllowed(false);
+          navigate({ to: "/onboarding", replace: true });
+          return;
+        }
+        setAllowed(true);
       })
       .catch(() => {
         if (!cancelled) setAllowed(true);
@@ -49,6 +63,7 @@ function AppLayout() {
     );
   }
   if (!allowed) return null;
+
 
   return (
     <SidebarProvider>

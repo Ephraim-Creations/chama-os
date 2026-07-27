@@ -1,72 +1,195 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { TrendingUp, Plus, Loader2, Building2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
+import { KpiCard } from "@/components/KpiCard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, Building2, Sprout, Plus } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
 import { ksh } from "@/lib/mock-data";
+import { useChama } from "@/context/chama-context";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useSnapshot } from "@/hooks/use-snapshot";
+import { addInvestment } from "@/lib/records.functions";
 
 export const Route = createFileRoute("/_authed/investments")({ component: Page });
 
-const items = [
-  { id: 1, name: "Kiserian Plot (¼ acre)", category: "Real Estate", icon: Building2, initial: 850_000, current: 1_200_000, income: 0 },
-  { id: 2, name: "Event Tents (20 units)", category: "Equipment", icon: Sprout, initial: 320_000, current: 380_000, income: 42_000 },
-  { id: 3, name: "Dairy Project — Limuru", category: "Agriculture", icon: TrendingUp, initial: 180_000, current: 215_000, income: 18_500 },
-];
-
 function Page() {
-  const total = items.reduce((s, i) => s + i.current, 0);
-  const monthly = items.reduce((s, i) => s + i.income, 0);
+  const { active } = useChama();
+  const { can } = usePermissions();
+  const { snapshot, loading, refresh } = useSnapshot();
+  const items = snapshot?.investments ?? [];
+
+  const invested = items.reduce((a, i) => a + i.initialValue, 0);
+  const current = items.reduce((a, i) => a + i.currentValue, 0);
+  const income = items.reduce((a, i) => a + i.monthlyIncome, 0);
+
   return (
-    <div className="mx-auto max-w-[1400px]">
+    <div className="mx-auto max-w-[1200px]">
       <PageHeader
         title="Investments"
-        description="Track every group investment and its growth."
-        actions={<Button className="h-11 rounded-xl font-semibold"><Plus className="mr-2 h-4 w-4" /> Add investment</Button>}
+        description="Group assets, their value today and the income they bring in."
+        actions={
+          can("investments.manage") && active ? (
+            <InvestmentDialog chamaId={active.id} onDone={refresh} />
+          ) : null
+        }
       />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Stat label="Portfolio value" value={ksh(total)} tone="primary" />
-        <Stat label="Monthly income" value={ksh(monthly)} tone="info" />
-        <Stat label="Investments tracked" value={items.length.toString()} tone="navy" />
+        <KpiCard label="Amount invested" value={ksh(invested)} icon={Building2} accent="navy" />
+        <KpiCard label="Current value" value={ksh(current)} icon={TrendingUp} accent="primary" />
+        <KpiCard label="Monthly income" value={ksh(income)} icon={TrendingUp} accent="info" />
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((i) => {
-          const growth = ((i.current - i.initial) / i.initial) * 100;
-          return (
-            <div key={i.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><i.icon className="h-5 w-5" /></div>
-                  <div>
-                    <div className="font-semibold text-foreground">{i.name}</div>
-                    <div className="text-xs text-muted-foreground">{i.category}</div>
+
+      <div className="mt-6">
+        {loading ? (
+          <div className="grid place-items-center py-14">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : items.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-card shadow-sm">
+            <EmptyState
+              icon={TrendingUp}
+              title="No investments recorded"
+              description="Add the group's assets to track their value over time."
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {items.map((i) => {
+              const growth = i.initialValue
+                ? Math.round(((i.currentValue - i.initialValue) / i.initialValue) * 100)
+                : 0;
+              return (
+                <article key={i.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-lg font-semibold text-foreground">{i.name}</h3>
+                      {i.category && <div className="text-sm text-muted-foreground">{i.category}</div>}
+                    </div>
+                    <Badge
+                      className={
+                        growth >= 0
+                          ? "bg-success/10 text-success hover:bg-success/10"
+                          : "bg-destructive/10 text-destructive hover:bg-destructive/10"
+                      }
+                    >
+                      {growth >= 0 ? "+" : ""}{growth}%
+                    </Badge>
                   </div>
-                </div>
-                <Badge className="bg-success/10 text-success hover:bg-success/10">+{growth.toFixed(1)}%</Badge>
-              </div>
-              <div className="mt-4 space-y-2">
-                <Row label="Initial value" value={ksh(i.initial)} />
-                <Row label="Current value" value={ksh(i.current)} bold />
-                <Row label="Monthly income" value={ksh(i.income)} />
-              </div>
-              <Progress value={Math.min(100, growth + 50)} className="mt-4 h-1.5" />
-            </div>
-          );
-        })}
+                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <div className="text-muted-foreground">Invested</div>
+                      <div className="font-semibold tabular-nums">{ksh(i.initialValue)}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Today</div>
+                      <div className="font-semibold tabular-nums">{ksh(i.currentValue)}</div>
+                    </div>
+                  </div>
+                  <Progress value={Math.min(100, Math.max(0, growth + 50))} className="mt-4 h-2" />
+                  <div className="mt-3 text-sm text-muted-foreground">
+                    Monthly income: <span className="font-semibold text-foreground">{ksh(i.monthlyIncome)}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: string; tone: "primary" | "info" | "navy" }) {
-  const map = { primary: "text-primary", info: "text-info", navy: "text-navy" };
+function InvestmentDialog({ chamaId, onDone }: { chamaId: string; onDone: () => void }) {
+  const save = useServerFn(addInvestment);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [initialValue, setInitialValue] = useState("");
+  const [currentValue, setCurrentValue] = useState("");
+  const [monthlyIncome, setMonthlyIncome] = useState("0");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (name.trim().length < 2) {
+      toast.error("Give the investment a name");
+      return;
+    }
+    setBusy(true);
+    try {
+      await save({
+        data: {
+          chamaId,
+          name: name.trim(),
+          category: category.trim() || null,
+          initialValue: Number(initialValue) || 0,
+          currentValue: Number(currentValue) || Number(initialValue) || 0,
+          monthlyIncome: Number(monthlyIncome) || 0,
+        },
+      });
+      toast.success("Investment saved");
+      setOpen(false);
+      setName("");
+      setCategory("");
+      setInitialValue("");
+      setCurrentValue("");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <div className="text-sm text-muted-foreground">{label}</div>
-      <div className={`mt-2 text-2xl font-bold ${map[tone]}`}>{value}</div>
-    </div>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="h-11 rounded-xl font-semibold">
+          <Plus className="mr-2 h-4 w-4" /> Record investment
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Record an investment</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Name</Label>
+            <Input className="h-11 rounded-xl" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Input className="h-11 rounded-xl" placeholder="Land, equipment, shares…" value={category} onChange={(e) => setCategory(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Amount invested</Label>
+              <Input className="h-11 rounded-xl" inputMode="numeric" value={initialValue} onChange={(e) => setInitialValue(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Value today</Label>
+              <Input className="h-11 rounded-xl" inputMode="numeric" value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Monthly income</Label>
+            <Input className="h-11 rounded-xl" inputMode="numeric" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button className="h-11 rounded-xl font-semibold" disabled={busy} onClick={submit}>
+            {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-}
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return <div className="flex justify-between text-sm"><span className="text-muted-foreground">{label}</span><span className={bold ? "font-bold text-foreground" : "font-medium text-foreground"}>{value}</span></div>;
 }
