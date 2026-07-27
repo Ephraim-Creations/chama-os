@@ -1,101 +1,228 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, HandCoins, AlertTriangle, CheckCircle2, Percent } from "lucide-react";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { Plus, HandCoins, AlertTriangle, CheckCircle2, Percent, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { KpiCard } from "@/components/KpiCard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { loans, ksh } from "@/lib/mock-data";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { ksh, initialsOf } from "@/lib/mock-data";
+import { useSnapshot } from "@/hooks/use-snapshot";
+import { useChama } from "@/context/chama-context";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/hooks/use-auth";
+import { recordLoan } from "@/lib/records.functions";
 
 export const Route = createFileRoute("/_authed/loans")({
   component: LoansPage,
 });
 
 const statusColor: Record<string, string> = {
-  Active: "bg-info/10 text-info hover:bg-info/10",
-  Overdue: "bg-destructive/10 text-destructive hover:bg-destructive/10",
-  Repaid: "bg-success/10 text-success hover:bg-success/10",
+  active: "bg-info/10 text-info hover:bg-info/10",
+  approved: "bg-info/10 text-info hover:bg-info/10",
+  overdue: "bg-destructive/10 text-destructive hover:bg-destructive/10",
+  completed: "bg-success/10 text-success hover:bg-success/10",
+  pending: "bg-warning/15 text-warning hover:bg-warning/15",
+  under_review: "bg-warning/15 text-warning hover:bg-warning/15",
+  rejected: "bg-muted text-muted-foreground hover:bg-muted",
 };
 
 function LoansPage() {
-  const totalOut = loans.reduce((a, l) => a + (l.amount - l.paid), 0);
+  const { active } = useChama();
+  const { can } = usePermissions();
+  const { snapshot, loading, refresh } = useSnapshot();
+
+  const loans = snapshot?.loans ?? [];
+  const outstanding = loans
+    .filter((l) => ["active", "approved", "overdue"].includes(l.status))
+    .reduce((a, l) => a + (l.amount - l.amountRepaid), 0);
+  const activeCount = loans.filter((l) => ["active", "approved"].includes(l.status)).length;
+  const overdue = loans.filter((l) => l.status === "overdue").length;
+  const completed = loans.filter((l) => l.status === "completed").length;
+  const rate = loans.length ? Math.round((completed / loans.length) * 100) : 0;
+
   return (
     <div className="mx-auto max-w-[1400px]">
       <PageHeader
         title="Loans"
-        description="Records only — Chama-OS does not disburse or hold any money."
-        actions={<Button className="h-11 rounded-xl font-semibold"><Plus className="mr-2 h-4 w-4" />Record loan</Button>}
+        description="Records only — Chama OS does not disburse or hold any money."
+        actions={active ? <LoanDialog chamaId={active.id} members={snapshot?.members ?? []} canManage={can("loans.manage")} onDone={refresh} /> : null}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Active loans" value="7" trend={-3} icon={HandCoins} accent="warning" />
-        <KpiCard label="Outstanding" value={ksh(totalOut)} trend={-8} icon={Percent} accent="primary" />
-        <KpiCard label="Overdue" value="1" trend={0} icon={AlertTriangle} accent="destructive" />
-        <KpiCard label="Repayment rate" value="94%" trend={2.7} icon={CheckCircle2} accent="primary" />
-      </div>
-
-      <div className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <div className="flex items-start gap-3 rounded-xl bg-info/5 p-4 text-sm">
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-info" />
-          <div className="text-foreground">
-            <span className="font-semibold">Loan qualification:</span> A member qualifies for a loan up to{" "}
-            <span className="font-semibold">3× their savings</span> after 6 months of consistent contributions and no active overdue loans.
-          </div>
-        </div>
+        <KpiCard label="Active loans" value={String(activeCount)} icon={HandCoins} accent="warning" />
+        <KpiCard label="Outstanding" value={ksh(outstanding)} icon={Percent} accent="primary" />
+        <KpiCard label="Overdue" value={String(overdue)} icon={AlertTriangle} accent="destructive" />
+        <KpiCard label="Repayment rate" value={`${rate}%`} icon={CheckCircle2} accent="primary" />
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card shadow-sm">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/40 hover:bg-muted/40">
-                <TableHead>Loan ID</TableHead>
-                <TableHead>Borrower</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Interest</TableHead>
-                <TableHead>Due date</TableHead>
-                <TableHead className="min-w-[180px]">Repayment</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loans.map((l) => {
-                const pct = Math.round((l.paid / l.amount) * 100);
-                return (
-                  <TableRow key={l.id} className="text-[15px]">
-                    <TableCell className="font-mono text-sm text-muted-foreground">{l.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border border-border">
-                          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{l.initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="font-medium text-foreground">{l.borrower}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums">{ksh(l.amount)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{l.interest}%</TableCell>
-                    <TableCell className="text-muted-foreground">{l.due}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Progress value={pct} className="h-2" />
-                        <span className="w-10 text-right text-sm font-semibold tabular-nums">{pct}%</span>
-                      </div>
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {ksh(l.paid)} of {ksh(l.amount)}
-                      </div>
-                    </TableCell>
-                    <TableCell><Badge className={statusColor[l.status]}>{l.status}</Badge></TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+        {loading ? (
+          <div className="grid place-items-center py-14">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : loans.length === 0 ? (
+          <EmptyState
+            icon={HandCoins}
+            title="No loans recorded"
+            description="Loan applications and issued loans will show up here."
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead>Borrower</TableHead>
+                  <TableHead>Purpose</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="min-w-[180px]">Repayment</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loans.map((l) => {
+                  const pct = l.amount ? Math.round((l.amountRepaid / l.amount) * 100) : 0;
+                  return (
+                    <TableRow key={l.id} className="text-[15px]">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9 border border-border">
+                            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                              {initialsOf(l.borrowerName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="font-medium text-foreground">{l.borrowerName}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[240px] truncate text-muted-foreground">{l.purpose}</TableCell>
+                      <TableCell className="text-right font-semibold tabular-nums">{ksh(l.amount)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Progress value={pct} className="h-2" />
+                          <span className="w-10 text-right text-sm font-semibold tabular-nums">{pct}%</span>
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          {ksh(l.amountRepaid)} of {ksh(l.amount)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${statusColor[l.status] ?? ""} capitalize`}>
+                          {l.status.replace("_", " ")}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function LoanDialog({
+  chamaId,
+  members,
+  canManage,
+  onDone,
+}: {
+  chamaId: string;
+  members: Array<{ userId: string; displayName: string }>;
+  canManage: boolean;
+  onDone: () => void;
+}) {
+  const save = useServerFn(recordLoan);
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [borrowerId, setBorrowerId] = useState(user?.id ?? "");
+  const [amount, setAmount] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [months, setMonths] = useState("6");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!borrowerId || !Number(amount) || purpose.trim().length < 3) {
+      toast.error("Fill in borrower, amount and purpose");
+      return;
+    }
+    setBusy(true);
+    try {
+      await save({
+        data: { chamaId, borrowerId, amount: Number(amount), purpose: purpose.trim(), months: Number(months) || 6 },
+      });
+      toast.success(canManage ? "Loan recorded" : "Loan application submitted");
+      setOpen(false);
+      setAmount("");
+      setPurpose("");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save loan");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="h-11 rounded-xl font-semibold">
+          <Plus className="mr-2 h-4 w-4" /> {canManage ? "Record loan" : "Apply for loan"}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{canManage ? "Record a loan" : "Apply for a loan"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {canManage && (
+            <div className="space-y-2">
+              <Label>Borrower</Label>
+              <Select value={borrowerId} onValueChange={setBorrowerId}>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose a member" /></SelectTrigger>
+                <SelectContent>
+                  {members.map((m) => (
+                    <SelectItem key={m.userId} value={m.userId}>{m.displayName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label>Amount (Ksh)</Label>
+            <Input className="h-11 rounded-xl" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Purpose</Label>
+            <Input className="h-11 rounded-xl" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Repayment period (months)</Label>
+            <Input className="h-11 rounded-xl" inputMode="numeric" value={months} onChange={(e) => setMonths(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button className="h-11 rounded-xl font-semibold" disabled={busy} onClick={submit}>
+            {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
