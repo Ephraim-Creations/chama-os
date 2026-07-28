@@ -9,6 +9,7 @@ export type SnapshotMember = {
   role: "chairperson" | "treasurer" | "secretary" | "member";
   joinedAt: string;
   savings: number;
+  penalties: number;
   deductions: number;
   contributions: number;
   activeLoans: number;
