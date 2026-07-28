@@ -170,12 +170,19 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
   const investments = iRes.data ?? [];
 
   const savingsByMember = new Map<string, number>();
+  const penaltiesByMember = new Map<string, number>();
   const countByMember = new Map<string, number>();
   for (const c of contributions) {
     const amt = Number(c.amount ?? 0);
-    const signed = c.type === "withdrawal" ? -amt : amt;
-    savingsByMember.set(c.member_id as string, (savingsByMember.get(c.member_id as string) ?? 0) + signed);
-    countByMember.set(c.member_id as string, (countByMember.get(c.member_id as string) ?? 0) + 1);
+    const key = c.member_id as string;
+    if (c.type === "penalty") {
+      // Penalties are a group income line, never part of a member's savings.
+      penaltiesByMember.set(key, (penaltiesByMember.get(key) ?? 0) + amt);
+    } else {
+      const signed = c.type === "withdrawal" ? -amt : amt;
+      savingsByMember.set(key, (savingsByMember.get(key) ?? 0) + signed);
+    }
+    countByMember.set(key, (countByMember.get(key) ?? 0) + 1);
   }
 
   const deductionRows = dmRes.data ?? [];
