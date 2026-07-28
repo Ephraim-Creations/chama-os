@@ -36,7 +36,20 @@ export type ChamaSnapshot = {
     status: string;
     months: number;
     appliedAt: string;
+    startDate: string | null;
+    installmentAmount: number | null;
+    frequency: string | null;
+    planNotes: string | null;
+    treasurerNotes: string | null;
+    chairNotes: string | null;
+    repayments: Array<{
+      id: string;
+      amount: number;
+      paidOn: string;
+      note: string | null;
+    }>;
   }>;
+
   deductions: Array<{
     id: string;
     name: string;
