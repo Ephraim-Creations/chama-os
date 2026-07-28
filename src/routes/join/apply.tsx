@@ -161,7 +161,7 @@ function ApplyPage() {
                   This becomes your sign-in email once you're approved.
                 </p>
               </Field>
-              <Field id="chama_name" label="Chama name" error={errors.chama_name}>
+              <Field id="chama_name" label="Proposed chama name" error={errors.chama_name}>
                 <Input
                   id="chama_name"
                   value={form.chama_name}
