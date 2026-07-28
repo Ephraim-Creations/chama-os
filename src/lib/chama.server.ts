@@ -158,7 +158,7 @@ export async function createChamaForUser(
     await Promise.allSettled(seeded.map((s) => sendSetupInvite(s.email)));
   }
 
-  return { id: chama.id, invites: seeded };
+  return { id: chama.id, invites: seeded, alreadyExisted: false };
 }
 
 export async function joinChamaWithCode(data: JoinChamaByCodeInput, userId: string) {
