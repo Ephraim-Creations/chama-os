@@ -144,16 +144,8 @@ export function AppHeader() {
 
       <ThemeToggle />
 
-      <Button variant="ghost" size="icon" asChild className="relative h-11 w-11">
-        <Link to="/notifications" aria-label="Notifications">
-          <Bell className="h-5 w-5" />
-          {unread > 0 && (
-            <Badge className="absolute -right-0.5 -top-0.5 h-5 min-w-5 rounded-full bg-destructive p-0 px-1 text-[10px] text-destructive-foreground">
-              {unread > 9 ? "9+" : unread}
-            </Badge>
-          )}
-        </Link>
-      </Button>
+      <NotificationsBell />
+
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
