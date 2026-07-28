@@ -7,6 +7,7 @@ export type Permission =
   | "members.invite"
   | "finance.view"
   | "finance.manage"
+  | "finance.deduct"
   | "loans.view"
   | "loans.manage"
   | "loans.approve"
