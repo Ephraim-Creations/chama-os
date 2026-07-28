@@ -26,7 +26,14 @@ import { useSnapshot } from "@/hooks/use-snapshot";
 import { useChama } from "@/context/chama-context";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useAuth } from "@/hooks/use-auth";
-import { recordLoan, decideLoanFn } from "@/lib/records.functions";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  recordLoan,
+  decideLoanFn,
+  setLoanPlanFn,
+  addLoanRepaymentFn,
+  removeLoanRepaymentFn,
+} from "@/lib/records.functions";
 
 export const Route = createFileRoute("/_authed/loans")({
   component: LoansPage,
