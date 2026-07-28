@@ -84,6 +84,11 @@ export type ChamaSnapshot = {
     investmentValue: number;
     deductionsTotal: number;
     pendingLoans: number;
+    penaltiesTotal: number;
+    loanedOut: number;
+    loanRepaid: number;
+    loanOutstanding: number;
+    availableToLend: number;
   };
   monthly: Array<{ month: string; amount: number }>;
   breakdown: Array<{ name: string; value: number }>;
