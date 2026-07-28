@@ -248,7 +248,22 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       status: l.status,
       months: l.repayment_months,
       appliedAt: l.applied_at,
+      startDate: l.start_date ?? null,
+      installmentAmount: l.installment_amount === null || l.installment_amount === undefined ? null : Number(l.installment_amount),
+      frequency: l.frequency ?? null,
+      planNotes: l.plan_notes ?? null,
+      treasurerNotes: l.treasurer_notes ?? null,
+      chairNotes: l.chair_notes ?? null,
+      repayments: repaymentRows
+        .filter((r: any) => r.loan_id === l.id)
+        .map((r: any) => ({
+          id: r.id as string,
+          amount: Number(r.amount ?? 0),
+          paidOn: r.paid_on as string,
+          note: (r.note ?? null) as string | null,
+        })),
     })),
+
     deductions: (dRes.data ?? []).map((d: any) => {
       const rows = deductionRows.filter((r: any) => r.deduction_id === d.id);
       return {
