@@ -198,7 +198,7 @@ function ApplyPage() {
                 className="h-12 w-full rounded-xl text-[15px] font-semibold"
               >
                 {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                {busy ? "Sending..." : "Send application"}
+                {busy ? "Sending..." : "Send enquiry"}
               </Button>
             </form>
           </>
