@@ -85,10 +85,37 @@ export async function createChamaForUser(
     throw new Error("Your account isn't approved to open a chama yet. Apply at /join/apply and we'll review it.");
   }
 
+  // Idempotency guard: a chair only ever opens one group here. A double click,
+  // a retry after a slow response, or a second visit to onboarding must return
+  // the group that already exists instead of creating another one.
+  const { data: existingMembership } = await supabaseAdmin
+    .from("memberships")
+    .select("chama_id")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+  if (existingMembership?.chama_id) {
+    return { id: existingMembership.chama_id as string, invites: [], alreadyExisted: true };
+  }
+
+  const { data: sameName } = await supabaseAdmin
+    .from("chamas")
+    .select("id")
+    .eq("created_by", userId)
+    .ilike("name", data.name.trim())
+    .limit(1)
+    .maybeSingle();
+  if (sameName?.id) {
+    await supabaseAdmin
+      .from("memberships")
+      .insert({ chama_id: sameName.id, user_id: userId, role: "chairperson" });
+    return { id: sameName.id as string, invites: [], alreadyExisted: true };
+  }
+
   const { data: chama, error } = await supabaseAdmin
     .from("chamas")
     .insert({
-      name: data.name,
+      name: data.name.trim(),
       type: data.type,
       location: data.location ?? null,
       created_by: userId,
@@ -102,9 +129,12 @@ export async function createChamaForUser(
     .from("memberships")
     .insert({ chama_id: chama.id, user_id: userId, role: "chairperson" });
   if (mErr) {
-    await supabaseAdmin.from("chamas").delete().eq("id", chama.id);
+    // Never leave a half-created, member-less group behind.
+    const { error: delErr } = await supabaseAdmin.from("chamas").delete().eq("id", chama.id);
+    if (delErr) console.error("[chama.server] rollback chama delete", delErr);
     fail(mErr, "Could not assign chairperson role.");
   }
+
 
   const seeded: Array<{ email: string; role: string; token: string }> = [];
   if (data.invites?.length) {
