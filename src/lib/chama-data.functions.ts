@@ -38,3 +38,17 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
     if (error) console.error("[chama-data.functions] markNotificationsRead", error);
     return { ok: true };
   });
+
+export const markNotificationRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context as any;
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("id", data.id)
+      .is("read_at", null);
+    if (error) console.error("[chama-data.functions] markNotificationRead", error);
+    return { ok: true };
+  });
