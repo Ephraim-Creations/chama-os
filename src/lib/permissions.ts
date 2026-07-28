@@ -7,6 +7,7 @@ export type Permission =
   | "members.invite"
   | "finance.view"
   | "finance.manage"
+  | "finance.deduct"
   | "loans.view"
   | "loans.manage"
   | "loans.approve"
@@ -42,6 +43,7 @@ const SECRETARY: Permission[] = [
 const TREASURER: Permission[] = [
   ...MEMBER,
   "finance.manage",
+  "finance.deduct",
   "loans.manage",
   "investments.manage",
 ];

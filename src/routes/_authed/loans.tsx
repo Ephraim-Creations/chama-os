@@ -26,7 +26,7 @@ import { useSnapshot } from "@/hooks/use-snapshot";
 import { useChama } from "@/context/chama-context";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useAuth } from "@/hooks/use-auth";
-import { recordLoan } from "@/lib/records.functions";
+import { recordLoan, decideLoanFn } from "@/lib/records.functions";
 
 export const Route = createFileRoute("/_authed/loans")({
   component: LoansPage,
@@ -44,7 +44,7 @@ const statusColor: Record<string, string> = {
 
 function LoansPage() {
   const { active } = useChama();
-  const { can } = usePermissions();
+  const { can, isChair } = usePermissions();
   const { snapshot, loading, refresh } = useSnapshot();
 
   const loans = snapshot?.loans ?? [];
@@ -92,6 +92,7 @@ function LoansPage() {
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="min-w-[180px]">Repayment</TableHead>
                   <TableHead>Status</TableHead>
+                  {(isChair || can("loans.manage")) && <TableHead className="text-right">Decision</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -125,6 +126,20 @@ function LoansPage() {
                           {l.status.replace("_", " ")}
                         </Badge>
                       </TableCell>
+                      {(isChair || can("loans.manage")) && (
+                        <TableCell className="text-right">
+                          {active && (
+                            <LoanActions
+                              chamaId={active.id}
+                              loanId={l.id}
+                              status={l.status}
+                              isChair={isChair}
+                              canReview={can("loans.manage")}
+                              onDone={refresh}
+                            />
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
@@ -133,6 +148,75 @@ function LoansPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function LoanActions({
+  chamaId,
+  loanId,
+  status,
+  isChair,
+  canReview,
+  onDone,
+}: {
+  chamaId: string;
+  loanId: string;
+  status: string;
+  isChair: boolean;
+  canReview: boolean;
+  onDone: () => void;
+}) {
+  const decide = useServerFn(decideLoanFn);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  if (!["pending", "under_review"].includes(status)) {
+    return <span className="text-xs text-muted-foreground">Decided</span>;
+  }
+
+  const run = async (decision: "approved" | "rejected" | "under_review") => {
+    setBusy(decision);
+    try {
+      await decide({ data: { chamaId, loanId, decision } });
+      toast.success(
+        decision === "approved"
+          ? "Loan approved"
+          : decision === "rejected"
+            ? "Loan rejected"
+            : "Loan marked under review",
+      );
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update this loan");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="flex justify-end gap-2">
+      {!isChair && canReview && status === "pending" && (
+        <Button size="sm" variant="outline" className="rounded-lg" disabled={!!busy} onClick={() => run("under_review")}>
+          {busy === "under_review" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send to chair"}
+        </Button>
+      )}
+      {isChair && (
+        <>
+          <Button size="sm" className="rounded-lg font-semibold" disabled={!!busy} onClick={() => run("approved")}>
+            {busy === "approved" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Approve"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-lg text-destructive hover:text-destructive"
+            disabled={!!busy}
+            onClick={() => run("rejected")}
+          >
+            {busy === "rejected" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reject"}
+          </Button>
+        </>
+      )}
+      {!isChair && !canReview && <span className="text-xs text-muted-foreground">Awaiting chair</span>}
     </div>
   );
 }

@@ -224,6 +224,92 @@ export type Database = {
           },
         ]
       }
+      deduction_members: {
+        Row: {
+          amount: number
+          chama_id: string
+          created_at: string
+          deduction_id: string
+          id: string
+          member_id: string
+        }
+        Insert: {
+          amount: number
+          chama_id: string
+          created_at?: string
+          deduction_id: string
+          id?: string
+          member_id: string
+        }
+        Update: {
+          amount?: number
+          chama_id?: string
+          created_at?: string
+          deduction_id?: string
+          id?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deduction_members_chama_id_fkey"
+            columns: ["chama_id"]
+            isOneToOne: false
+            referencedRelation: "chamas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deduction_members_deduction_id_fkey"
+            columns: ["deduction_id"]
+            isOneToOne: false
+            referencedRelation: "deductions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deductions: {
+        Row: {
+          amount_per_member: number
+          applied_on: string
+          chama_id: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_per_member: number
+          applied_on?: string
+          chama_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_per_member?: number
+          applied_on?: string
+          chama_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deductions_chama_id_fkey"
+            columns: ["chama_id"]
+            isOneToOne: false
+            referencedRelation: "chamas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feed_comments: {
         Row: {
           author_id: string

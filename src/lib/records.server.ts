@@ -114,3 +114,55 @@ export async function insertInvestment(
   }
   return { ok: true };
 }
+
+export async function decideLoan(
+  chamaId: string,
+  userId: string,
+  input: { loanId: string; decision: "approved" | "rejected" | "under_review"; note?: string | null },
+) {
+  const role = await roleIn(chamaId, userId);
+  const isReview = input.decision === "under_review";
+  if (isReview) {
+    if (!can(role, "loans.manage")) throw new Error("Only the treasurer or chairperson can review loans.");
+  } else if (role !== "chairperson") {
+    throw new Error("Only the chairperson can approve or reject a loan.");
+  }
+
+  const { data: loan } = await supabaseAdmin
+    .from("loans")
+    .select("id, borrower_id, amount, status")
+    .eq("id", input.loanId)
+    .eq("chama_id", chamaId)
+    .maybeSingle();
+  if (!loan) throw new Error("That loan no longer exists.");
+
+  const patch = isReview
+    ? { status: "under_review", treasurer_notes: input.note ?? null }
+    : {
+        status: input.decision === "approved" ? "active" : "rejected",
+        chair_notes: input.note ?? null,
+        decided_at: new Date().toISOString(),
+      };
+
+  const { error } = await supabaseAdmin.from("loans").update(patch as never).eq("id", input.loanId);
+  if (error) {
+    console.error("[records.server] decideLoan", error);
+    throw new Error("Could not update that loan.");
+  }
+
+  const title = isReview
+    ? "Your loan is under review"
+    : input.decision === "approved"
+      ? "Loan approved"
+      : "Loan application rejected";
+  const { error: notifyError } = await supabaseAdmin.from("notifications").insert({
+    user_id: loan.borrower_id as string,
+    chama_id: chamaId,
+    title,
+    body: input.note ?? null,
+    kind: "loans",
+  });
+  if (notifyError) console.error("[records.server] decideLoan notify", notifyError);
+
+  return { ok: true };
+}
