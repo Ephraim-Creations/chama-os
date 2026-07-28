@@ -41,7 +41,16 @@ export const createChamaSchema = z.object({
   invites: z.array(inviteSeedSchema).max(50).optional(),
 });
 
+export const saveChamaSettingsSchema = z.object({
+  chamaId: z.string().uuid(),
+  name: z.string().min(2).max(120),
+  type: z.enum(chamaTypes),
+  location: z.string().max(200).optional().nullable(),
+  rules: rulesSchema.optional(),
+});
+
 export const joinChamaByCodeSchema = z.object({
+
   code: z.string().min(4).max(32).regex(/^[A-Za-z0-9_-]+$/),
 });
 
