@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Search, ChevronDown, Check, Users, LogOut, Plus } from "lucide-react";
+import { Search, ChevronDown, Check, Users, LogOut, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,12 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useChama } from "@/context/chama-context";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationsBell } from "@/components/NotificationsBell";
+
 
 const roleLabels: Record<string, string> = {
   chairperson: "Chairperson", treasurer: "Treasurer", secretary: "Secretary", member: "Member",
@@ -27,32 +28,9 @@ export function AppHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { chamas, active, setActiveId } = useChama();
-  const [unread, setUnread] = useState(0);
   const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null } | null>(null);
 
-  useEffect(() => {
-    if (!user?.id) {
-      setUnread(0);
-      return;
-    }
-    let cancelled = false;
-    const loadUnread = () => {
-      void supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .is("read_at", null)
-        .then(({ count }) => {
-          if (!cancelled) setUnread(count ?? 0);
-        });
-    };
-    loadUnread();
-    window.addEventListener("notifications-updated", loadUnread);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("notifications-updated", loadUnread);
-    };
-  }, [user?.id, active?.id]);
+
 
 
   useEffect(() => {
@@ -144,16 +122,8 @@ export function AppHeader() {
 
       <ThemeToggle />
 
-      <Button variant="ghost" size="icon" asChild className="relative h-11 w-11">
-        <Link to="/notifications" aria-label="Notifications">
-          <Bell className="h-5 w-5" />
-          {unread > 0 && (
-            <Badge className="absolute -right-0.5 -top-0.5 h-5 min-w-5 rounded-full bg-destructive p-0 px-1 text-[10px] text-destructive-foreground">
-              {unread > 9 ? "9+" : unread}
-            </Badge>
-          )}
-        </Link>
-      </Button>
+      <NotificationsBell />
+
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

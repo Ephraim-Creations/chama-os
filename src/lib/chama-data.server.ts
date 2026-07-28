@@ -9,6 +9,7 @@ export type SnapshotMember = {
   role: "chairperson" | "treasurer" | "secretary" | "member";
   joinedAt: string;
   savings: number;
+  penalties: number;
   deductions: number;
   contributions: number;
   activeLoans: number;
@@ -83,6 +84,11 @@ export type ChamaSnapshot = {
     investmentValue: number;
     deductionsTotal: number;
     pendingLoans: number;
+    penaltiesTotal: number;
+    loanedOut: number;
+    loanRepaid: number;
+    loanOutstanding: number;
+    availableToLend: number;
   };
   monthly: Array<{ month: string; amount: number }>;
   breakdown: Array<{ name: string; value: number }>;
@@ -164,12 +170,19 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
   const investments = iRes.data ?? [];
 
   const savingsByMember = new Map<string, number>();
+  const penaltiesByMember = new Map<string, number>();
   const countByMember = new Map<string, number>();
   for (const c of contributions) {
     const amt = Number(c.amount ?? 0);
-    const signed = c.type === "withdrawal" ? -amt : amt;
-    savingsByMember.set(c.member_id as string, (savingsByMember.get(c.member_id as string) ?? 0) + signed);
-    countByMember.set(c.member_id as string, (countByMember.get(c.member_id as string) ?? 0) + 1);
+    const key = c.member_id as string;
+    if (c.type === "penalty") {
+      // Penalties are a group income line, never part of a member's savings.
+      penaltiesByMember.set(key, (penaltiesByMember.get(key) ?? 0) + amt);
+    } else {
+      const signed = c.type === "withdrawal" ? -amt : amt;
+      savingsByMember.set(key, (savingsByMember.get(key) ?? 0) + signed);
+    }
+    countByMember.set(key, (countByMember.get(key) ?? 0) + 1);
   }
 
   const deductionRows = dmRes.data ?? [];
@@ -204,6 +217,7 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     savings:
       (savingsByMember.get(m.user_id as string) ?? 0) -
       (deductionsByMember.get(m.user_id as string) ?? 0),
+    penalties: penaltiesByMember.get(m.user_id as string) ?? 0,
     deductions: deductionsByMember.get(m.user_id as string) ?? 0,
     contributions: countByMember.get(m.user_id as string) ?? 0,
     activeLoans: activeLoanByMember.get(m.user_id as string) ?? 0,
@@ -233,9 +247,21 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     (a, c) => a + (c.type === "withdrawal" ? -Number(c.amount ?? 0) : Number(c.amount ?? 0)),
     0,
   );
-  const activeLoanValue = loans
-    .filter((l) => ["active", "approved", "overdue"].includes(l.status as string))
-    .reduce((a, l) => a + (Number(l.amount ?? 0) - Number(l.amount_repaid ?? 0)), 0);
+  const outstandingLoans = loans.filter((l) =>
+    ["active", "approved", "overdue"].includes(l.status as string),
+  );
+  const activeLoanValue = outstandingLoans.reduce(
+    (a, l) => a + (Number(l.amount ?? 0) - Number(l.amount_repaid ?? 0)),
+    0,
+  );
+  const penaltiesTotal = contributions
+    .filter((c) => c.type === "penalty")
+    .reduce((a, c) => a + Number(c.amount ?? 0), 0);
+  const loanedOut = outstandingLoans.reduce((a, l) => a + Number(l.amount ?? 0), 0);
+  const loanRepaid = loans.reduce((a, l) => a + Number(l.amount_repaid ?? 0), 0);
+  const investmentValue = investments.reduce((a, i) => a + Number(i.current_value ?? 0), 0);
+  const groupSavings = totalSavings - deductionsTotal;
+  const availableToLend = Math.max(groupSavings - activeLoanValue, 0);
 
   return {
     chamaId,
@@ -309,12 +335,17 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     })),
     totals: {
       members: members.length,
-      savings: totalSavings - deductionsTotal,
+      savings: groupSavings,
       monthlyCollection,
       activeLoanValue,
-      investmentValue: investments.reduce((a, i) => a + Number(i.current_value ?? 0), 0),
+      investmentValue,
       deductionsTotal,
       pendingLoans: loans.filter((l) => ["pending", "under_review"].includes(l.status as string)).length,
+      penaltiesTotal,
+      loanedOut,
+      loanRepaid,
+      loanOutstanding: activeLoanValue,
+      availableToLend,
     },
     monthly: monthKeys.map((m) => ({ month: m.month, amount: monthTotals.get(m.key) ?? 0 })),
     breakdown: Array.from(breakdownMap.entries()).map(([name, value]) => ({ name, value })),

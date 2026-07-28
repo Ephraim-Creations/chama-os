@@ -20,8 +20,12 @@ type NavItem = { title: string; url: string; icon: any; perm?: Permission };
 const SECTIONS: Array<{ label: string; items: NavItem[] }> = [
   {
     label: "Overview",
-    items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }],
+    items: [
+      { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
+      { title: "My stats", url: "/member", icon: UserRound },
+    ],
   },
+
   {
     label: "Members",
     items: [
@@ -66,13 +70,13 @@ const SECTIONS: Array<{ label: string; items: NavItem[] }> = [
   {
     label: "Account",
     items: [
-      { title: "Profile", url: "/member", icon: UserRound },
       { title: "Billing", url: "/billing", icon: CreditCard, perm: "billing.manage" },
-      { title: "Settings", url: "/settings", icon: Settings, perm: "settings.manage" },
+      { title: "Settings", url: "/settings", icon: Settings },
       { title: "Help center", url: "/help", icon: LifeBuoy },
     ],
   },
 ];
+
 
 export function AppSidebar() {
   const { state } = useSidebar();
