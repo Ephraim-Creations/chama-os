@@ -217,6 +217,7 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     savings:
       (savingsByMember.get(m.user_id as string) ?? 0) -
       (deductionsByMember.get(m.user_id as string) ?? 0),
+    penalties: penaltiesByMember.get(m.user_id as string) ?? 0,
     deductions: deductionsByMember.get(m.user_id as string) ?? 0,
     contributions: countByMember.get(m.user_id as string) ?? 0,
     activeLoans: activeLoanByMember.get(m.user_id as string) ?? 0,
