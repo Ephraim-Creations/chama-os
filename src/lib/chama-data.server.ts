@@ -100,7 +100,7 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     .maybeSingle();
   if (!mine) throw new Error("You are not a member of this chama.");
 
-  const [mRes, cRes, lRes, iRes, mtRes, dRes, dmRes] = await Promise.all([
+  const [mRes, cRes, lRes, iRes, mtRes, dRes, dmRes, lrRes] = await Promise.all([
     supabaseAdmin
       .from("memberships")
       .select("id, user_id, role, joined_at")
