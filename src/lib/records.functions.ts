@@ -82,3 +82,21 @@ export const addInvestment = createServerFn({ method: "POST" })
     const { insertInvestment } = await import("@/lib/records.server");
     return insertInvestment(data.chamaId, userId, data);
   });
+
+export const decideLoanFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        chamaId: z.string().uuid(),
+        loanId: z.string().uuid(),
+        decision: z.enum(["approved", "rejected", "under_review"]),
+        note: z.string().trim().max(300).optional().nullable(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    const { decideLoan } = await import("@/lib/records.server");
+    return decideLoan(data.chamaId, userId, data);
+  });
