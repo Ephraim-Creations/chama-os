@@ -157,6 +157,14 @@ function Dashboard() {
         <KpiCard label="Pending approvals" value={String(t?.pendingLoans ?? 0)} icon={Clock} accent="destructive" />
       </div>
 
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="Total loaned out" value={ksh(t?.loanedOut ?? 0)} icon={HandCoins} accent="navy" />
+        <KpiCard label="Loan repayments received" value={ksh(t?.loanRepaid ?? 0)} icon={CheckCircle2} accent="primary" />
+        <KpiCard label="Outstanding balance" value={ksh(t?.loanOutstanding ?? 0)} icon={Clock} accent="warning" />
+        <KpiCard label="Available to lend" value={ksh(t?.availableToLend ?? 0)} icon={Wallet} accent="info" />
+      </div>
+
+
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Panel
           title="Monthly contributions"
