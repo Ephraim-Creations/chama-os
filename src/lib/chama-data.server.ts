@@ -36,7 +36,20 @@ export type ChamaSnapshot = {
     status: string;
     months: number;
     appliedAt: string;
+    startDate: string | null;
+    installmentAmount: number | null;
+    frequency: string | null;
+    planNotes: string | null;
+    treasurerNotes: string | null;
+    chairNotes: string | null;
+    repayments: Array<{
+      id: string;
+      amount: number;
+      paidOn: string;
+      note: string | null;
+    }>;
   }>;
+
   deductions: Array<{
     id: string;
     name: string;
@@ -87,7 +100,7 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     .maybeSingle();
   if (!mine) throw new Error("You are not a member of this chama.");
 
-  const [mRes, cRes, lRes, iRes, mtRes, dRes, dmRes] = await Promise.all([
+  const [mRes, cRes, lRes, iRes, mtRes, dRes, dmRes, lrRes] = await Promise.all([
     supabaseAdmin
       .from("memberships")
       .select("id, user_id, role, joined_at")
@@ -101,9 +114,12 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       .limit(500),
     supabaseAdmin
       .from("loans")
-      .select("id, borrower_id, amount, amount_repaid, purpose, status, repayment_months, applied_at")
+      .select(
+        "id, borrower_id, amount, amount_repaid, purpose, status, repayment_months, applied_at, start_date, installment_amount, frequency, plan_notes, treasurer_notes, chair_notes",
+      )
       .eq("chama_id", chamaId)
       .order("applied_at", { ascending: false }),
+
     supabaseAdmin
       .from("investments")
       .select("id, name, category, initial_value, current_value, monthly_income")
@@ -123,7 +139,15 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       .from("deduction_members")
       .select("id, deduction_id, member_id, amount")
       .eq("chama_id", chamaId),
+    supabaseAdmin
+      .from("loan_repayments")
+      .select("id, loan_id, amount, paid_on, note")
+      .eq("chama_id", chamaId)
+      .order("paid_on", { ascending: false }),
   ]);
+
+  const repaymentRows = lrRes.data ?? [];
+
 
   const memberRows = mRes.data ?? [];
   const ids = memberRows.map((m) => m.user_id as string);
@@ -235,7 +259,22 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       status: l.status,
       months: l.repayment_months,
       appliedAt: l.applied_at,
+      startDate: l.start_date ?? null,
+      installmentAmount: l.installment_amount === null || l.installment_amount === undefined ? null : Number(l.installment_amount),
+      frequency: l.frequency ?? null,
+      planNotes: l.plan_notes ?? null,
+      treasurerNotes: l.treasurer_notes ?? null,
+      chairNotes: l.chair_notes ?? null,
+      repayments: repaymentRows
+        .filter((r: any) => r.loan_id === l.id)
+        .map((r: any) => ({
+          id: r.id as string,
+          amount: Number(r.amount ?? 0),
+          paidOn: r.paid_on as string,
+          note: (r.note ?? null) as string | null,
+        })),
     })),
+
     deductions: (dRes.data ?? []).map((d: any) => {
       const rows = deductionRows.filter((r: any) => r.deduction_id === d.id);
       return {

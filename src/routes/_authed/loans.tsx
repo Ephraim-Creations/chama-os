@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, HandCoins, AlertTriangle, CheckCircle2, Percent, Loader2 } from "lucide-react";
+import { Plus, HandCoins, AlertTriangle, CheckCircle2, Percent, Loader2, CalendarClock } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { KpiCard } from "@/components/KpiCard";
@@ -26,7 +26,14 @@ import { useSnapshot } from "@/hooks/use-snapshot";
 import { useChama } from "@/context/chama-context";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useAuth } from "@/hooks/use-auth";
-import { recordLoan, decideLoanFn } from "@/lib/records.functions";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  recordLoan,
+  decideLoanFn,
+  setLoanPlanFn,
+  addLoanRepaymentFn,
+  removeLoanRepaymentFn,
+} from "@/lib/records.functions";
 
 export const Route = createFileRoute("/_authed/loans")({
   component: LoansPage,
@@ -119,7 +126,13 @@ function LoansPage() {
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
                           {ksh(l.amountRepaid)} of {ksh(l.amount)}
+                          {l.installmentAmount
+                            ? ` · ${ksh(l.installmentAmount)} ${l.frequency ?? "monthly"}`
+                            : ""}
                         </div>
+                        {l.planNotes && (
+                          <div className="mt-1 text-xs text-muted-foreground">{l.planNotes}</div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={`${statusColor[l.status] ?? ""} capitalize`}>
@@ -129,17 +142,24 @@ function LoansPage() {
                       {(isChair || can("loans.manage")) && (
                         <TableCell className="text-right">
                           {active && (
-                            <LoanActions
-                              chamaId={active.id}
-                              loanId={l.id}
-                              status={l.status}
-                              isChair={isChair}
-                              canReview={can("loans.manage")}
-                              onDone={refresh}
-                            />
+                            <div className="flex items-center justify-end gap-2">
+                              {can("loans.manage") &&
+                                ["approved", "active", "overdue", "completed"].includes(l.status) && (
+                                  <LoanPlanDialog chamaId={active.id} loan={l} onDone={refresh} />
+                                )}
+                              <LoanActions
+                                chamaId={active.id}
+                                loanId={l.id}
+                                status={l.status}
+                                isChair={isChair}
+                                canReview={can("loans.manage")}
+                                onDone={refresh}
+                              />
+                            </div>
                           )}
                         </TableCell>
                       )}
+
                     </TableRow>
                   );
                 })}
@@ -169,6 +189,8 @@ function LoanActions({
 }) {
   const decide = useServerFn(decideLoanFn);
   const [busy, setBusy] = useState<string | null>(null);
+  const [pending, setPending] = useState<"approved" | "rejected" | "under_review" | null>(null);
+  const [note, setNote] = useState("");
 
   if (!["pending", "under_review"].includes(status)) {
     return <span className="text-xs text-muted-foreground">Decided</span>;
@@ -177,14 +199,16 @@ function LoanActions({
   const run = async (decision: "approved" | "rejected" | "under_review") => {
     setBusy(decision);
     try {
-      await decide({ data: { chamaId, loanId, decision } });
+      await decide({ data: { chamaId, loanId, decision, note: note.trim() || null } });
       toast.success(
         decision === "approved"
           ? "Loan approved"
           : decision === "rejected"
             ? "Loan rejected"
-            : "Loan marked under review",
+            : "Loan sent to the chairperson",
       );
+      setPending(null);
+      setNote("");
       onDone();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not update this loan");
@@ -194,32 +218,277 @@ function LoanActions({
   };
 
   return (
-    <div className="flex justify-end gap-2">
-      {!isChair && canReview && status === "pending" && (
-        <Button size="sm" variant="outline" className="rounded-lg" disabled={!!busy} onClick={() => run("under_review")}>
-          {busy === "under_review" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send to chair"}
-        </Button>
-      )}
-      {isChair && (
-        <>
-          <Button size="sm" className="rounded-lg font-semibold" disabled={!!busy} onClick={() => run("approved")}>
-            {busy === "approved" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Approve"}
+    <>
+      <div className="flex justify-end gap-2">
+        {!isChair && canReview && status === "pending" && (
+          <Button size="sm" variant="outline" className="rounded-lg" onClick={() => setPending("under_review")}>
+            Send to chair
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-lg text-destructive hover:text-destructive"
-            disabled={!!busy}
-            onClick={() => run("rejected")}
-          >
-            {busy === "rejected" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reject"}
-          </Button>
-        </>
-      )}
-      {!isChair && !canReview && <span className="text-xs text-muted-foreground">Awaiting chair</span>}
-    </div>
+        )}
+        {isChair && (
+          <>
+            <Button size="sm" className="rounded-lg font-semibold" onClick={() => setPending("approved")}>
+              Approve
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-lg text-destructive hover:text-destructive"
+              onClick={() => setPending("rejected")}
+            >
+              Reject
+            </Button>
+          </>
+        )}
+        {!isChair && !canReview && <span className="text-xs text-muted-foreground">Awaiting chair</span>}
+      </div>
+
+      <Dialog open={pending !== null} onOpenChange={(o) => !o && setPending(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {pending === "approved"
+                ? "Approve this loan"
+                : pending === "rejected"
+                  ? "Reject this loan"
+                  : "Send to the chairperson"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-left">
+            <Label>Notes for the borrower (optional)</Label>
+            <Textarea
+              rows={4}
+              className="rounded-xl"
+              placeholder="Explain the decision, conditions or next steps…"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              className="h-11 rounded-xl font-semibold"
+              disabled={!!busy}
+              onClick={() => pending && run(pending)}
+            >
+              {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {pending === "rejected" ? "Reject loan" : pending === "approved" ? "Approve loan" : "Send"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
+
+type SnapshotLoan = {
+  id: string;
+  amount: number;
+  amountRepaid: number;
+  months: number;
+  startDate: string | null;
+  installmentAmount: number | null;
+  frequency: string | null;
+  planNotes: string | null;
+  repayments: Array<{ id: string; amount: number; paidOn: string; note: string | null }>;
+};
+
+function LoanPlanDialog({
+  chamaId,
+  loan,
+  onDone,
+}: {
+  chamaId: string;
+  loan: SnapshotLoan;
+  onDone: () => void;
+}) {
+  const savePlan = useServerFn(setLoanPlanFn);
+  const addPayment = useServerFn(addLoanRepaymentFn);
+  const removePayment = useServerFn(removeLoanRepaymentFn);
+
+  const [open, setOpen] = useState(false);
+  const [startDate, setStartDate] = useState(loan.startDate ?? "");
+  const [installment, setInstallment] = useState(loan.installmentAmount ? String(loan.installmentAmount) : "");
+  const [frequency, setFrequency] = useState(loan.frequency ?? "monthly");
+  const [months, setMonths] = useState(String(loan.months ?? 6));
+  const [planNotes, setPlanNotes] = useState(loan.planNotes ?? "");
+  const [busy, setBusy] = useState(false);
+
+  const [payAmount, setPayAmount] = useState("");
+  const [payDate, setPayDate] = useState(new Date().toISOString().slice(0, 10));
+  const [payNote, setPayNote] = useState("");
+  const [payBusy, setPayBusy] = useState(false);
+
+  const balance = Math.max(loan.amount - loan.amountRepaid, 0);
+
+  const submitPlan = async () => {
+    setBusy(true);
+    try {
+      await savePlan({
+        data: {
+          chamaId,
+          loanId: loan.id,
+          startDate: startDate || null,
+          installmentAmount: Number(installment) > 0 ? Number(installment) : null,
+          frequency: frequency as "weekly" | "biweekly" | "monthly" | "quarterly",
+          planNotes: planNotes.trim() || null,
+          months: Number(months) > 0 ? Number(months) : null,
+        },
+      });
+      toast.success("Payment plan saved");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save the plan");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitPayment = async () => {
+    if (!Number(payAmount)) {
+      toast.error("Enter the amount paid");
+      return;
+    }
+    setPayBusy(true);
+    try {
+      await addPayment({
+        data: {
+          chamaId,
+          loanId: loan.id,
+          amount: Number(payAmount),
+          paidOn: payDate,
+          note: payNote.trim() || null,
+        },
+      });
+      toast.success("Payment recorded");
+      setPayAmount("");
+      setPayNote("");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not record that payment");
+    } finally {
+      setPayBusy(false);
+    }
+  };
+
+  const deletePayment = async (repaymentId: string) => {
+    try {
+      await removePayment({ data: { chamaId, repaymentId } });
+      toast.success("Payment removed");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not remove that payment");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="rounded-lg">
+          <CalendarClock className="mr-2 h-4 w-4" /> Plan
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Payment plan & payments</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm">
+            Balance: <span className="font-semibold tabular-nums">{ksh(balance)}</span> of {ksh(loan.amount)}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>First payment date</Label>
+              <Input type="date" className="h-11 rounded-xl" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Installment (Ksh)</Label>
+              <Input className="h-11 rounded-xl" inputMode="numeric" value={installment} onChange={(e) => setInstallment(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Frequency</Label>
+              <Select value={frequency} onValueChange={setFrequency}>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="biweekly">Every 2 weeks</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Period (months)</Label>
+              <Input className="h-11 rounded-xl" inputMode="numeric" value={months} onChange={(e) => setMonths(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Plan description</Label>
+            <Textarea
+              rows={3}
+              className="rounded-xl"
+              placeholder="e.g. Ksh 5,000 every month by M-Pesa before the 5th."
+              value={planNotes}
+              onChange={(e) => setPlanNotes(e.target.value)}
+            />
+          </div>
+
+          <Button className="h-11 w-full rounded-xl font-semibold" disabled={busy} onClick={submitPlan}>
+            {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save plan
+          </Button>
+
+          <div className="border-t border-border pt-4">
+            <div className="mb-3 text-sm font-semibold">Record a payment</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Amount (Ksh)</Label>
+                <Input className="h-11 rounded-xl" inputMode="numeric" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Date paid</Label>
+                <Input type="date" className="h-11 rounded-xl" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
+              </div>
+            </div>
+            <div className="mt-3 space-y-2">
+              <Label>Description (optional)</Label>
+              <Textarea rows={2} className="rounded-xl" placeholder="Reference, channel or comment…" value={payNote} onChange={(e) => setPayNote(e.target.value)} />
+            </div>
+            <Button variant="outline" className="mt-3 h-11 w-full rounded-xl font-semibold" disabled={payBusy} onClick={submitPayment}>
+              {payBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Add payment
+            </Button>
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <div className="mb-2 text-sm font-semibold">Payments so far</div>
+            {loan.repayments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No payments recorded yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {loan.repayments.map((r) => (
+                  <li key={r.id} className="flex items-start gap-3 rounded-xl border border-border p-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold tabular-nums">{ksh(r.amount)}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(r.paidOn).toLocaleDateString()}
+                        {r.note ? ` · ${r.note}` : ""}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deletePayment(r.id)}>
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 function LoanDialog({
   chamaId,

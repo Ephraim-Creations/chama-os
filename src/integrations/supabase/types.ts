@@ -453,6 +453,57 @@ export type Database = {
           },
         ]
       }
+      loan_repayments: {
+        Row: {
+          amount: number
+          chama_id: string
+          created_at: string
+          id: string
+          loan_id: string
+          note: string | null
+          paid_on: string
+          recorded_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          chama_id: string
+          created_at?: string
+          id?: string
+          loan_id: string
+          note?: string | null
+          paid_on?: string
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          chama_id?: string
+          created_at?: string
+          id?: string
+          loan_id?: string
+          note?: string | null
+          paid_on?: string
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_repayments_chama_id_fkey"
+            columns: ["chama_id"]
+            isOneToOne: false
+            referencedRelation: "chamas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_repayments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loans: {
         Row: {
           amount: number
@@ -462,9 +513,13 @@ export type Database = {
           chair_notes: string | null
           chama_id: string
           decided_at: string | null
+          frequency: string | null
           id: string
+          installment_amount: number | null
+          plan_notes: string | null
           purpose: string
           repayment_months: number
+          start_date: string | null
           status: Database["public"]["Enums"]["loan_status"]
           treasurer_notes: string | null
         }
@@ -476,9 +531,13 @@ export type Database = {
           chair_notes?: string | null
           chama_id: string
           decided_at?: string | null
+          frequency?: string | null
           id?: string
+          installment_amount?: number | null
+          plan_notes?: string | null
           purpose: string
           repayment_months?: number
+          start_date?: string | null
           status?: Database["public"]["Enums"]["loan_status"]
           treasurer_notes?: string | null
         }
@@ -490,9 +549,13 @@ export type Database = {
           chair_notes?: string | null
           chama_id?: string
           decided_at?: string | null
+          frequency?: string | null
           id?: string
+          installment_amount?: number | null
+          plan_notes?: string | null
           purpose?: string
           repayment_months?: number
+          start_date?: string | null
           status?: Database["public"]["Enums"]["loan_status"]
           treasurer_notes?: string | null
         }

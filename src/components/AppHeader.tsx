@@ -36,18 +36,24 @@ export function AppHeader() {
       return;
     }
     let cancelled = false;
-    void supabase
-      .from("notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .is("read_at", null)
-      .then(({ count }) => {
-        if (!cancelled) setUnread(count ?? 0);
-      });
+    const loadUnread = () => {
+      void supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .is("read_at", null)
+        .then(({ count }) => {
+          if (!cancelled) setUnread(count ?? 0);
+        });
+    };
+    loadUnread();
+    window.addEventListener("notifications-updated", loadUnread);
     return () => {
       cancelled = true;
+      window.removeEventListener("notifications-updated", loadUnread);
     };
   }, [user?.id, active?.id]);
+
 
   useEffect(() => {
     if (!user?.id) {
