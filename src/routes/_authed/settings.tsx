@@ -137,7 +137,9 @@ function ProfileCard() {
           phone: phone.trim() || null,
         },
       });
+      window.dispatchEvent(new Event("profile-updated"));
       toast.success("Profile saved");
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
