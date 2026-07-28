@@ -78,6 +78,39 @@ export async function insertContribution(
   return { ok: true };
 }
 
+/** A member's borrowing ceiling: net savings (never below zero) x the chama multiplier. */
+export async function loanLimitFor(chamaId: string, memberId: string): Promise<number> {
+  const [{ data: chama }, { data: contributions }, { data: deductions }] = await Promise.all([
+    supabaseAdmin.from("chamas").select("rules").eq("id", chamaId).maybeSingle(),
+    supabaseAdmin
+      .from("contributions")
+      .select("type, amount")
+      .eq("chama_id", chamaId)
+      .eq("member_id", memberId),
+    supabaseAdmin
+      .from("deduction_members")
+      .select("amount")
+      .eq("chama_id", chamaId)
+      .eq("member_id", memberId),
+  ]);
+
+  const rules = (chama?.rules ?? {}) as Record<string, unknown>;
+  const multiplier =
+    typeof rules.loan_max_multiplier === "number" && rules.loan_max_multiplier >= 0
+      ? rules.loan_max_multiplier
+      : 3;
+
+  let savings = 0;
+  for (const c of contributions ?? []) {
+    const amount = Number(c.amount ?? 0);
+    if (c.type === "penalty") continue;
+    savings += c.type === "withdrawal" ? -amount : amount;
+  }
+  for (const d of deductions ?? []) savings -= Number(d.amount ?? 0);
+
+  return Math.max(savings, 0) * multiplier;
+}
+
 export async function insertLoan(
   chamaId: string,
   userId: string,
@@ -87,6 +120,18 @@ export async function insertLoan(
   const forSomeoneElse = input.borrowerId !== userId;
   if (forSomeoneElse && !can(role, "loans.manage")) {
     throw new Error("Only the treasurer or chairperson can record loans for others.");
+  }
+
+  if (!forSomeoneElse) {
+    const limit = await loanLimitFor(chamaId, userId);
+    if (limit <= 0) {
+      throw new Error(
+        "Your savings balance is zero, so your loan limit is Ksh 0. Save more to become eligible.",
+      );
+    }
+    if (input.amount > limit) {
+      throw new Error(`Your loan limit is Ksh ${Math.round(limit).toLocaleString("en-KE")}.`);
+    }
   }
   const { data: row, error } = await supabaseAdmin
     .from("loans")
