@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Wallet, HandCoins, TrendingUp, CalendarDays, Loader2, Inbox } from "lucide-react";
+import { Wallet, HandCoins, TrendingUp, CalendarDays, Loader2, Inbox, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { EmptyState } from "@/components/EmptyState";
