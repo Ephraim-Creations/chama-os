@@ -94,12 +94,16 @@ function Onboarding() {
           navigate({ to: "/admin", replace: true });
           return;
         }
-        if (p.onboarded && a.memberships > 0) {
+        if (a.memberships > 0) {
           navigate({ to: "/dashboard", replace: true });
           return;
         }
-        setCanCreate(a.canCreateChama && a.memberships === 0);
+        setCanCreate(a.canCreateChama);
+        // Prefill the name they proposed when they enquired — nothing was
+        // created back then, they just confirm it here.
+        if (a.application?.chama_name) setName(a.application.chama_name);
         if (p.onboarded) setStep(1);
+
         setReady(true);
       })
       .catch(() => setReady(true));
