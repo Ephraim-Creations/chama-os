@@ -9,6 +9,7 @@ export type SnapshotMember = {
   role: "chairperson" | "treasurer" | "secretary" | "member";
   joinedAt: string;
   savings: number;
+  deductions: number;
   contributions: number;
   activeLoans: number;
 };
@@ -36,6 +37,15 @@ export type ChamaSnapshot = {
     months: number;
     appliedAt: string;
   }>;
+  deductions: Array<{
+    id: string;
+    name: string;
+    amountPerMember: number;
+    notes: string | null;
+    appliedOn: string;
+    total: number;
+    members: Array<{ memberId: string; memberName: string; amount: number }>;
+  }>;
   investments: Array<{
     id: string;
     name: string;
@@ -58,6 +68,7 @@ export type ChamaSnapshot = {
     monthlyCollection: number;
     activeLoanValue: number;
     investmentValue: number;
+    deductionsTotal: number;
     pendingLoans: number;
   };
   monthly: Array<{ month: string; amount: number }>;
@@ -76,7 +87,7 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     .maybeSingle();
   if (!mine) throw new Error("You are not a member of this chama.");
 
-  const [mRes, cRes, lRes, iRes, mtRes] = await Promise.all([
+  const [mRes, cRes, lRes, iRes, mtRes, dRes, dmRes] = await Promise.all([
     supabaseAdmin
       .from("memberships")
       .select("id, user_id, role, joined_at")
@@ -103,6 +114,15 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       .select("id, title, agenda, location, scheduled_at, minutes")
       .eq("chama_id", chamaId)
       .order("scheduled_at", { ascending: false }),
+    supabaseAdmin
+      .from("deductions")
+      .select("id, name, amount_per_member, notes, applied_on, created_at")
+      .eq("chama_id", chamaId)
+      .order("applied_on", { ascending: false }),
+    supabaseAdmin
+      .from("deduction_members")
+      .select("id, deduction_id, member_id, amount")
+      .eq("chama_id", chamaId),
   ]);
 
   const memberRows = mRes.data ?? [];
@@ -128,6 +148,14 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     countByMember.set(c.member_id as string, (countByMember.get(c.member_id as string) ?? 0) + 1);
   }
 
+  const deductionRows = dmRes.data ?? [];
+  const deductionsByMember = new Map<string, number>();
+  for (const d of deductionRows) {
+    const k = d.member_id as string;
+    deductionsByMember.set(k, (deductionsByMember.get(k) ?? 0) + Number(d.amount ?? 0));
+  }
+  const deductionsTotal = deductionRows.reduce((a, d) => a + Number(d.amount ?? 0), 0);
+
   const activeLoanByMember = new Map<string, number>();
   for (const l of loans) {
     if (["active", "approved", "overdue"].includes(l.status as string)) {
@@ -149,7 +177,10 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     avatarUrl: (profileById.get(m.user_id)?.avatar_url as string | null) ?? null,
     role: m.role,
     joinedAt: m.joined_at as string,
-    savings: savingsByMember.get(m.user_id as string) ?? 0,
+    savings:
+      (savingsByMember.get(m.user_id as string) ?? 0) -
+      (deductionsByMember.get(m.user_id as string) ?? 0),
+    deductions: deductionsByMember.get(m.user_id as string) ?? 0,
     contributions: countByMember.get(m.user_id as string) ?? 0,
     activeLoans: activeLoanByMember.get(m.user_id as string) ?? 0,
   }));
@@ -205,6 +236,22 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       months: l.repayment_months,
       appliedAt: l.applied_at,
     })),
+    deductions: (dRes.data ?? []).map((d: any) => {
+      const rows = deductionRows.filter((r: any) => r.deduction_id === d.id);
+      return {
+        id: d.id as string,
+        name: d.name as string,
+        amountPerMember: Number(d.amount_per_member ?? 0),
+        notes: (d.notes ?? null) as string | null,
+        appliedOn: d.applied_on as string,
+        total: rows.reduce((a: number, r: any) => a + Number(r.amount ?? 0), 0),
+        members: rows.map((r: any) => ({
+          memberId: r.member_id as string,
+          memberName: nameOf(r.member_id as string),
+          amount: Number(r.amount ?? 0),
+        })),
+      };
+    }),
     investments: investments.map((i: any) => ({
       id: i.id,
       name: i.name,
@@ -223,10 +270,11 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     })),
     totals: {
       members: members.length,
-      savings: totalSavings,
+      savings: totalSavings - deductionsTotal,
       monthlyCollection,
       activeLoanValue,
       investmentValue: investments.reduce((a, i) => a + Number(i.current_value ?? 0), 0),
+      deductionsTotal,
       pendingLoans: loans.filter((l) => ["pending", "under_review"].includes(l.status as string)).length,
     },
     monthly: monthKeys.map((m) => ({ month: m.month, amount: monthTotals.get(m.key) ?? 0 })),
