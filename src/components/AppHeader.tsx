@@ -28,6 +28,7 @@ export function AppHeader() {
   const navigate = useNavigate();
   const { chamas, active, setActiveId } = useChama();
   const [unread, setUnread] = useState(0);
+  const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null } | null>(null);
 
   useEffect(() => {
     if (!user?.id) {
@@ -48,10 +49,39 @@ export function AppHeader() {
     };
   }, [user?.id, active?.id]);
 
+  useEffect(() => {
+    if (!user?.id) {
+      setProfile(null);
+      return;
+    }
+    let cancelled = false;
+    const loadProfile = () => {
+      void supabase
+        .from("profiles")
+        .select("full_name, display_name")
+        .eq("id", user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!cancelled && data) setProfile(data);
+        });
+    };
+    loadProfile();
+    window.addEventListener("profile-updated", loadProfile);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("profile-updated", loadProfile);
+    };
+  }, [user?.id]);
 
-  const fullName = (user?.user_metadata?.full_name as string) || user?.email || "Member";
+  const fullName =
+    profile?.display_name?.trim() ||
+    profile?.full_name?.trim() ||
+    (user?.user_metadata?.full_name as string) ||
+    user?.email ||
+    "Member";
   const firstName = fullName.split(" ")[0];
   const initials = initialsOf(fullName) || "?";
+
 
   const handleSignOut = async () => {
     await signOut();
