@@ -83,7 +83,7 @@ function NotificationsPage() {
       <PageHeader
         title="Notifications"
         description="Reminders and updates from your chama."
-        action={
+        actions={
           <Button variant="outline" className="gap-2" onClick={readAll} disabled={unread === 0}>
             <CheckCheck className="h-4 w-4" /> Mark all as read
           </Button>
