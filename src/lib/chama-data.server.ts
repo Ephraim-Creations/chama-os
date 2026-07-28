@@ -114,9 +114,12 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       .limit(500),
     supabaseAdmin
       .from("loans")
-      .select("id, borrower_id, amount, amount_repaid, purpose, status, repayment_months, applied_at")
+      .select(
+        "id, borrower_id, amount, amount_repaid, purpose, status, repayment_months, applied_at, start_date, installment_amount, frequency, plan_notes, treasurer_notes, chair_notes",
+      )
       .eq("chama_id", chamaId)
       .order("applied_at", { ascending: false }),
+
     supabaseAdmin
       .from("investments")
       .select("id, name, category, initial_value, current_value, monthly_income")
