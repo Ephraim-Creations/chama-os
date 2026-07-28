@@ -32,6 +32,7 @@ const SECTIONS: Array<{ label: string; items: NavItem[] }> = [
     label: "Finance",
     items: [
       { title: "Contributions", url: "/contributions", icon: Wallet, perm: "finance.view" },
+      { title: "Deductions", url: "/deductions", icon: Scissors, perm: "finance.view" },
       { title: "Loans", url: "/loans", icon: HandCoins, perm: "loans.view" },
       { title: "Investments", url: "/investments", icon: TrendingUp, perm: "investments.view" },
     ],
