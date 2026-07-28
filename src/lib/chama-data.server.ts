@@ -139,7 +139,15 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       .from("deduction_members")
       .select("id, deduction_id, member_id, amount")
       .eq("chama_id", chamaId),
+    supabaseAdmin
+      .from("loan_repayments")
+      .select("id, loan_id, amount, paid_on, note")
+      .eq("chama_id", chamaId)
+      .order("paid_on", { ascending: false }),
   ]);
+
+  const repaymentRows = lrRes.data ?? [];
+
 
   const memberRows = mRes.data ?? [];
   const ids = memberRows.map((m) => m.user_id as string);
