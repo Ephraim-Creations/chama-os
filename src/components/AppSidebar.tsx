@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, Wallet, HandCoins, CalendarDays, FileBarChart,
   Bell, Settings, LifeBuoy, Sprout, ShieldCheck, TrendingUp, MessageSquare,
-  CreditCard, ClipboardList, Inbox, UserRound, FolderOpen,
+  CreditCard, ClipboardList, Inbox, UserRound,
 } from "lucide-react";
 
 import {
@@ -66,7 +66,6 @@ const SECTIONS: Array<{ label: string; items: NavItem[] }> = [
     label: "Account",
     items: [
       { title: "Profile", url: "/member", icon: UserRound },
-      { title: "Documents", url: "/help", icon: FolderOpen },
       { title: "Billing", url: "/billing", icon: CreditCard, perm: "billing.manage" },
       { title: "Settings", url: "/settings", icon: Settings, perm: "settings.manage" },
       { title: "Help center", url: "/help", icon: LifeBuoy },
@@ -103,10 +102,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/dashboard" className="flex items-center gap-3 px-2 py-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Sprout className="h-5 w-5" />
+      <SidebarHeader className="border-b border-sidebar-border group-data-[collapsible=icon]:p-1">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-3 px-2 py-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2"
+        >
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:rounded-lg">
+            <Sprout className="h-5 w-5 group-data-[collapsible=icon]:h-4 group-data-[collapsible=icon]:w-4" />
           </div>
           {!collapsed && (
             <div className="min-w-0 leading-tight">
@@ -119,9 +121,9 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="px-1">
+      <SidebarContent className="px-1 group-data-[collapsible=icon]:px-0">
         {sections.map((section) => (
-          <SidebarGroup key={section.label}>
+          <SidebarGroup key={section.label} className="group-data-[collapsible=icon]:p-1">
             <SidebarGroupLabel className="text-sidebar-foreground/50">{section.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -131,11 +133,14 @@ export function AppSidebar() {
                       asChild
                       isActive={isActive(item.url)}
                       tooltip={item.title}
-                      className="h-11 text-[15px] data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold hover:bg-sidebar-accent"
+                      className="h-11 text-[15px] data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold hover:bg-sidebar-accent group-data-[collapsible=icon]:!h-9 group-data-[collapsible=icon]:!w-9 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0"
                     >
-                      <Link to={item.url} className="flex items-center gap-3">
-                        <item.icon className="h-5 w-5 shrink-0" />
-                        <span className="truncate">{item.title}</span>
+                      <Link
+                        to={item.url}
+                        className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+                      >
+                        <item.icon className="h-5 w-5 shrink-0 group-data-[collapsible=icon]:h-[18px] group-data-[collapsible=icon]:w-[18px]" />
+                        <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -146,21 +151,15 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
-        {!collapsed ? (
-          <div className="rounded-xl bg-sidebar-accent p-3 text-sidebar-foreground">
-            <div className="truncate text-xs font-medium opacity-70">{active?.name ?? "Your chama"}</div>
-            <div className="mt-1 text-[11px] opacity-60">
-              {role === "chairperson"
-                ? "Invite members from the Members page."
-                : "Contact your chairperson to invite others."}
-            </div>
+      <SidebarFooter className="border-t border-sidebar-border group-data-[collapsible=icon]:hidden">
+        <div className="rounded-xl bg-sidebar-accent p-3 text-sidebar-foreground">
+          <div className="truncate text-xs font-medium opacity-70">{active?.name ?? "Your chama"}</div>
+          <div className="mt-1 text-[11px] opacity-60">
+            {role === "chairperson"
+              ? "Invite members from the Members page."
+              : "Contact your chairperson to invite others."}
           </div>
-        ) : (
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-sidebar-accent text-sidebar-foreground">
-            <Users className="h-4 w-4" />
-          </div>
-        )}
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

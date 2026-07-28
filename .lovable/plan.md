@@ -1,46 +1,34 @@
-## What's actually happening
+## 1. Billing page matches website + admin pricing
 
-I checked the data behind the admin dashboard. The 18 groups are **not** created by the application form — approving an application never creates a chama today. Of the 18 groups, **17 have zero members and zero invites**: they are leftovers from repeated "Create my chama" clicks during the period the chairperson-role step was failing. Each attempt inserted a group row, then failed on the chairperson step, and the cleanup didn't remove the row. Only one group ("asdfghj") is real.
+`src/routes/_authed/billing.tsx` currently hardcodes three plans (Free / Growth / SACCO) that don't match the `pricing_plans` table used by the landing page and `/admin/billing`.
 
-So there are two things to fix: the duplicate/garbage groups, and the flow itself so the two stages are clearly separated.
+- Load plans from the same source the landing page uses (`listPricingPlans`), so admin edits flow to the chair's billing page automatically.
+- Add a small public-safe server function to read the active chama's current subscription (plan, status, renewal date) from `billing_subscriptions`, scoped to a chama the caller belongs to.
+- Render: current plan badge on the matching card, real renewal date, and the rest as upgrade options. "Upgrade" opens a contact/help prompt (no payment provider is connected yet).
+- Keep the page chairperson-gated as today.
 
-## Target flow
+## 2. Documents tab
 
-```text
-1. Enquiry     /join/apply  -> chair_applications row (no account, no chama)
-2. Review      /admin/applications -> approve / reject
-3. Invite      approval emails a one-time "Create your account" link
-4. Account     /set-password -> password + PIN
-5. Onboarding  /onboarding -> profile, then chama basics/rules/invites (ONE chama)
-6. Dashboard
-```
+Remove "Documents" from the sidebar Account section — it currently points at `/help` (duplicate) and the product is records-only, not a document store. Help center stays.
 
-Applications stay pure enquiries, exactly like a contact/booking submission. The chama only ever comes into existence at step 5, once.
+## 3. Help center rewrite (role-aware)
 
-## Changes
+`src/routes/_authed/help.tsx`:
+- Replace the FAQ list with answers written per role, and show the reader's own role first (Chairperson / Treasurer / Secretary / Member) using the existing `usePermissions` hook — e.g. "Only the Chairperson adds members and assigns roles", "Treasurer records contributions and loan repayments", "Secretary schedules meetings and files minutes", "Members view records, edit their own profile, reset their own PIN".
+- Add a real contact block: support email and admin phone number.
+- Make the search box actually filter the FAQ list.
 
-**1. Stop duplicate groups at the source (server)**
-- In the chama creation logic, before inserting: if the user already has any membership, return the existing chama instead of creating a new one. This makes a double click or retry idempotent.
-- Also reject a second group with the same name created by the same user within a short window.
-- Wrap creation so a failed chairperson step reliably removes the half-created group (current cleanup left rows behind).
+## 4. Collapsed sidebar
 
-**2. Stop duplicate submits in the UI**
-- Onboarding "Create my chama" disables immediately and guards against re-entry while a request is in flight, and after a success it never re-submits (currently only a `busy` flag that reset on error, letting each retry create another group).
-- On failure, show whether the group was actually created and, if so, route to the dashboard rather than allowing another create.
+In `src/components/AppSidebar.tsx`, when collapsed to the icon rail (48px):
+- Center each menu button and let icons shrink to the rail (`size-8` button, 4-unit icon), hide labels and the gap.
+- Shrink the header logo tile so it fits the rail instead of overflowing.
+- Hide the footer card entirely when collapsed rather than showing a stray tile.
 
-**3. Make the enquiry read as an enquiry**
-- Reword `/join/apply` and its confirmation: this is a request to open a chama; nothing is created yet; the group is set up after approval using the emailed link.
-- Application row keeps the proposed chama name, and it is prefilled (not auto-created) in onboarding step 2 so the chair confirms it once.
+## 5. Notification bell
 
-**4. Approval sends a clearer invitation**
-- Approval keeps sending the set-password link, with copy that says "create your account, then set up your chama".
-- Rejection/approval states surface on the application list.
+Remove the hardcoded red "3" badge in `src/components/AppHeader.tsx`. Show a count only when there are real unread notifications for the signed-in user; otherwise a plain bell.
 
-**5. Clean up existing data (migration)**
-- Delete the 17 chama rows that have no memberships and no invites. Real group data is untouched.
-- Add a database guard: a unique constraint preventing the same creator from having two groups with the same name.
-
-## Technical notes
-
-- Files touched: `src/lib/chama.server.ts` (idempotent create + reliable rollback), `src/routes/onboarding.tsx` (submit guard, prefill from application), `src/routes/join/apply.tsx` (enquiry copy), `src/lib/access.functions.ts` / `src/lib/onboarding.server.ts` (approval email copy), plus one migration for cleanup and the uniqueness guard.
-- No change to RLS or role/permission model.
+### Technical notes
+- New server function file for the chama's billing subscription read, going through `requireSupabaseAuth` with a membership check.
+- No schema changes; `billing_subscriptions` and `pricing_plans` already exist.
