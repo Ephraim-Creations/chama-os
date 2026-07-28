@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, Wallet, HandCoins, CalendarDays, FileBarChart,
   Bell, Settings, LifeBuoy, Sprout, ShieldCheck, TrendingUp, MessageSquare,
-  CreditCard, ClipboardList, Inbox, UserRound,
+  CreditCard, ClipboardList, Inbox, UserRound, Scissors,
 } from "lucide-react";
 
 import {
