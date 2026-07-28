@@ -13,6 +13,7 @@ export type SnapshotMember = {
   deductions: number;
   contributions: number;
   activeLoans: number;
+  loanLimit: number;
 };
 
 export type ChamaSnapshot = {
@@ -89,6 +90,7 @@ export type ChamaSnapshot = {
     loanRepaid: number;
     loanOutstanding: number;
     availableToLend: number;
+    loanMultiplier: number;
   };
   monthly: Array<{ month: string; amount: number }>;
   breakdown: Array<{ name: string; value: number }>;
@@ -98,6 +100,17 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 /** Everything a chama dashboard needs, computed from real rows only. */
 export async function buildSnapshot(chamaId: string, userId: string): Promise<ChamaSnapshot> {
+  const { data: chamaRow } = await supabaseAdmin
+    .from("chamas")
+    .select("rules")
+    .eq("id", chamaId)
+    .maybeSingle();
+  const rules = (chamaRow?.rules ?? {}) as Record<string, unknown>;
+  const loanMultiplier =
+    typeof rules.loan_max_multiplier === "number" && rules.loan_max_multiplier >= 0
+      ? rules.loan_max_multiplier
+      : 3;
+
   const { data: mine } = await supabaseAdmin
     .from("memberships")
     .select("id")
@@ -206,7 +219,11 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     return (p?.display_name as string) || (p?.full_name as string) || "Member";
   };
 
-  const members: SnapshotMember[] = memberRows.map((m: any) => ({
+  const members: SnapshotMember[] = memberRows.map((m: any) => {
+    const netSavings =
+      (savingsByMember.get(m.user_id as string) ?? 0) -
+      (deductionsByMember.get(m.user_id as string) ?? 0);
+    return {
     id: m.id as string,
     userId: m.user_id as string,
     name: (profileById.get(m.user_id)?.full_name as string) ?? "Member",
@@ -214,14 +231,14 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     avatarUrl: (profileById.get(m.user_id)?.avatar_url as string | null) ?? null,
     role: m.role,
     joinedAt: m.joined_at as string,
-    savings:
-      (savingsByMember.get(m.user_id as string) ?? 0) -
-      (deductionsByMember.get(m.user_id as string) ?? 0),
+    savings: netSavings,
     penalties: penaltiesByMember.get(m.user_id as string) ?? 0,
     deductions: deductionsByMember.get(m.user_id as string) ?? 0,
     contributions: countByMember.get(m.user_id as string) ?? 0,
     activeLoans: activeLoanByMember.get(m.user_id as string) ?? 0,
-  }));
+    loanLimit: Math.max(netSavings, 0) * loanMultiplier,
+    };
+  });
 
   const now = new Date();
   const monthKeys: Array<{ key: string; month: string }> = [];
@@ -346,6 +363,7 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
       loanRepaid,
       loanOutstanding: activeLoanValue,
       availableToLend,
+      loanMultiplier,
     },
     monthly: monthKeys.map((m) => ({ month: m.month, amount: monthTotals.get(m.key) ?? 0 })),
     breakdown: Array.from(breakdownMap.entries()).map(([name, value]) => ({ name, value })),
