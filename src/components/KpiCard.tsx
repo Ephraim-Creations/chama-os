@@ -8,10 +8,12 @@ export function KpiCard({
   trend,
   icon: Icon,
   accent = "primary",
+  hint,
 }: {
   label: string;
   value: string;
   trend?: number;
+  hint?: string;
   icon: LucideIcon;
   accent?: "primary" | "info" | "warning" | "destructive" | "navy";
 }) {
@@ -47,6 +49,7 @@ export function KpiCard({
       <div className="mt-1 text-[28px] font-bold leading-tight tracking-tight text-foreground">
         {value}
       </div>
+      {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
   );
 }
