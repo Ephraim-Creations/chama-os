@@ -247,9 +247,21 @@ export async function buildSnapshot(chamaId: string, userId: string): Promise<Ch
     (a, c) => a + (c.type === "withdrawal" ? -Number(c.amount ?? 0) : Number(c.amount ?? 0)),
     0,
   );
-  const activeLoanValue = loans
-    .filter((l) => ["active", "approved", "overdue"].includes(l.status as string))
-    .reduce((a, l) => a + (Number(l.amount ?? 0) - Number(l.amount_repaid ?? 0)), 0);
+  const outstandingLoans = loans.filter((l) =>
+    ["active", "approved", "overdue"].includes(l.status as string),
+  );
+  const activeLoanValue = outstandingLoans.reduce(
+    (a, l) => a + (Number(l.amount ?? 0) - Number(l.amount_repaid ?? 0)),
+    0,
+  );
+  const penaltiesTotal = contributions
+    .filter((c) => c.type === "penalty")
+    .reduce((a, c) => a + Number(c.amount ?? 0), 0);
+  const loanedOut = outstandingLoans.reduce((a, l) => a + Number(l.amount ?? 0), 0);
+  const loanRepaid = loans.reduce((a, l) => a + Number(l.amount_repaid ?? 0), 0);
+  const investmentValue = investments.reduce((a, i) => a + Number(i.current_value ?? 0), 0);
+  const groupSavings = totalSavings - deductionsTotal;
+  const availableToLend = Math.max(groupSavings - activeLoanValue, 0);
 
   return {
     chamaId,
