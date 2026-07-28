@@ -26,13 +26,21 @@ const toneFor = (t: string) =>
 
 function NotificationsPage() {
   const load = useServerFn(listMyNotifications);
+  const markRead = useServerFn(markNotificationsRead);
   const [items, setItems] = useState<Note[] | null>(null);
 
   useEffect(() => {
     void load()
-      .then((rows) => setItems(rows as Note[]))
+      .then(async (rows) => {
+        setItems(rows as Note[]);
+        if ((rows as Note[]).some((r) => !r.read_at)) {
+          await markRead({ data: undefined }).catch(() => undefined);
+        }
+        window.dispatchEvent(new Event("notifications-updated"));
+      })
       .catch(() => setItems([]));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   return (
     <div className="mx-auto max-w-3xl">
