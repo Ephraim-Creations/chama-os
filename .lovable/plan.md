@@ -1,39 +1,46 @@
-# Admin control, email onboarding and PIN sign-in
+## What's actually happening
 
-Three connected pieces: a group-only admin console, real onboarding emails, and a fast email+PIN sign-in inspired by the POS touch panel (our own layout and branding — the POS sidebar is reference only).
+I checked the data behind the admin dashboard. The 18 groups are **not** created by the application form — approving an application never creates a chama today. Of the 18 groups, **17 have zero members and zero invites**: they are leftovers from repeated "Create my chama" clicks during the period the chairperson-role step was failing. Each attempt inserted a group row, then failed on the chairperson step, and the cleanup didn't remove the row. Only one group ("asdfghj") is real.
 
-## 1. Admin console at /admin — groups, not people
+So there are two things to fix: the duplicate/garbage groups, and the flow itself so the two stages are clearly separated.
 
-Privacy rule applied throughout: the platform admin sees each chama as a single unit. No member names, no member emails, no per-member figures anywhere in /admin.
+## Target flow
 
-Changes:
-- **Overview**: remove the "Members" and money-total cards (those aggregate member data). Keep groups count, pending applications, plans, and add plan-mix and new-groups-this-month counts.
-- **Chamas tab → group cards/table**: group name, type, location, created date, member *count* only, current plan, status (active / suspended). Search + filter by plan and status. No drill-down into member records.
-- **Plans & billing (new focus)**: assign a pricing plan to any group directly from the group row — a plan dropdown writing to `billing_subscriptions`, with status (active, trialing, past_due, cancelled) and renewal date. A "Billing" tab lists every group's subscription with plan changes applied instantly.
-- **Suspend / reactivate a group**: blocks sign-in for that group's members, shown as a status badge.
-- **Applications**: unchanged review queue, but approving now fires the onboarding email (below).
-- Keep the existing top-nav admin layout, restyled for density: Overview · Groups · Applications · Plans · Billing · Announcements.
+```text
+1. Enquiry     /join/apply  -> chair_applications row (no account, no chama)
+2. Review      /admin/applications -> approve / reject
+3. Invite      approval emails a one-time "Create your account" link
+4. Account     /set-password -> password + PIN
+5. Onboarding  /onboarding -> profile, then chama basics/rules/invites (ONE chama)
+6. Dashboard
+```
 
-## 2. Onboarding emails (built-in sender)
+Applications stay pure enquiries, exactly like a contact/booking submission. The chama only ever comes into existence at step 5, once.
 
-Using the built-in default sender now; branded sender can be added later once a domain is set up.
+## Changes
 
-- **Chair approval**: approving an application creates the auth account (if new) and emails an invitation link. The chair clicks it, lands on a "Set your password" page, then goes straight to creating their chama.
-- **Member invite**: when a chair adds a member email on the Members page, that person immediately receives the same set-password invitation. Accepting the link confirms the email, sets the password, and auto-joins them to the chama through the existing pending-invite conversion.
-- **Resend / copy link** buttons for both, so nobody is stuck waiting on an email.
-- A single `/set-password` page handles both invite and recovery links, then routes to the PIN setup step.
+**1. Stop duplicate groups at the source (server)**
+- In the chama creation logic, before inserting: if the user already has any membership, return the existing chama instead of creating a new one. This makes a double click or retry idempotent.
+- Also reject a second group with the same name created by the same user within a short window.
+- Wrap creation so a failed chairperson step reliably removes the half-created group (current cleanup left rows behind).
 
-## 3. Email + PIN sign-in
+**2. Stop duplicate submits in the UI**
+- Onboarding "Create my chama" disables immediately and guards against re-entry while a request is in flight, and after a success it never re-submits (currently only a `busy` flag that reset on error, letting each retry create another group).
+- On failure, show whether the group was actually created and, if so, route to the dashboard rather than allowing another create.
 
-- After setting a password, the user is prompted to create a 4-digit PIN (skippable, changeable later in Profile).
-- **Login page** gets two tabs: **PIN** (email + touch keypad) and **Password** — same visual language as the rest of Chama-OS, dark-mode aware.
-- **Security**: the PIN is never stored in plain form — it is salted and hashed server-side, verified only on the server, and never checked in the browser. Because 4 digits are weak on their own, sign-in enforces: max 5 attempts, then a 15-minute lock on that account; attempts are throttled per IP; every failed and successful PIN sign-in is written to the transparency log. Users can always fall back to password or the emailed one-time link.
-- **Users tab in the chairperson's app** (not /admin): the chair sees their members' invite status and can reset a member's PIN — they can never view it.
+**3. Make the enquiry read as an enquiry**
+- Reword `/join/apply` and its confirmation: this is a request to open a chama; nothing is created yet; the group is set up after approval using the emailed link.
+- Application row keeps the proposed chama name, and it is prefilled (not auto-created) in onboarding step 2 so the chair confirms it once.
+
+**4. Approval sends a clearer invitation**
+- Approval keeps sending the set-password link, with copy that says "create your account, then set up your chama".
+- Rejection/approval states surface on the application list.
+
+**5. Clean up existing data (migration)**
+- Delete the 17 chama rows that have no memberships and no invites. Real group data is untouched.
+- Add a database guard: a unique constraint preventing the same creator from having two groups with the same name.
 
 ## Technical notes
 
-- New table `user_pins` (user_id, pin_hash, salt, failed_attempts, locked_until) with self-only RLS; hashing and verification live in a server function using Web Crypto PBKDF2.
-- PIN sign-in server function verifies the hash, then mints a one-time sign-in token via the admin auth API; the browser exchanges it for a session. No password or PIN ever crosses the wire in a reusable form.
-- `chama_status` column on `chamas` (active/suspended) plus `billing_subscriptions` gains `status` and `renews_at`.
-- Onboarding emails use the auth invite/recovery links from the admin auth API, sent server-side from the approval and invite server functions.
-- Admin server functions are re-scoped so no member-identifying column is ever selected for the platform admin.
+- Files touched: `src/lib/chama.server.ts` (idempotent create + reliable rollback), `src/routes/onboarding.tsx` (submit guard, prefill from application), `src/routes/join/apply.tsx` (enquiry copy), `src/lib/access.functions.ts` / `src/lib/onboarding.server.ts` (approval email copy), plus one migration for cleanup and the uniqueness guard.
+- No change to RLS or role/permission model.
