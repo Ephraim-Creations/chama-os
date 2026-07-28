@@ -19,24 +19,62 @@ export async function requirePermission(chamaId: string, userId: string, permiss
   return role;
 }
 
+
+/** Append a row to the chama's activity (transparency) log. Never throws. */
+export async function logChange(input: {
+  chamaId: string;
+  table: string;
+  recordId: string;
+  action: "create" | "update" | "delete";
+  previous?: unknown;
+  next?: unknown;
+  userId: string;
+  reason?: string | null;
+}) {
+  const { error } = await supabaseAdmin.from("transparency_logs").insert({
+    chama_id: input.chamaId,
+    table_name: input.table,
+    record_id: input.recordId,
+    action: input.action,
+    previous_value: (input.previous ?? null) as any,
+    new_value: (input.next ?? null) as any,
+    edited_by: input.userId,
+    reason: input.reason ?? null,
+  });
+  if (error) console.error("[records.server] logChange", error);
+}
+
 export async function insertContribution(
   chamaId: string,
   userId: string,
   input: { memberId: string; type: string; amount: number; notes?: string | null },
 ) {
   await requirePermission(chamaId, userId, "finance.manage");
-  const { error } = await supabaseAdmin.from("contributions").insert({
-    chama_id: chamaId,
-    member_id: input.memberId,
-    type: input.type as any,
-    amount: input.amount,
-    notes: input.notes ?? null,
-    recorded_by: userId,
-  });
-  if (error) {
+  const { data: row, error } = await supabaseAdmin
+    .from("contributions")
+    .insert({
+      chama_id: chamaId,
+      member_id: input.memberId,
+      type: input.type as any,
+      amount: input.amount,
+      notes: input.notes ?? null,
+      recorded_by: userId,
+    })
+    .select("id, member_id, type, amount, notes")
+    .single();
+  if (error || !row) {
     console.error("[records.server] contribution", error);
     throw new Error("Could not record that contribution.");
   }
+  await logChange({
+    chamaId,
+    table: "contributions",
+    recordId: row.id as string,
+    action: "create",
+    next: row,
+    userId,
+    reason: input.notes ?? null,
+  });
   return { ok: true };
 }
 
@@ -50,18 +88,31 @@ export async function insertLoan(
   if (forSomeoneElse && !can(role, "loans.manage")) {
     throw new Error("Only the treasurer or chairperson can record loans for others.");
   }
-  const { error } = await supabaseAdmin.from("loans").insert({
-    chama_id: chamaId,
-    borrower_id: input.borrowerId,
-    amount: input.amount,
-    purpose: input.purpose,
-    repayment_months: input.months,
-    status: forSomeoneElse ? "active" : "pending",
-  });
-  if (error) {
+  const { data: row, error } = await supabaseAdmin
+    .from("loans")
+    .insert({
+      chama_id: chamaId,
+      borrower_id: input.borrowerId,
+      amount: input.amount,
+      purpose: input.purpose,
+      repayment_months: input.months,
+      status: forSomeoneElse ? "active" : "pending",
+    })
+    .select("id, borrower_id, amount, purpose, repayment_months, status")
+    .single();
+  if (error || !row) {
     console.error("[records.server] loan", error);
     throw new Error("Could not save that loan.");
   }
+  await logChange({
+    chamaId,
+    table: "loans",
+    recordId: row.id as string,
+    action: "create",
+    next: row,
+    userId,
+    reason: input.purpose,
+  });
   return { ok: true };
 }
 
@@ -99,7 +150,9 @@ export async function insertInvestment(
   },
 ) {
   await requirePermission(chamaId, userId, "investments.manage");
-  const { error } = await supabaseAdmin.from("investments").insert({
+  const { data: row, error } = await supabaseAdmin
+    .from("investments")
+    .insert({
     chama_id: chamaId,
     name: input.name,
     category: input.category ?? null,
@@ -107,11 +160,22 @@ export async function insertInvestment(
     current_value: input.currentValue,
     monthly_income: input.monthlyIncome,
     notes: input.notes ?? null,
-  });
-  if (error) {
+    })
+    .select("id, name, category, initial_value, current_value, monthly_income")
+    .single();
+  if (error || !row) {
     console.error("[records.server] investment", error);
     throw new Error("Could not save that investment.");
   }
+  await logChange({
+    chamaId,
+    table: "investments",
+    recordId: row.id as string,
+    action: "create",
+    next: row,
+    userId,
+    reason: input.notes ?? null,
+  });
   return { ok: true };
 }
 
@@ -149,6 +213,17 @@ export async function decideLoan(
     console.error("[records.server] decideLoan", error);
     throw new Error("Could not update that loan.");
   }
+
+  await logChange({
+    chamaId,
+    table: "loans",
+    recordId: input.loanId,
+    action: "update",
+    previous: { status: loan.status, amount: loan.amount, borrower_id: loan.borrower_id },
+    next: { ...patch, amount: loan.amount, borrower_id: loan.borrower_id },
+    userId,
+    reason: input.note ?? null,
+  });
 
   const title = isReview
     ? "Your loan is under review"
@@ -204,6 +279,21 @@ export async function setLoanPlan(
     throw new Error("Could not save that payment plan.");
   }
 
+  await logChange({
+    chamaId,
+    table: "loans",
+    recordId: input.loanId,
+    action: "update",
+    next: {
+      start_date: input.startDate ?? null,
+      installment_amount: input.installmentAmount ?? null,
+      frequency: input.frequency ?? null,
+      borrower_id: loan.borrower_id,
+    },
+    userId,
+    reason: input.planNotes ?? "Payment plan updated",
+  });
+
   const { error: notifyError } = await supabaseAdmin.from("notifications").insert({
     user_id: loan.borrower_id as string,
     chama_id: chamaId,
@@ -231,18 +321,32 @@ export async function addLoanRepayment(
     .maybeSingle();
   if (!loan) throw new Error("That loan no longer exists.");
 
-  const { error } = await supabaseAdmin.from("loan_repayments").insert({
-    loan_id: input.loanId,
-    chama_id: chamaId,
-    amount: input.amount,
-    paid_on: input.paidOn,
-    note: input.note ?? null,
-    recorded_by: userId,
-  });
+  const { data: repayment, error } = await supabaseAdmin
+    .from("loan_repayments")
+    .insert({
+      loan_id: input.loanId,
+      chama_id: chamaId,
+      amount: input.amount,
+      paid_on: input.paidOn,
+      note: input.note ?? null,
+      recorded_by: userId,
+    })
+    .select("id, loan_id, amount, paid_on, note")
+    .single();
   if (error) {
     console.error("[records.server] addLoanRepayment", error);
     throw new Error("Could not record that payment.");
   }
+
+  await logChange({
+    chamaId,
+    table: "loan_repayments",
+    recordId: (repayment?.id as string) ?? input.loanId,
+    action: "create",
+    next: { loan_id: input.loanId, amount: input.amount, paid_on: input.paidOn, borrower_id: loan.borrower_id },
+    userId,
+    reason: input.note ?? null,
+  });
 
   const { error: notifyError } = await supabaseAdmin.from("notifications").insert({
     user_id: loan.borrower_id as string,
@@ -262,6 +366,12 @@ export async function removeLoanRepayment(
   input: { repaymentId: string },
 ) {
   await requirePermission(chamaId, userId, "loans.manage");
+  const { data: existing } = await supabaseAdmin
+    .from("loan_repayments")
+    .select("id, loan_id, amount, paid_on, note")
+    .eq("id", input.repaymentId)
+    .eq("chama_id", chamaId)
+    .maybeSingle();
   const { error } = await supabaseAdmin
     .from("loan_repayments")
     .delete()
@@ -271,5 +381,14 @@ export async function removeLoanRepayment(
     console.error("[records.server] removeLoanRepayment", error);
     throw new Error("Could not remove that payment.");
   }
+  await logChange({
+    chamaId,
+    table: "loan_repayments",
+    recordId: input.repaymentId,
+    action: "delete",
+    previous: existing,
+    userId,
+    reason: "Payment removed",
+  });
   return { ok: true };
 }
