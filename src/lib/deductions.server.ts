@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requirePermission, roleIn } from "@/lib/records.server";
+import { logChange, requirePermission, roleIn } from "@/lib/records.server";
 
 const ksh = (n: number) =>
   `Ksh ${Math.round(n).toLocaleString("en-KE")}`;
@@ -59,6 +59,21 @@ export async function createDeduction(
     await supabaseAdmin.from("deductions").delete().eq("id", deduction.id);
     throw new Error("Could not apply that deduction to the selected members.");
   }
+
+  await logChange({
+    chamaId,
+    table: "deductions",
+    recordId: deduction.id as string,
+    action: "create",
+    next: {
+      name: input.name,
+      amount_per_member: input.amountPerMember,
+      members: targets.length,
+      applied_on: input.appliedOn ?? new Date().toISOString().slice(0, 10),
+    },
+    userId,
+    reason: input.notes ?? null,
+  });
 
   const { error: notifyError } = await supabaseAdmin.from("notifications").insert(
     targets.map((memberId) => ({

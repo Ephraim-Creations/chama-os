@@ -1,52 +1,39 @@
-## Goal
+## 1. Loan limit never goes negative
 
-Make the bell a real notification centre, separate **personal** stats from **collective** chama analytics (penalties are not contributions), rename the sidebar entries, and open Settings to every member except the chama setup tab.
+Today **My stats** shows `Loan eligibility = savings × 3` hardcoded — so a member sitting at −10 shows −30. Two fixes:
 
----
+- Use the chairperson's setting instead of the fixed 3. The Chama setup tab already saves `loan_max_multiplier` (default 3) into the chama rules; it just isn't read anywhere yet.
+- Floor the result: if savings are zero or negative, eligibility is **Ksh 0**, with a small caption like "Save more to unlock a loan" instead of a negative figure.
+- Apply the same floor wherever a limit is shown or checked: My stats card, the loan application form's max hint, and the server-side check when a loan is submitted (a member at 0 cannot apply).
 
-## 1. Notification centre in the bell
+## 2. Deductions visible to everyone — confirmed, plus a small gap
 
-Today the bell is just a link to `/notifications`, and opening that page silently marks everything read.
+Checked the access rules: the Deductions page is already open to every member (`finance.view`), and each run lists every member's share, so nothing is hidden. Only the "New deduction" and reverse buttons stay with chair/treasurer, which is right.
 
-- Bell becomes a dropdown panel: latest ~8 notifications, unread highlighted, each row showing title, short body and time.
-- Each row gets an **Open** action that routes to the tab the notification is about, using its `kind`:
-  - `loan`/`loans` → `/loans`, `contribution` → `/contributions`, `deduction` → `/deductions`, `report` → `/reports`, `meeting` → `/meetings`, `announce` → `/feed`, anything else → `/notifications`.
-  - Opening a single notification marks just that one read.
-- **Mark all as read** button in the panel header and at the top of `/notifications`.
-- `/notifications` no longer auto-marks on load; the badge only drops when the user acts. Page keeps a kind filter row (All / Loans / Finance / Meetings / Announcements) and the same Open behaviour per row.
+The one gap: a member has no per-person deductions history in **My stats**. Add a "Deductions taken" breakdown there listing each run and the amount taken from that member.
 
-## 2. Penalties are not contributions
+## 3. Activity log actually logs things
 
-In the member's personal figures, penalty rows are currently folded into "savings" and the entry count.
+Right now `transparency_logs` only receives a row when the chair reverses a deduction — which is why the Activity log looks empty. Extend logging to every money-touching action:
 
-- Personal savings = contributions of type savings/welfare/project/investment, minus withdrawals, minus deductions. **Penalties are excluded** and reported as their own "Penalties paid" figure.
-- Collective analytics (dashboard, reports, transparency) keep counting penalties in group income, as they do today — nothing hidden at group level.
+| Action | Logged as |
+| --- | --- |
+| Contribution recorded / edited | create / update |
+| Deduction applied and reversed | create / delete |
+| Loan applied, approved, rejected | create / update, with the note as reason |
+| Payment plan set, repayment added/removed | update |
+| Investment added / value updated | create / update |
 
-## 3. Personal vs collective stats
+Each row keeps who did it, before/after values and any note typed in the dialog. The Activity log page then gets:
 
-- **My stats** page (chairperson, treasurer, secretary and member alike) shows only that person's numbers: my savings, penalties paid, deductions, my loan balance and repayment progress, my entries, next meeting. No other member's figures.
-- **Overview / dashboard + reports** show the collective picture, extended with:
-  - Total loaned out (all active/approved/overdue principal)
-  - Total repaid to date
-  - Outstanding loan balance
-  - **Available to lend** = group savings + investment income held − outstanding loan balance
-  - Penalties collected, deductions collected
-
-## 4. Sidebar and naming
-
-- Overview section becomes: **Overview** (`/dashboard`) and, right below it, **My stats** (`/member`).
-- The old **Profile** item is removed from the Account section (it pointed at the same page).
-- **Settings** is visible to every role; inside Settings the **Chama setup** tab stays chairperson-only (already the case), so members get Profile, Security, Accessibility and Notifications only.
-
----
+- Plain-English lines ("Treasurer recorded a Ksh 2,000 savings contribution for Jane") instead of raw table names and UUIDs.
+- A filter row: All / Contributions / Deductions / Loans / Investments.
+- Everyone in the chama can read it (already the case in the access rules).
 
 ## Technical notes
 
-- `src/lib/chama-data.server.ts`: add `penalties` per member, exclude penalties from `savings`; add `totals.loanedOut`, `totals.loanRepaid`, `totals.loanOutstanding`, `totals.availableToLend`, `totals.penaltiesTotal`.
-- `src/lib/chama-data.functions.ts`: add `markNotificationRead` (single id, scoped to the caller) alongside the existing `markNotificationsRead`.
-- New `src/components/NotificationsBell.tsx` used by `AppHeader`; shared `kind → route` map in a small helper so bell and page agree.
-- `src/routes/_authed/notifications.tsx`: drop auto-mark-on-mount, add explicit mark-all + per-row open, add kind filter.
-- `src/routes/_authed/member.tsx`: retitle to "My stats", add penalties card and my-loan detail.
-- `src/routes/_authed/dashboard.tsx`: add the lending-capacity KPIs.
-- `src/components/AppSidebar.tsx`: reorder/rename items, drop the `settings.manage` gate on Settings.
-- No database changes needed — penalty is already a contribution type and notifications already carry `kind` and `read_at`.
+- New `logChange()` helper in `src/lib/records.server.ts` (service-role insert into `transparency_logs`), called from the contribution, loan, repayment, deduction and investment write paths.
+- `src/lib/chama-data.server.ts`: expose `rules.loan_max_multiplier` and a per-member `loanLimit = max(savings, 0) * multiplier` in the snapshot so UI and server agree on one number.
+- `src/routes/_authed/member.tsx`: replace `savings * 3`, add the deductions breakdown.
+- `src/routes/_authed/transparency.tsx`: human-readable rendering + filters.
+- No database changes needed — `transparency_logs` and the chama `rules` JSON already carry everything.

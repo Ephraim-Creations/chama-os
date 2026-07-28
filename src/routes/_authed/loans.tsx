@@ -53,6 +53,7 @@ function LoansPage() {
   const { active } = useChama();
   const { can, isChair } = usePermissions();
   const { snapshot, loading, refresh } = useSnapshot();
+  const { user } = useAuth();
 
   const loans = snapshot?.loans ?? [];
   const outstanding = loans
@@ -68,7 +69,7 @@ function LoansPage() {
       <PageHeader
         title="Loans"
         description="Records only — Chama OS does not disburse or hold any money."
-        actions={active ? <LoanDialog chamaId={active.id} members={snapshot?.members ?? []} canManage={can("loans.manage")} onDone={refresh} /> : null}
+        actions={active ? <LoanDialog chamaId={active.id} members={snapshot?.members ?? []} canManage={can("loans.manage")} myLimit={Math.max((snapshot?.members ?? []).find((m) => m.userId === user?.id)?.loanLimit ?? 0, 0)} onDone={refresh} /> : null}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -494,11 +495,13 @@ function LoanDialog({
   chamaId,
   members,
   canManage,
+  myLimit,
   onDone,
 }: {
   chamaId: string;
   members: Array<{ userId: string; displayName: string }>;
   canManage: boolean;
+  myLimit: number;
   onDone: () => void;
 }) {
   const save = useServerFn(recordLoan);
@@ -513,6 +516,14 @@ function LoanDialog({
   const submit = async () => {
     if (!borrowerId || !Number(amount) || purpose.trim().length < 3) {
       toast.error("Fill in borrower, amount and purpose");
+      return;
+    }
+    if (!canManage && Number(amount) > myLimit) {
+      toast.error(
+        myLimit > 0
+          ? `Your loan limit is ${ksh(myLimit)}.`
+          : "Your loan limit is Ksh 0 — save more to become eligible.",
+      );
       return;
     }
     setBusy(true);
@@ -560,6 +571,13 @@ function LoanDialog({
           <div className="space-y-2">
             <Label>Amount (Ksh)</Label>
             <Input className="h-11 rounded-xl" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            {!canManage && (
+              <p className="text-xs text-muted-foreground">
+                {myLimit > 0
+                  ? `Your limit is ${ksh(myLimit)}.`
+                  : "Your loan limit is Ksh 0 — save more to become eligible."}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Purpose</Label>

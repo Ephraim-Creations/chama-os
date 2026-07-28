@@ -30,6 +30,18 @@ function Page() {
   const myLoans = (snapshot?.loans ?? []).filter((l) => l.borrowerId === user?.id);
   const activeLoan = myLoans.find((l) => ["active", "approved", "overdue"].includes(l.status));
   const myEntries = (snapshot?.contributions ?? []).filter((c) => c.memberId === user?.id);
+  const loanLimit = Math.max(me?.loanLimit ?? 0, 0);
+  const multiplier = snapshot?.totals.loanMultiplier ?? 3;
+  const myDeductions = (snapshot?.deductions ?? [])
+    .map((d) => ({
+      id: d.id,
+      name: d.name,
+      appliedOn: d.appliedOn,
+      amount: d.members
+        .filter((m) => m.memberId === user?.id)
+        .reduce((a, m) => a + m.amount, 0),
+    }))
+    .filter((d) => d.amount > 0);
   const nextMeeting = (snapshot?.meetings ?? [])
     .filter((m) => new Date(m.scheduledAt).getTime() >= Date.now())
     .sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt))[0];
@@ -45,7 +57,17 @@ function Page() {
         <KpiCard label="My savings" value={ksh(savings)} icon={Wallet} accent="primary" />
         <KpiCard label="My penalties" value={ksh(penalties)} icon={AlertTriangle} accent="warning" />
         <KpiCard label="Active loan balance" value={ksh(activeLoan ? activeLoan.amount - activeLoan.amountRepaid : 0)} icon={HandCoins} accent="info" />
-        <KpiCard label="Loan eligibility" value={ksh(savings * 3)} icon={TrendingUp} accent="navy" />
+        <KpiCard
+          label="Loan eligibility"
+          value={ksh(loanLimit)}
+          icon={TrendingUp}
+          accent="navy"
+          hint={
+            loanLimit > 0
+              ? `${multiplier}x your savings`
+              : "Save more to unlock a loan"
+          }
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -92,6 +114,27 @@ function Page() {
             <EmptyState icon={CalendarDays} title="Nothing scheduled" />
           )}
         </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="text-lg font-semibold text-foreground">Deductions taken from me</div>
+        {myDeductions.length === 0 ? (
+          <EmptyState icon={Inbox} title="No deductions" description="Nothing has been deducted from your savings." />
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {myDeductions.map((d) => (
+              <li key={d.id} className="flex items-center justify-between py-3">
+                <div>
+                  <div className="text-[15px] font-medium text-foreground">{d.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(d.appliedOn).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="font-semibold tabular-nums text-warning">-{ksh(d.amount)}</div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
