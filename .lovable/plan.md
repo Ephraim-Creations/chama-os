@@ -1,34 +1,39 @@
-## 1. Billing page matches website + admin pricing
+## Deductions in Finance
 
-`src/routes/_authed/billing.tsx` currently hardcodes three plans (Free / Growth / SACCO) that don't match the `pricing_plans` table used by the landing page and `/admin/billing`.
+A new **Deductions** page under the Finance section of the sidebar.
 
-- Load plans from the same source the landing page uses (`listPricingPlans`), so admin edits flow to the chair's billing page automatically.
-- Add a small public-safe server function to read the active chama's current subscription (plan, status, renewal date) from `billing_subscriptions`, scoped to a chama the caller belongs to.
-- Render: current plan badge on the matching card, real renewal date, and the rest as upgrade options. "Upgrade" opens a contact/help prompt (no payment provider is connected yet).
-- Keep the page chairperson-gated as today.
+**Creating a deduction (chairperson or treasurer):**
+- Name (e.g. "Chama-OS cost share", "Office rent"), amount per member, optional note, date.
+- Member picker with a **Select all** button, plus individual checkboxes and a search box.
+- Live summary before saving: "12 members × Ksh 500 = Ksh 6,000".
+- Saving records one row per selected member, immediately reducing each member's savings balance, and fires a bell notification to each affected member.
 
-## 2. Documents tab
+**What members see:**
+- The Deductions page lists every deduction that touched them: name, amount, date, who recorded it.
+- Chair/treasurer see the full group view grouped by deduction batch, with totals and a per-member breakdown.
+- Balances on the dashboard and contributions page account for deductions, so net savings stay accurate.
+- Deleting/reversing a deduction is chair-only and leaves a trail in Transparency.
 
-Remove "Documents" from the sidebar Account section — it currently points at `/help` (duplicate) and the product is records-only, not a document store. Help center stays.
+## Loans — chair holds the decision
 
-## 3. Help center rewrite (role-aware)
+- Treasurer can record applications, add review notes, and move a loan to "under review"; they no longer see approve/reject.
+- Chairperson gets the Approve / Reject actions with a decision note, on both the loans list and the loan detail.
+- Borrower gets a bell notification on any status change.
 
-`src/routes/_authed/help.tsx`:
-- Replace the FAQ list with answers written per role, and show the reader's own role first (Chairperson / Treasurer / Secretary / Member) using the existing `usePermissions` hook — e.g. "Only the Chairperson adds members and assigns roles", "Treasurer records contributions and loan repayments", "Secretary schedules meetings and files minutes", "Members view records, edit their own profile, reset their own PIN".
-- Add a real contact block: support email and admin phone number.
-- Make the search box actually filter the FAQ list.
+## New modules
 
-## 4. Collapsed sidebar
+1. **Fines & penalties** — chair/treasurer issue a fine to one or many members (same select-all picker), with reason and status; members see their fines and get notified.
+2. **Payouts (merry-go-round)** — an ordered rotation of members with scheduled dates, showing whose turn is next and marking payouts as disbursed.
+3. **Member statements** — a per-member ledger (contributions in, deductions/fines out, loans, balance) for any date range, printable/downloadable. Members see only their own; chair/treasurer see anyone's.
+4. **Budget & expenses** — group running costs (rent, Chama-OS fee, refreshments) against a budget per period, with a simple spent-vs-budget view.
 
-In `src/components/AppSidebar.tsx`, when collapsed to the icon rail (48px):
-- Center each menu button and let icons shrink to the rail (`size-8` button, 4-unit icon), hide labels and the gap.
-- Shrink the header logo tile so it fits the rail instead of overflowing.
-- Hide the footer card entirely when collapsed rather than showing a stray tile.
+## Suggested build order
 
-## 5. Notification bell
+Deductions + chair-only loan decisions first (this request), then Statements, Fines, Budget, Payouts.
 
-Remove the hardcoded red "3" badge in `src/components/AppHeader.tsx`. Show a count only when there are real unread notifications for the signed-in user; otherwise a plain bell.
+## Technical notes
 
-### Technical notes
-- New server function file for the chama's billing subscription read, going through `requireSupabaseAuth` with a membership check.
-- No schema changes; `billing_subscriptions` and `pricing_plans` already exist.
+- New tables: `deductions` (batch: chama, name, amount, note, created_by) and `deduction_members` (deduction, member, amount, status), plus `fines`, `payouts`, `expenses` in later phases. Each gets GRANTs, RLS scoped to chama membership, and write policies restricted via `has_chama_role`.
+- Writes go through new `deductions.functions.ts` / `deductions.server.ts` server functions using the existing `requirePermission` pattern; new permissions `finance.deduct` and `loans.decide` added to `src/lib/permissions.ts` (chair + treasurer, chair only respectively).
+- `getChamaSnapshot` extended to return deductions so dashboard/contributions balances are net of them.
+- Notifications inserted server-side per affected member in the same handler; bell count already reads live from `notifications`.
