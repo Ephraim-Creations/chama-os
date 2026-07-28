@@ -30,20 +30,28 @@ function SettingsPage() {
     document.documentElement.dataset.fontSize = size === "base" ? "" : size;
   };
 
+  const { active } = useChama();
+  const isChair = active?.role === "chairperson";
+
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader title="Settings" description="Your profile, security and how the app reads." />
 
       <Tabs defaultValue="profile" className="space-y-5">
-        <TabsList className="h-12 rounded-xl bg-muted p-1">
+        <TabsList className="h-12 flex-wrap rounded-xl bg-muted p-1">
           <TabsTrigger value="profile" className="h-10 rounded-lg px-4 text-[15px]">Profile</TabsTrigger>
+          {isChair && (
+            <TabsTrigger value="chama" className="h-10 rounded-lg px-4 text-[15px]">Chama setup</TabsTrigger>
+          )}
           <TabsTrigger value="security" className="h-10 rounded-lg px-4 text-[15px]">Security</TabsTrigger>
           <TabsTrigger value="accessibility" className="h-10 rounded-lg px-4 text-[15px]">Accessibility</TabsTrigger>
           <TabsTrigger value="notifications" className="h-10 rounded-lg px-4 text-[15px]">Notifications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile"><ProfileCard /></TabsContent>
+        {isChair && <TabsContent value="chama"><ChamaSetupCard /></TabsContent>}
         <TabsContent value="security"><SecurityCard /></TabsContent>
+
 
         <TabsContent value="accessibility">
           <Card title="Display & language" desc="Make the app comfortable to read.">
