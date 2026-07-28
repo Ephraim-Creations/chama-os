@@ -28,32 +28,9 @@ export function AppHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { chamas, active, setActiveId } = useChama();
-  const [unread, setUnread] = useState(0);
   const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null } | null>(null);
 
-  useEffect(() => {
-    if (!user?.id) {
-      setUnread(0);
-      return;
-    }
-    let cancelled = false;
-    const loadUnread = () => {
-      void supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .is("read_at", null)
-        .then(({ count }) => {
-          if (!cancelled) setUnread(count ?? 0);
-        });
-    };
-    loadUnread();
-    window.addEventListener("notifications-updated", loadUnread);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("notifications-updated", loadUnread);
-    };
-  }, [user?.id, active?.id]);
+
 
 
   useEffect(() => {
