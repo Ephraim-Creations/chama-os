@@ -53,6 +53,7 @@ function LoansPage() {
   const { active } = useChama();
   const { can, isChair } = usePermissions();
   const { snapshot, loading, refresh } = useSnapshot();
+  const { user } = useAuth();
 
   const loans = snapshot?.loans ?? [];
   const outstanding = loans
