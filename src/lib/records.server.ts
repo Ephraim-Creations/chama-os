@@ -166,3 +166,110 @@ export async function decideLoan(
 
   return { ok: true };
 }
+
+export async function setLoanPlan(
+  chamaId: string,
+  userId: string,
+  input: {
+    loanId: string;
+    startDate?: string | null;
+    installmentAmount?: number | null;
+    frequency?: string | null;
+    planNotes?: string | null;
+    months?: number | null;
+  },
+) {
+  await requirePermission(chamaId, userId, "loans.manage");
+
+  const { data: loan } = await supabaseAdmin
+    .from("loans")
+    .select("id, borrower_id")
+    .eq("id", input.loanId)
+    .eq("chama_id", chamaId)
+    .maybeSingle();
+  if (!loan) throw new Error("That loan no longer exists.");
+
+  const { error } = await supabaseAdmin
+    .from("loans")
+    .update({
+      start_date: input.startDate ?? null,
+      installment_amount: input.installmentAmount ?? null,
+      frequency: input.frequency ?? null,
+      plan_notes: input.planNotes ?? null,
+      ...(input.months ? { repayment_months: input.months } : {}),
+    } as never)
+    .eq("id", input.loanId);
+  if (error) {
+    console.error("[records.server] setLoanPlan", error);
+    throw new Error("Could not save that payment plan.");
+  }
+
+  const { error: notifyError } = await supabaseAdmin.from("notifications").insert({
+    user_id: loan.borrower_id as string,
+    chama_id: chamaId,
+    title: "Your loan payment plan was updated",
+    body: input.planNotes ?? null,
+    kind: "loan",
+  });
+  if (notifyError) console.error("[records.server] setLoanPlan notify", notifyError);
+
+  return { ok: true };
+}
+
+export async function addLoanRepayment(
+  chamaId: string,
+  userId: string,
+  input: { loanId: string; amount: number; paidOn: string; note?: string | null },
+) {
+  await requirePermission(chamaId, userId, "loans.manage");
+
+  const { data: loan } = await supabaseAdmin
+    .from("loans")
+    .select("id, borrower_id, amount")
+    .eq("id", input.loanId)
+    .eq("chama_id", chamaId)
+    .maybeSingle();
+  if (!loan) throw new Error("That loan no longer exists.");
+
+  const { error } = await supabaseAdmin.from("loan_repayments").insert({
+    loan_id: input.loanId,
+    chama_id: chamaId,
+    amount: input.amount,
+    paid_on: input.paidOn,
+    note: input.note ?? null,
+    recorded_by: userId,
+  });
+  if (error) {
+    console.error("[records.server] addLoanRepayment", error);
+    throw new Error("Could not record that payment.");
+  }
+
+  const { error: notifyError } = await supabaseAdmin.from("notifications").insert({
+    user_id: loan.borrower_id as string,
+    chama_id: chamaId,
+    title: "Loan payment recorded",
+    body: `A payment of Ksh ${input.amount.toLocaleString()} was recorded on your loan.`,
+    kind: "loan",
+  });
+  if (notifyError) console.error("[records.server] addLoanRepayment notify", notifyError);
+
+  return { ok: true };
+}
+
+export async function removeLoanRepayment(
+  chamaId: string,
+  userId: string,
+  input: { repaymentId: string },
+) {
+  await requirePermission(chamaId, userId, "loans.manage");
+  const { error } = await supabaseAdmin
+    .from("loan_repayments")
+    .delete()
+    .eq("id", input.repaymentId)
+    .eq("chama_id", chamaId);
+  if (error) {
+    console.error("[records.server] removeLoanRepayment", error);
+    throw new Error("Could not remove that payment.");
+  }
+  return { ok: true };
+}

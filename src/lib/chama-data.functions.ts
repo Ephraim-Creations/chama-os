@@ -26,3 +26,15 @@ export const listMyNotifications = createServerFn({ method: "GET" })
     }
     return data ?? [];
   });
+
+export const markNotificationsRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context as any;
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .is("read_at", null);
+    if (error) console.error("[chama-data.functions] markNotificationsRead", error);
+    return { ok: true };
+  });
