@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Bell, HandCoins, CalendarDays, Megaphone, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
-import { listMyNotifications } from "@/lib/chama-data.functions";
+import { listMyNotifications, markNotificationsRead } from "@/lib/chama-data.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authed/notifications")({
