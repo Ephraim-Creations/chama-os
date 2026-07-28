@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Search, ChevronDown, Check, Users, LogOut, Plus } from "lucide-react";
+import { Search, ChevronDown, Check, Users, LogOut, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,12 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useChama } from "@/context/chama-context";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationsBell } from "@/components/NotificationsBell";
+
 
 const roleLabels: Record<string, string> = {
   chairperson: "Chairperson", treasurer: "Treasurer", secretary: "Secretary", member: "Member",
