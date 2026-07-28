@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, Wallet, HandCoins, CalendarDays, FileBarChart,
   Bell, Settings, LifeBuoy, Sprout, ShieldCheck, TrendingUp, MessageSquare,
-  CreditCard, ClipboardList, Inbox, UserRound, FolderOpen,
+  CreditCard, ClipboardList, Inbox, UserRound,
 } from "lucide-react";
 
 import {
@@ -66,7 +66,6 @@ const SECTIONS: Array<{ label: string; items: NavItem[] }> = [
     label: "Account",
     items: [
       { title: "Profile", url: "/member", icon: UserRound },
-      { title: "Documents", url: "/help", icon: FolderOpen },
       { title: "Billing", url: "/billing", icon: CreditCard, perm: "billing.manage" },
       { title: "Settings", url: "/settings", icon: Settings, perm: "settings.manage" },
       { title: "Help center", url: "/help", icon: LifeBuoy },
