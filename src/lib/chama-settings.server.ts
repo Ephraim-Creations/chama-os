@@ -1,6 +1,22 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { SaveChamaSettingsInput } from "@/lib/chama.schemas";
 
+export type ChamaRules = {
+  contribution_amount?: number;
+  contribution_frequency?: string;
+  late_penalty?: number;
+  meeting_cadence?: string;
+  meeting_day?: string;
+  quorum_percent?: number;
+  loan_approval_threshold?: number;
+  currency?: string;
+  description?: string;
+  founded_year?: number | null;
+  joining_fee?: number;
+  loan_interest_rate?: number;
+  loan_max_multiplier?: number;
+};
+
 async function assertChair(chamaId: string, userId: string) {
   const { data, error } = await supabaseAdmin
     .from("memberships")
@@ -35,7 +51,7 @@ export async function loadChamaSettings(chamaId: string, userId: string) {
   }
   return {
     ...data,
-    rules: (data.rules ?? {}) as Record<string, unknown>,
+    rules: (data.rules ?? {}) as ChamaRules,
     canEdit: membership.role === "chairperson",
   };
 }
@@ -49,7 +65,7 @@ export async function saveChamaSettings(data: SaveChamaSettingsInput, userId: st
     .eq("id", data.chamaId)
     .maybeSingle();
 
-  const rules = { ...((current?.rules ?? {}) as Record<string, unknown>), ...(data.rules ?? {}) };
+  const rules = { ...((current?.rules ?? {}) as ChamaRules), ...(data.rules ?? {}) };
 
   const { error } = await supabaseAdmin
     .from("chamas")
