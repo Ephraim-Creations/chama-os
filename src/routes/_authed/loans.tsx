@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, HandCoins, AlertTriangle, CheckCircle2, Percent, Loader2 } from "lucide-react";
+import { Plus, HandCoins, AlertTriangle, CheckCircle2, Percent, Loader2, CalendarClock } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { KpiCard } from "@/components/KpiCard";
