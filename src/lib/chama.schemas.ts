@@ -62,5 +62,7 @@ export const setMemberRoleSchema = z.object({
 
 export type FindSimilarChamasInput = z.infer<typeof findSimilarChamasSchema>;
 export type CreateChamaInput = z.infer<typeof createChamaSchema>;
+export type SaveChamaSettingsInput = z.infer<typeof saveChamaSettingsSchema>;
 export type JoinChamaByCodeInput = z.infer<typeof joinChamaByCodeSchema>;
+
 export type SetMemberRoleInput = z.infer<typeof setMemberRoleSchema>;
