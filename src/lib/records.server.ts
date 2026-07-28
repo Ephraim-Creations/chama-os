@@ -136,7 +136,7 @@ export async function decideLoan(
     .maybeSingle();
   if (!loan) throw new Error("That loan no longer exists.");
 
-  const patch: Record<string, unknown> = isReview
+  const patch = isReview
     ? { status: "under_review", treasurer_notes: input.note ?? null }
     : {
         status: input.decision === "approved" ? "active" : "rejected",
@@ -144,7 +144,7 @@ export async function decideLoan(
         decided_at: new Date().toISOString(),
       };
 
-  const { error } = await supabaseAdmin.from("loans").update(patch).eq("id", input.loanId);
+  const { error } = await supabaseAdmin.from("loans").update(patch as never).eq("id", input.loanId);
   if (error) {
     console.error("[records.server] decideLoan", error);
     throw new Error("Could not update that loan.");

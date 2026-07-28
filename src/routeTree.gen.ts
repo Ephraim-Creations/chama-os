@@ -41,6 +41,7 @@ import { Route as AuthedLoansRouteImport } from './routes/_authed/loans'
 import { Route as AuthedInvestmentsRouteImport } from './routes/_authed/investments'
 import { Route as AuthedHelpRouteImport } from './routes/_authed/help'
 import { Route as AuthedFeedRouteImport } from './routes/_authed/feed'
+import { Route as AuthedDeductionsRouteImport } from './routes/_authed/deductions'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedCreateChamaRouteImport } from './routes/_authed/create-chama'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
@@ -205,6 +206,11 @@ const AuthedFeedRoute = AuthedFeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedDeductionsRoute = AuthedDeductionsRouteImport.update({
+  id: '/deductions',
+  path: '/deductions',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/contributions': typeof AuthedContributionsRoute
   '/create-chama': typeof AuthedCreateChamaRoute
   '/dashboard': typeof AuthedDashboardRoute
+  '/deductions': typeof AuthedDeductionsRoute
   '/feed': typeof AuthedFeedRoute
   '/help': typeof AuthedHelpRoute
   '/investments': typeof AuthedInvestmentsRoute
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/contributions': typeof AuthedContributionsRoute
   '/create-chama': typeof AuthedCreateChamaRoute
   '/dashboard': typeof AuthedDashboardRoute
+  '/deductions': typeof AuthedDeductionsRoute
   '/feed': typeof AuthedFeedRoute
   '/help': typeof AuthedHelpRoute
   '/investments': typeof AuthedInvestmentsRoute
@@ -316,6 +324,7 @@ export interface FileRoutesById {
   '/_authed/contributions': typeof AuthedContributionsRoute
   '/_authed/create-chama': typeof AuthedCreateChamaRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
+  '/_authed/deductions': typeof AuthedDeductionsRoute
   '/_authed/feed': typeof AuthedFeedRoute
   '/_authed/help': typeof AuthedHelpRoute
   '/_authed/investments': typeof AuthedInvestmentsRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/contributions'
     | '/create-chama'
     | '/dashboard'
+    | '/deductions'
     | '/feed'
     | '/help'
     | '/investments'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/contributions'
     | '/create-chama'
     | '/dashboard'
+    | '/deductions'
     | '/feed'
     | '/help'
     | '/investments'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/_authed/contributions'
     | '/_authed/create-chama'
     | '/_authed/dashboard'
+    | '/_authed/deductions'
     | '/_authed/feed'
     | '/_authed/help'
     | '/_authed/investments'
@@ -695,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedFeedRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/deductions': {
+      id: '/_authed/deductions'
+      path: '/deductions'
+      fullPath: '/deductions'
+      preLoaderRoute: typeof AuthedDeductionsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
       path: '/dashboard'
@@ -731,6 +750,7 @@ interface AuthedRouteChildren {
   AuthedContributionsRoute: typeof AuthedContributionsRoute
   AuthedCreateChamaRoute: typeof AuthedCreateChamaRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedDeductionsRoute: typeof AuthedDeductionsRoute
   AuthedFeedRoute: typeof AuthedFeedRoute
   AuthedHelpRoute: typeof AuthedHelpRoute
   AuthedInvestmentsRoute: typeof AuthedInvestmentsRoute
@@ -750,6 +770,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedContributionsRoute: AuthedContributionsRoute,
   AuthedCreateChamaRoute: AuthedCreateChamaRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedDeductionsRoute: AuthedDeductionsRoute,
   AuthedFeedRoute: AuthedFeedRoute,
   AuthedHelpRoute: AuthedHelpRoute,
   AuthedInvestmentsRoute: AuthedInvestmentsRoute,
