@@ -54,6 +54,8 @@ function Onboarding() {
   const [canCreate, setCanCreate] = useState(false);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+
 
   // profile
   const [fullName, setFullName] = useState("");
