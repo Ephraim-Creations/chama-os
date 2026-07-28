@@ -126,7 +126,13 @@ function LoansPage() {
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
                           {ksh(l.amountRepaid)} of {ksh(l.amount)}
+                          {l.installmentAmount
+                            ? ` · ${ksh(l.installmentAmount)} ${l.frequency ?? "monthly"}`
+                            : ""}
                         </div>
+                        {l.planNotes && (
+                          <div className="mt-1 text-xs text-muted-foreground">{l.planNotes}</div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={`${statusColor[l.status] ?? ""} capitalize`}>
@@ -136,17 +142,24 @@ function LoansPage() {
                       {(isChair || can("loans.manage")) && (
                         <TableCell className="text-right">
                           {active && (
-                            <LoanActions
-                              chamaId={active.id}
-                              loanId={l.id}
-                              status={l.status}
-                              isChair={isChair}
-                              canReview={can("loans.manage")}
-                              onDone={refresh}
-                            />
+                            <div className="flex items-center justify-end gap-2">
+                              {can("loans.manage") &&
+                                ["approved", "active", "overdue", "completed"].includes(l.status) && (
+                                  <LoanPlanDialog chamaId={active.id} loan={l} onDone={refresh} />
+                                )}
+                              <LoanActions
+                                chamaId={active.id}
+                                loanId={l.id}
+                                status={l.status}
+                                isChair={isChair}
+                                canReview={can("loans.manage")}
+                                onDone={refresh}
+                              />
+                            </div>
                           )}
                         </TableCell>
                       )}
+
                     </TableRow>
                   );
                 })}
