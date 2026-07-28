@@ -20,8 +20,12 @@ type NavItem = { title: string; url: string; icon: any; perm?: Permission };
 const SECTIONS: Array<{ label: string; items: NavItem[] }> = [
   {
     label: "Overview",
-    items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }],
+    items: [
+      { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
+      { title: "My stats", url: "/member", icon: UserRound },
+    ],
   },
+
   {
     label: "Members",
     items: [
