@@ -1,39 +1,52 @@
-## Deductions in Finance
+## Goal
 
-A new **Deductions** page under the Finance section of the sidebar.
+Make the bell a real notification centre, separate **personal** stats from **collective** chama analytics (penalties are not contributions), rename the sidebar entries, and open Settings to every member except the chama setup tab.
 
-**Creating a deduction (chairperson or treasurer):**
-- Name (e.g. "Chama-OS cost share", "Office rent"), amount per member, optional note, date.
-- Member picker with a **Select all** button, plus individual checkboxes and a search box.
-- Live summary before saving: "12 members × Ksh 500 = Ksh 6,000".
-- Saving records one row per selected member, immediately reducing each member's savings balance, and fires a bell notification to each affected member.
+---
 
-**What members see:**
-- The Deductions page lists every deduction that touched them: name, amount, date, who recorded it.
-- Chair/treasurer see the full group view grouped by deduction batch, with totals and a per-member breakdown.
-- Balances on the dashboard and contributions page account for deductions, so net savings stay accurate.
-- Deleting/reversing a deduction is chair-only and leaves a trail in Transparency.
+## 1. Notification centre in the bell
 
-## Loans — chair holds the decision
+Today the bell is just a link to `/notifications`, and opening that page silently marks everything read.
 
-- Treasurer can record applications, add review notes, and move a loan to "under review"; they no longer see approve/reject.
-- Chairperson gets the Approve / Reject actions with a decision note, on both the loans list and the loan detail.
-- Borrower gets a bell notification on any status change.
+- Bell becomes a dropdown panel: latest ~8 notifications, unread highlighted, each row showing title, short body and time.
+- Each row gets an **Open** action that routes to the tab the notification is about, using its `kind`:
+  - `loan`/`loans` → `/loans`, `contribution` → `/contributions`, `deduction` → `/deductions`, `report` → `/reports`, `meeting` → `/meetings`, `announce` → `/feed`, anything else → `/notifications`.
+  - Opening a single notification marks just that one read.
+- **Mark all as read** button in the panel header and at the top of `/notifications`.
+- `/notifications` no longer auto-marks on load; the badge only drops when the user acts. Page keeps a kind filter row (All / Loans / Finance / Meetings / Announcements) and the same Open behaviour per row.
 
-## New modules
+## 2. Penalties are not contributions
 
-1. **Fines & penalties** — chair/treasurer issue a fine to one or many members (same select-all picker), with reason and status; members see their fines and get notified.
-2. **Payouts (merry-go-round)** — an ordered rotation of members with scheduled dates, showing whose turn is next and marking payouts as disbursed.
-3. **Member statements** — a per-member ledger (contributions in, deductions/fines out, loans, balance) for any date range, printable/downloadable. Members see only their own; chair/treasurer see anyone's.
-4. **Budget & expenses** — group running costs (rent, Chama-OS fee, refreshments) against a budget per period, with a simple spent-vs-budget view.
+In the member's personal figures, penalty rows are currently folded into "savings" and the entry count.
 
-## Suggested build order
+- Personal savings = contributions of type savings/welfare/project/investment, minus withdrawals, minus deductions. **Penalties are excluded** and reported as their own "Penalties paid" figure.
+- Collective analytics (dashboard, reports, transparency) keep counting penalties in group income, as they do today — nothing hidden at group level.
 
-Deductions + chair-only loan decisions first (this request), then Statements, Fines, Budget, Payouts.
+## 3. Personal vs collective stats
+
+- **My stats** page (chairperson, treasurer, secretary and member alike) shows only that person's numbers: my savings, penalties paid, deductions, my loan balance and repayment progress, my entries, next meeting. No other member's figures.
+- **Overview / dashboard + reports** show the collective picture, extended with:
+  - Total loaned out (all active/approved/overdue principal)
+  - Total repaid to date
+  - Outstanding loan balance
+  - **Available to lend** = group savings + investment income held − outstanding loan balance
+  - Penalties collected, deductions collected
+
+## 4. Sidebar and naming
+
+- Overview section becomes: **Overview** (`/dashboard`) and, right below it, **My stats** (`/member`).
+- The old **Profile** item is removed from the Account section (it pointed at the same page).
+- **Settings** is visible to every role; inside Settings the **Chama setup** tab stays chairperson-only (already the case), so members get Profile, Security, Accessibility and Notifications only.
+
+---
 
 ## Technical notes
 
-- New tables: `deductions` (batch: chama, name, amount, note, created_by) and `deduction_members` (deduction, member, amount, status), plus `fines`, `payouts`, `expenses` in later phases. Each gets GRANTs, RLS scoped to chama membership, and write policies restricted via `has_chama_role`.
-- Writes go through new `deductions.functions.ts` / `deductions.server.ts` server functions using the existing `requirePermission` pattern; new permissions `finance.deduct` and `loans.decide` added to `src/lib/permissions.ts` (chair + treasurer, chair only respectively).
-- `getChamaSnapshot` extended to return deductions so dashboard/contributions balances are net of them.
-- Notifications inserted server-side per affected member in the same handler; bell count already reads live from `notifications`.
+- `src/lib/chama-data.server.ts`: add `penalties` per member, exclude penalties from `savings`; add `totals.loanedOut`, `totals.loanRepaid`, `totals.loanOutstanding`, `totals.availableToLend`, `totals.penaltiesTotal`.
+- `src/lib/chama-data.functions.ts`: add `markNotificationRead` (single id, scoped to the caller) alongside the existing `markNotificationsRead`.
+- New `src/components/NotificationsBell.tsx` used by `AppHeader`; shared `kind → route` map in a small helper so bell and page agree.
+- `src/routes/_authed/notifications.tsx`: drop auto-mark-on-mount, add explicit mark-all + per-row open, add kind filter.
+- `src/routes/_authed/member.tsx`: retitle to "My stats", add penalties card and my-loan detail.
+- `src/routes/_authed/dashboard.tsx`: add the lending-capacity KPIs.
+- `src/components/AppSidebar.tsx`: reorder/rename items, drop the `settings.manage` gate on Settings.
+- No database changes needed — penalty is already a contribution type and notifications already carry `kind` and `read_at`.
