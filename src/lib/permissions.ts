@@ -43,6 +43,7 @@ const SECRETARY: Permission[] = [
 const TREASURER: Permission[] = [
   ...MEMBER,
   "finance.manage",
+  "finance.deduct",
   "loans.manage",
   "investments.manage",
 ];
