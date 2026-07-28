@@ -97,14 +97,14 @@ function ApplyPage() {
               <CheckCircle2 className="h-7 w-7" />
             </div>
             <h1 className="mt-5 text-2xl font-bold text-foreground">
-              {done.status === "approved" ? "You're already approved" : "Application received"}
+              {done.status === "approved" ? "You're already approved" : "Enquiry received"}
             </h1>
             <p className="mt-3 text-[15px] text-muted-foreground">
               {done.status === "approved"
-                ? "Your email is already cleared to open a chama. Sign in and set up your group."
+                ? "Your email is already cleared. Check your inbox for the link to create your account, then set up your group."
                 : done.duplicate
-                  ? "We already have an application for this email. We'll get back to you on the phone number you gave us."
-                  : "We review every chairperson application by hand. We'll call or email you shortly, then you can sign in and set up your chama."}
+                  ? "We already have an enquiry for this email. We'll get back to you on the phone number you gave us."
+                  : "Nothing has been created yet — this is an enquiry. We review every chairperson request by hand, then email you a link to create your account and set up your chama."}
             </p>
             <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:justify-center">
               <Button asChild className="h-11 rounded-xl px-6 font-semibold">
@@ -118,12 +118,13 @@ function ApplyPage() {
         ) : (
           <>
             <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              Apply to open a chama
+              Enquire about opening a chama
             </h1>
             <p className="mt-3 text-[15px] text-muted-foreground">
-              Tell us who you are and which group you lead. We check every application before opening a
-              chama, so please use details we can reach you on.
+              Tell us who you are and which group you lead. Nothing is created yet — once we approve your
+              enquiry we email you a link to create your account and set the group up yourself.
             </p>
+
 
             <form onSubmit={onSubmit} className="mt-8 space-y-5">
               <Field id="full_name" label="Your full name" error={errors.full_name}>
@@ -160,7 +161,7 @@ function ApplyPage() {
                   This becomes your sign-in email once you're approved.
                 </p>
               </Field>
-              <Field id="chama_name" label="Chama name" error={errors.chama_name}>
+              <Field id="chama_name" label="Proposed chama name" error={errors.chama_name}>
                 <Input
                   id="chama_name"
                   value={form.chama_name}
@@ -197,7 +198,7 @@ function ApplyPage() {
                 className="h-12 w-full rounded-xl text-[15px] font-semibold"
               >
                 {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                {busy ? "Sending..." : "Send application"}
+                {busy ? "Sending..." : "Send enquiry"}
               </Button>
             </form>
           </>

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -54,6 +54,8 @@ function Onboarding() {
   const [canCreate, setCanCreate] = useState(false);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+
 
   // profile
   const [fullName, setFullName] = useState("");
@@ -92,12 +94,16 @@ function Onboarding() {
           navigate({ to: "/admin", replace: true });
           return;
         }
-        if (p.onboarded && a.memberships > 0) {
+        if (a.memberships > 0) {
           navigate({ to: "/dashboard", replace: true });
           return;
         }
-        setCanCreate(a.canCreateChama && a.memberships === 0);
+        setCanCreate(a.canCreateChama);
+        // Prefill the name they proposed when they enquired — nothing was
+        // created back then, they just confirm it here.
+        if (a.application?.chama_name) setName(a.application.chama_name);
         if (p.onboarded) setStep(1);
+
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -138,17 +144,19 @@ function Onboarding() {
   };
 
   const finish = async () => {
+    if (submitting.current) return;
     if (name.trim().length < 2) {
       setStep(1);
       return toast.error("Give your chama a name");
     }
+    submitting.current = true;
     setBusy(true);
     try {
       const invites = seeds
         .map((s) => ({ email: s.email.trim().toLowerCase(), role: s.role }))
         .filter((s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s.email));
 
-      await create({
+      const result = await create({
         data: {
           name: name.trim(),
           type,
@@ -167,19 +175,34 @@ function Onboarding() {
       await refresh().catch((error) => {
         console.error("[onboarding] refresh after chama creation", error);
       });
-      toast.success(
-        invites.length
-          ? `Your chama is ready — we emailed ${invites.length} sign-in link${invites.length > 1 ? "s" : ""}.`
-          : "Your chama is ready",
-      );
+      if ((result as { alreadyExisted?: boolean })?.alreadyExisted) {
+        toast.success("Your chama is already set up — taking you to the dashboard.");
+      } else {
+        toast.success(
+          invites.length
+            ? `Your chama is ready — we emailed ${invites.length} sign-in link${invites.length > 1 ? "s" : ""}.`
+            : "Your chama is ready",
+        );
+      }
       navigate({ to: "/dashboard", replace: true });
-
     } catch (err) {
+      // If the group actually landed, never let them submit again.
+      const created = await access()
+        .then((a) => a.memberships > 0)
+        .catch(() => false);
+      if (created) {
+        await refresh().catch(() => undefined);
+        toast.success("Your chama was created — taking you to the dashboard.");
+        navigate({ to: "/dashboard", replace: true });
+        return;
+      }
+      submitting.current = false;
       toast.error(err instanceof Error ? err.message : "Could not create your chama");
     } finally {
       setBusy(false);
     }
   };
+
 
   if (!ready) {
     return (
