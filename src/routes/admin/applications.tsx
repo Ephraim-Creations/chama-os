@@ -38,9 +38,16 @@ function ApplicationsPage() {
   async function decide(id: string, decision: "approved" | "rejected") {
     setBusyId(id);
     try {
-      await decideChairApplication({ data: { id, decision } });
-      toast.success(decision === "approved" ? "Approved" : "Rejected");
+      const res = await decideChairApplication({ data: { id, decision } });
+      toast.success(
+        decision === "approved"
+          ? res?.emailed
+            ? "Approved — we emailed them a link to create their account."
+            : "Approved, but the email could not be sent. Share the sign-in link manually."
+          : "Rejected",
+      );
       await load();
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not update.");
     } finally {
