@@ -45,7 +45,10 @@ export async function savePin(userId: string, pin: string) {
   const pin_hash = await hashPin(pin, salt);
   const { error } = await supabaseAdmin
     .from("user_pins")
-    .upsert({ user_id: userId, pin_hash, salt, failed_attempts: 0, locked_until: null });
+    .upsert(
+      { user_id: userId, pin_hash, salt, failed_attempts: 0, locked_until: null },
+      { onConflict: "user_id" },
+    );
   if (error) {
     console.error("[pins.server] savePin", error);
     throw new Error("Could not save your PIN.");
