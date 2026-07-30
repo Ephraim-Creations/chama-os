@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, Copy, Check, Loader2, X, ShieldCheck, Users, KeyRound } from "lucide-react";
+import { Search, Copy, Check, Loader2, X, ShieldCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
@@ -21,7 +21,7 @@ import { useSnapshot } from "@/hooks/use-snapshot";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
 import { listChamaInvites, revokeInvite } from "@/lib/invites.functions";
 import { setMemberRole } from "@/lib/chama.functions";
-import { resetMemberPin } from "@/lib/pins.functions";
+
 import { ROLE_LABELS } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_authed/members")({
