@@ -1,0 +1,1 @@
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_pins TO service_role;

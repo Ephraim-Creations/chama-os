@@ -1,39 +1,32 @@
-## 1. Loan limit never goes negative
+## Goal
 
-Today **My stats** shows `Loan eligibility = savings × 3` hardcoded — so a member sitting at −10 shows −30. Two fixes:
+"Set PIN" in Settings → Security must save a new 4-digit PIN for the signed-in member, overwrite any previous one, and let them sign in with email + that PIN.
 
-- Use the chairperson's setting instead of the fixed 3. The Chama setup tab already saves `loan_max_multiplier` (default 3) into the chama rules; it just isn't read anywhere yet.
-- Floor the result: if savings are zero or negative, eligibility is **Ksh 0**, with a small caption like "Save more to unlock a loan" instead of a negative figure.
-- Apply the same floor wherever a limit is shown or checked: My stats card, the loan application form's max hint, and the server-side check when a loan is submitted (a member at 0 cannot apply).
+## Current state (verified)
 
-## 2. Deductions visible to everyone — confirmed, plus a small gap
+- The Security card is already wired to the PIN server functions (set / remove / status), and the login screen already has the PIN keypad calling the PIN sign-in function.
+- The `user_pins` table exists but contains **0 rows** — so no PIN has ever been stored successfully. The failure point is not yet confirmed; step 1 is to confirm it rather than guess.
 
-Checked the access rules: the Deductions page is already open to every member (`finance.view`), and each run lists every member's share, so nothing is hidden. Only the "New deduction" and reverse buttons stay with chair/treasurer, which is right.
+## Step 1 — Reproduce and locate the failure
 
-The one gap: a member has no per-person deductions history in **My stats**. Add a "Deductions taken" breakdown there listing each run and the amount taken from that member.
+Sign in as a test member in the preview browser, open Settings, type a PIN, press Set PIN, and capture the exact error from the console/network and server-function logs. Then re-check the table for a new row.
 
-## 3. Activity log actually logs things
+Likely candidates to check while reproducing:
+- the auth bearer reaching the server function (protected calls need the token attached),
+- table permissions/grants for the service-role write path,
+- the unique/primary key used by the upsert (a missing conflict target makes the save fail silently or error).
 
-Right now `transparency_logs` only receives a row when the chair reverses a deduction — which is why the Activity log looks empty. Extend logging to every money-touching action:
+## Step 2 — Fix what the reproduction shows
 
-| Action | Logged as |
-| --- | --- |
-| Contribution recorded / edited | create / update |
-| Deduction applied and reversed | create / delete |
-| Loan applied, approved, rejected | create / update, with the note as reason |
-| Payment plan set, repayment added/removed | update |
-| Investment added / value updated | create / update |
+Repair whichever layer fails so that pressing Set PIN:
+- stores a salted hash of the new PIN, replacing any earlier PIN for that member,
+- resets any failed-attempt counter and lock so the new PIN works immediately,
+- flips the card to "A 4-digit PIN is active on your account." with Change / Remove options.
 
-Each row keeps who did it, before/after values and any note typed in the dialog. The Activity log page then gets:
+## Step 3 — Verify the sign-in loop end to end
 
-- Plain-English lines ("Treasurer recorded a Ksh 2,000 savings contribution for Jane") instead of raw table names and UUIDs.
-- A filter row: All / Contributions / Deductions / Loans / Investments.
-- Everyone in the chama can read it (already the case in the access rules).
+Sign out, choose the PIN tab on the login screen, enter the email and the new 4-digit PIN, and confirm it lands on the dashboard. Then change the PIN in Settings and confirm the old PIN is rejected and the new one works. Also confirm Remove PIN deletes the row and the login PIN tab then rejects it.
 
-## Technical notes
+## Out of scope
 
-- New `logChange()` helper in `src/lib/records.server.ts` (service-role insert into `transparency_logs`), called from the contribution, loan, repayment, deduction and investment write paths.
-- `src/lib/chama-data.server.ts`: expose `rules.loan_max_multiplier` and a per-member `loanLimit = max(savings, 0) * multiplier` in the snapshot so UI and server agree on one number.
-- `src/routes/_authed/member.tsx`: replace `savings * 3`, add the deductions breakdown.
-- `src/routes/_authed/transparency.tsx`: human-readable rendering + filters.
-- No database changes needed — `transparency_logs` and the chama `rules` JSON already carry everything.
+No change to who may set a PIN — it stays self-service only; no official can set or reset someone else's.
