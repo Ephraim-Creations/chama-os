@@ -177,6 +177,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          message: string
+          mobile: string | null
+          name: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_read?: boolean
+          message: string
+          mobile?: string | null
+          name: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          mobile?: string | null
+          name?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       contributions: {
         Row: {
           amount: number
@@ -670,6 +703,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source: string
+          subscribed: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+          subscribed?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+          subscribed?: boolean
+        }
+        Relationships: []
       }
       notifications: {
         Row: {

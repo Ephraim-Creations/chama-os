@@ -25,6 +25,8 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as JoinApplyRouteImport } from './routes/join/apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminPricingRouteImport } from './routes/admin/pricing'
+import { Route as AdminNewsletterRouteImport } from './routes/admin/newsletter'
+import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
 import { Route as AdminChamasRouteImport } from './routes/admin/chamas'
 import { Route as AdminBillingRouteImport } from './routes/admin/billing'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
@@ -124,6 +126,16 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
 const AdminPricingRoute = AdminPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNewsletterRoute = AdminNewsletterRouteImport.update({
+  id: '/newsletter',
+  path: '/newsletter',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminChamasRoute = AdminChamasRouteImport.update({
@@ -264,6 +276,8 @@ export interface FileRoutesByFullPath {
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
@@ -301,6 +315,8 @@ export interface FileRoutesByTo {
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
@@ -341,6 +357,8 @@ export interface FileRoutesById {
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/chamas': typeof AdminChamasRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
@@ -381,6 +399,8 @@ export interface FileRouteTypes {
     | '/admin/applications'
     | '/admin/billing'
     | '/admin/chamas'
+    | '/admin/messages'
+    | '/admin/newsletter'
     | '/admin/pricing'
     | '/auth/reset-password'
     | '/join/apply'
@@ -418,6 +438,8 @@ export interface FileRouteTypes {
     | '/admin/applications'
     | '/admin/billing'
     | '/admin/chamas'
+    | '/admin/messages'
+    | '/admin/newsletter'
     | '/admin/pricing'
     | '/auth/reset-password'
     | '/join/apply'
@@ -457,6 +479,8 @@ export interface FileRouteTypes {
     | '/admin/applications'
     | '/admin/billing'
     | '/admin/chamas'
+    | '/admin/messages'
+    | '/admin/newsletter'
     | '/admin/pricing'
     | '/auth/reset-password'
     | '/join/apply'
@@ -593,6 +617,20 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/admin/pricing'
       preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/newsletter': {
+      id: '/admin/newsletter'
+      path: '/newsletter'
+      fullPath: '/admin/newsletter'
+      preLoaderRoute: typeof AdminNewsletterRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/chamas': {
@@ -793,6 +831,8 @@ interface AdminRouteChildren {
   AdminApplicationsRoute: typeof AdminApplicationsRoute
   AdminBillingRoute: typeof AdminBillingRoute
   AdminChamasRoute: typeof AdminChamasRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminPricingRoute: typeof AdminPricingRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -802,6 +842,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminApplicationsRoute: AdminApplicationsRoute,
   AdminBillingRoute: AdminBillingRoute,
   AdminChamasRoute: AdminChamasRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
+  AdminNewsletterRoute: AdminNewsletterRoute,
   AdminPricingRoute: AdminPricingRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

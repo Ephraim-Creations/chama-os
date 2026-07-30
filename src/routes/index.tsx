@@ -308,7 +308,8 @@ function Pricing() {
       suffix: p.amount_kes > 0 ? `/ ${p.period}` : undefined,
       tagline: p.description ?? "",
       features: ((p.features as string[]) ?? []) as string[],
-      cta: p.amount_kes > 0 ? `Choose ${p.name}` : "Get started",
+      cta: p.amount_kes === 0 && p.sort_order > 0 ? "Talk to us" : p.amount_kes > 0 ? `Choose ${p.name}` : "Get started",
+      custom: p.amount_kes === 0 && p.sort_order > 0,
       highlight: p.highlight,
     }));
 
@@ -361,7 +362,7 @@ function Pricing() {
                 variant={t.highlight ? "default" : "outline"}
                 className="mt-auto h-11 rounded-xl font-semibold"
               >
-                <Link to="/join">{t.cta}</Link>
+                <Link to={t.custom ? "/contact" : "/join"}>{t.cta}</Link>
               </Button>
             </div>
           ))}

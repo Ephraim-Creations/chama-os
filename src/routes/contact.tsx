@@ -4,6 +4,7 @@ import { PageFooter } from "@/components/PageFooter";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { submitContactMessage } from "@/lib/marketing.functions";
 
 export const Route = createFileRoute("/contact")({
   component: Contact,
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [formState, setFormState] = useState<"idle" | "submitting" | "success">("idle");
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,11 +35,16 @@ function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormState("submitting");
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setFormState("success");
-    setFormData({ name: "", email: "", mobile: "", subject: "", message: "" });
-    setTimeout(() => setFormState("idle"), 3000);
+    setError(null);
+    try {
+      await submitContactMessage({ data: formData });
+      setFormState("success");
+      setFormData({ name: "", email: "", mobile: "", subject: "", message: "" });
+      setTimeout(() => setFormState("idle"), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send your message.");
+      setFormState("idle");
+    }
   };
 
   const contactMethods = [
@@ -113,6 +120,12 @@ function Contact() {
               Fill out the form below and we'll get back to you as soon as possible.
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
           {formState === "success" && (
             <div className="mb-6 rounded-2xl border border-success/30 bg-success/10 p-6 flex items-start gap-4">
