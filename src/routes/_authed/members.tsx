@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, Copy, Check, Loader2, X, ShieldCheck, Users, KeyRound } from "lucide-react";
+import { Search, Copy, Check, Loader2, X, ShieldCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
@@ -21,7 +21,7 @@ import { useSnapshot } from "@/hooks/use-snapshot";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
 import { listChamaInvites, revokeInvite } from "@/lib/invites.functions";
 import { setMemberRole } from "@/lib/chama.functions";
-import { resetMemberPin } from "@/lib/pins.functions";
+
 import { ROLE_LABELS } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_authed/members")({
@@ -46,7 +46,7 @@ function MembersPage() {
   const list = useServerFn(listChamaInvites);
   const revoke = useServerFn(revokeInvite);
   const changeRole = useServerFn(setMemberRole);
-  const resetPin = useServerFn(resetMemberPin);
+  
 
   const [invites, setInvites] = useState<Invite[] | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -98,18 +98,6 @@ function MembersPage() {
     }
   };
 
-  const onResetPin = async (memberUserId: string) => {
-    if (!active) return;
-    setBusyId(memberUserId);
-    try {
-      await resetPin({ data: { chamaId: active.id, memberUserId } });
-      toast.success("PIN cleared — they can set a new one at sign-in");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not reset PIN");
-    } finally {
-      setBusyId(null);
-    }
-  };
 
   const pending = (invites ?? []).filter((i) => i.status === "pending");
   const members = useMemo(() => {
@@ -227,7 +215,7 @@ function MembersPage() {
                   <TableHead className="text-right text-foreground">Savings</TableHead>
                   <TableHead className="text-right text-foreground">Entries</TableHead>
                   <TableHead className="text-right text-foreground">Active loans</TableHead>
-                  {isChair && <TableHead className="text-right text-foreground">Security</TableHead>}
+                  
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -269,23 +257,6 @@ function MembersPage() {
                     <TableCell className="text-right font-semibold tabular-nums">{ksh(m.savings)}</TableCell>
                     <TableCell className="text-right tabular-nums">{m.contributions}</TableCell>
                     <TableCell className="text-right tabular-nums">{m.activeLoans}</TableCell>
-                    {isChair && (
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-9 rounded-lg"
-                          disabled={busyId === m.userId}
-                          onClick={() => onResetPin(m.userId)}
-                        >
-                          {busyId === m.userId ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <><KeyRound className="mr-1.5 h-3.5 w-3.5" /> Reset PIN</>
-                          )}
-                        </Button>
-                      </TableCell>
-                    )}
                   </TableRow>
                 ))}
               </TableBody>
