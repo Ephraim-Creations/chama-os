@@ -17,6 +17,7 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [formState, setFormState] = useState<"idle" | "submitting" | "success">("idle");
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,11 +34,16 @@ function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormState("submitting");
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setFormState("success");
-    setFormData({ name: "", email: "", mobile: "", subject: "", message: "" });
-    setTimeout(() => setFormState("idle"), 3000);
+    setError(null);
+    try {
+      await submitContactMessage({ data: formData });
+      setFormState("success");
+      setFormData({ name: "", email: "", mobile: "", subject: "", message: "" });
+      setTimeout(() => setFormState("idle"), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send your message.");
+      setFormState("idle");
+    }
   };
 
   const contactMethods = [
