@@ -4,6 +4,7 @@ import { PageFooter } from "@/components/PageFooter";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { submitContactMessage } from "@/lib/marketing.functions";
 
 export const Route = createFileRoute("/contact")({
   component: Contact,
@@ -119,6 +120,12 @@ function Contact() {
               Fill out the form below and we'll get back to you as soon as possible.
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
           {formState === "success" && (
             <div className="mb-6 rounded-2xl border border-success/30 bg-success/10 p-6 flex items-start gap-4">
