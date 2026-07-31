@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.feed_posts_guard_announcement() FROM PUBLIC, anon, authenticated;
