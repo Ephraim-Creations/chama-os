@@ -31,6 +31,7 @@ import { Route as AdminChamasRouteImport } from './routes/admin/chamas'
 import { Route as AdminBillingRouteImport } from './routes/admin/billing'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedSecretaryRouteImport } from './routes/_authed/secretary'
@@ -159,6 +160,11 @@ const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   path: '/announcements',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AuthedTransparencyRoute = AuthedTransparencyRouteImport.update({
   id: '/transparency',
   path: '/transparency',
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
@@ -361,6 +369,7 @@ export interface FileRoutesById {
   '/_authed/secretary': typeof AuthedSecretaryRoute
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/transparency': typeof AuthedTransparencyRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
+    | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/applications'
     | '/admin/billing'
@@ -444,6 +454,7 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
+    | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/applications'
     | '/admin/billing'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/_authed/secretary'
     | '/_authed/settings'
     | '/_authed/transparency'
+    | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/applications'
     | '/admin/billing'
@@ -674,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_authed/transparency': {
       id: '/_authed/transparency'
       path: '/transparency'
@@ -847,6 +866,7 @@ const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApplicationsRoute: typeof AdminApplicationsRoute
   AdminBillingRoute: typeof AdminBillingRoute
@@ -858,6 +878,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApplicationsRoute: AdminApplicationsRoute,
   AdminBillingRoute: AdminBillingRoute,
