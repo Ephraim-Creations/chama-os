@@ -64,8 +64,23 @@ export function Navbar() {
         </div>
       </header>
 
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background text-foreground">
+      {/* Overlay (tablet, where drawer covers 40%) */}
+      <div
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      {/* Slide-in menu: full width on mobile, 40% on tablet */}
+      <div
+        id="mobile-nav"
+        className={`fixed left-0 top-0 z-50 h-[100dvh] w-screen border-r border-border bg-background text-foreground shadow-2xl transition-transform duration-300 ease-out sm:w-[40vw] sm:min-w-[320px] lg:hidden ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {mobileMenuOpen && (
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-border px-4 py-4">
               <div className="flex items-center gap-3 min-w-0">
