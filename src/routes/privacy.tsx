@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { PageFooter } from "@/components/PageFooter";
+import { openCookieSettings } from "@/components/CookieConsent";
 
 export const Route = createFileRoute("/privacy")({
   component: Privacy,
