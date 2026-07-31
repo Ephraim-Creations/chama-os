@@ -25,7 +25,7 @@ export function Navbar() {
             <div className="font-bold tracking-tight text-sm sm:text-base truncate">Chama-OS</div>
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
+          <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground lg:flex">
             <a href="/#features" className="hover:text-foreground">Features</a>
             <a href="/#how" className="hover:text-foreground">How it works</a>
             <a href="/#pricing" className="hover:text-foreground">Pricing</a>
@@ -39,21 +39,23 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground md:hidden"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground lg:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
             {user ? (
-              <Button variant="ghost" onClick={handleSignOut} className="hidden h-10 rounded-xl md:inline-flex">
+              <Button variant="ghost" onClick={handleSignOut} className="hidden h-10 rounded-xl lg:inline-flex">
                 <LogOut className="mr-1.5 h-4 w-4" /> Sign out
               </Button>
             ) : (
-              <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
+              <Button variant="ghost" asChild className="hidden h-10 rounded-xl lg:inline-flex">
                 <Link to="/login">Sign in</Link>
               </Button>
             )}
-            <Button asChild className="hidden h-10 rounded-xl font-semibold md:inline-flex">
+            <Button asChild className="hidden h-10 rounded-xl font-semibold lg:inline-flex">
               <Link to="/join">
                 Create my Chama <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
