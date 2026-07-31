@@ -1,32 +1,56 @@
 ## Goal
 
-"Set PIN" in Settings → Security must save a new 4-digit PIN for the signed-in member, overwrite any previous one, and let them sign in with email + that PIN.
+Add first-party visitor analytics to the `/admin` dashboard, plus a real cookie consent banner on the public site that actually controls whether tracking happens.
 
 ## Current state (verified)
 
-- The Security card is already wired to the PIN server functions (set / remove / status), and the login screen already has the PIN keypad calling the PIN sign-in function.
-- The `user_pins` table exists but contains **0 rows** — so no PIN has ever been stored successfully. The failure point is not yet confirmed; step 1 is to confirm it rather than guess.
+There is no analytics code and no consent code anywhere in the project — no tracking table, no banner, no admin analytics tab. Everything below is new.
 
-## Step 1 — Reproduce and locate the failure
+## What gets built
 
-Sign in as a test member in the preview browser, open Settings, type a PIN, press Set PIN, and capture the exact error from the console/network and server-function logs. Then re-check the table for a new row.
+### 1. Cookie consent banner (public site)
 
-Likely candidates to check while reproducing:
-- the auth bearer reaching the server function (protected calls need the token attached),
-- table permissions/grants for the service-role write path,
-- the unique/primary key used by the upsert (a missing conflict target makes the save fail silently or error).
+A bottom banner on first visit with three actions: Accept all, Reject non-essential, and a link to the Privacy page. The choice is stored in a first-party cookie (`chama_consent`, 6 months) so it persists across visits and is readable on the server.
 
-## Step 2 — Fix what the reproduction shows
+- Reject: nothing is tracked beyond a single anonymous, non-identifying page count with no cookie ID.
+- Accept: a random visitor ID cookie is set so repeat visits can be grouped into sessions.
+- A small "Cookie settings" link in the footer lets people change their mind later.
 
-Repair whichever layer fails so that pressing Set PIN:
-- stores a salted hash of the new PIN, replacing any earlier PIN for that member,
-- resets any failed-attempt counter and lock so the new PIN works immediately,
-- flips the card to "A 4-digit PIN is active on your account." with Change / Remove options.
+### 2. Tracking
 
-## Step 3 — Verify the sign-in loop end to end
+A page view is recorded on every route change on public pages (landing, pricing, about, contact, terms, privacy, join). Captured per view:
 
-Sign out, choose the PIN tab on the login screen, enter the email and the new 4-digit PIN, and confirm it lands on the dashboard. Then change the PIN in Settings and confirm the old PIN is rejected and the new one works. Also confirm Remove PIN deletes the row and the login PIN tab then rejects it.
+- path and referrer
+- device type (mobile / tablet / desktop) and browser, derived from the user agent
+- country, from the edge request header when available
+- coarse timestamp, visitor ID (only with consent), session ID
+
+No IP address is stored, and nothing is captured inside the signed-in chama app.
+
+### 3. Admin analytics tab
+
+New "Analytics" item in the `/admin` sidebar showing, for a selectable range (7 / 30 / 90 days):
+
+- KPI cards: total views, unique visitors, sessions, average views per session
+- A visits-over-time line chart
+- Top pages table
+- Device-type breakdown (mobile / tablet / desktop)
+- Browser breakdown
+- Top referrers (which sites send traffic)
+- Top countries
+- Consent split: how many visitors accepted vs rejected
+
+Empty states everywhere until data accumulates — no fake or seeded numbers.
+
+## Technical section
+
+- Migration creates `public.page_views` (id, path, referrer, device_type, browser, country, visitor_id, session_id, consented, created_at) with GRANTs, RLS on, an insert path restricted to trusted server code, and select limited to platform admins via `is_platform_admin`. Indexes on `created_at` and `path`.
+- Ingestion goes through a TanStack server route under `src/routes/api/public/track` so it can be called with `keepalive` and can read the user agent and country header server-side; input validated with Zod, path allow-listed to known public routes, writes via the service-role client.
+- Aggregation lives in `src/lib/analytics.server.ts` with admin-guarded server functions in `src/lib/analytics.functions.ts` (same `is_platform_admin` check pattern used by the other admin functions).
+- Consent state lives in `src/components/CookieConsent.tsx` plus a small `src/lib/consent.ts` helper; the banner is rendered in `__root.tsx` and gated to public routes. Rendering waits for hydration so it cannot cause a hydration mismatch.
+- Charts reuse the existing Recharts setup already used on the dashboard.
 
 ## Out of scope
 
-No change to who may set a PIN — it stays self-service only; no official can set or reset someone else's.
+- No Google Analytics / PostHog — this stays first-party so the data shows inside your own admin.
+- No tracking of authenticated in-app behaviour.
