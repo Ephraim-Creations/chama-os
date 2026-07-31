@@ -3,6 +3,7 @@ import logoImage from "@/assets/chama-OS-logo.png";
 import { Button } from "@/components/ui/button";
 import { Mail, CheckCircle2 } from "lucide-react";
 import { subscribeToNewsletter } from "@/lib/marketing.functions";
+import { openCookieSettings } from "@/components/CookieConsent";
 
 function NewsletterSignup() {
   const [email, setEmail] = useState("");
