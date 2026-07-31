@@ -137,6 +137,7 @@ function RootComponent() {
         <ChamaProvider>
           <Preloader />
           <Outlet />
+          <CookieConsent />
         </ChamaProvider>
       </ThemeProvider>
     </QueryClientProvider>
