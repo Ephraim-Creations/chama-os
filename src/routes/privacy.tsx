@@ -175,7 +175,7 @@ function Privacy() {
             </section>
 
             <section>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">7. Changes to This Privacy Policy</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">8. Changes to This Privacy Policy</h2>
               <p className="text-muted-foreground mb-4 leading-relaxed">
                 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date at the top of this Privacy Policy.
               </p>
@@ -185,7 +185,7 @@ function Privacy() {
             </section>
 
             <section>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">8. Contact Us</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">9. Contact Us</h2>
               <p className="text-muted-foreground mb-4 leading-relaxed">
                 If you have any questions about this Privacy Policy, please contact us:
               </p>
