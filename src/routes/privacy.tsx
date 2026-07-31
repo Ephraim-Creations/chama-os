@@ -133,7 +133,41 @@ function Privacy() {
             </section>
 
             <section>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">6. Third-Party Links</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">6. Cookies</h2>
+              <p className="text-muted-foreground mb-4 leading-relaxed">
+                Cookies are small text files stored on your device. Chama-OS sets first-party cookies only — we do not use advertising networks or third-party tracking scripts, and we never sell your data.
+              </p>
+              <h3 className="text-xl font-semibold mt-8 mb-4 text-foreground">Essential cookies (always active)</h3>
+              <p className="text-muted-foreground mb-4 leading-relaxed">
+                Required for the website to function. These keep you signed in, protect your account, and remember your cookie choice. They cannot be switched off.
+              </p>
+              <ul className="space-y-2 text-muted-foreground mb-6">
+                <li>• <strong className="text-foreground">chama_consent</strong> — stores your cookie preference for 6 months.</li>
+                <li>• Authentication cookies — keep your session active while you are signed in.</li>
+              </ul>
+              <h3 className="text-xl font-semibold mt-8 mb-4 text-foreground">Analytics cookies (optional)</h3>
+              <p className="text-muted-foreground mb-4 leading-relaxed">
+                Set only if you accept them. They let us count visits to our public pages so we can improve them. Analytics apply to public marketing pages only — activity inside your chama dashboard is never tracked, and we do not store your IP address.
+              </p>
+              <ul className="space-y-2 text-muted-foreground mb-6">
+                <li>• <strong className="text-foreground">chama_vid</strong> — a random visitor identifier, kept for 6 months.</li>
+                <li>• <strong className="text-foreground">chama_sid</strong> — a random session identifier that expires after 30 minutes of inactivity.</li>
+              </ul>
+              <p className="text-muted-foreground leading-relaxed">
+                You can change or withdraw your consent at any time.{" "}
+                <button
+                  type="button"
+                  onClick={openCookieSettings}
+                  className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+                >
+                  Open cookie settings
+                </button>
+                . If you decline analytics cookies, the identifiers above are deleted from your device.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">7. Third-Party Links</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Our service may contain links to other sites that are not operated by us. If you click on a third-party link, you will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every site you visit. We have no control over and assume no responsibility for the content, privacy policies or practices of any third-party sites or services.
               </p>
