@@ -10,6 +10,7 @@ import {
 import { ChamaProvider } from "@/context/chama-context";
 import { ThemeProvider } from "next-themes";
 import { Preloader } from "@/components/Preloader";
+import { CookieConsent } from "@/components/CookieConsent";
 
 import appCss from "../styles.css?url";
 import logoImage from "@/assets/chama-OS-logo.png";
