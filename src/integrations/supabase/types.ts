@@ -769,6 +769,45 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          browser: string
+          consented: boolean
+          country: string | null
+          created_at: string
+          device_type: string
+          id: string
+          path: string
+          referrer: string | null
+          session_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string
+          consented?: boolean
+          country?: string | null
+          created_at?: string
+          device_type?: string
+          id?: string
+          path: string
+          referrer?: string | null
+          session_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string
+          consented?: boolean
+          country?: string | null
+          created_at?: string
+          device_type?: string
+          id?: string
+          path?: string
+          referrer?: string | null
+          session_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       platform_admins: {
         Row: {
           created_at: string
