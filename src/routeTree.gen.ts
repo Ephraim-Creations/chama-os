@@ -31,6 +31,7 @@ import { Route as AdminChamasRouteImport } from './routes/admin/chamas'
 import { Route as AdminBillingRouteImport } from './routes/admin/billing'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin/announcements'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AuthedTransparencyRouteImport } from './routes/_authed/transparency'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedSecretaryRouteImport } from './routes/_authed/secretary'
@@ -48,6 +49,7 @@ import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedCreateChamaRouteImport } from './routes/_authed/create-chama'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
 import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -158,6 +160,11 @@ const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   path: '/announcements',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AuthedTransparencyRoute = AuthedTransparencyRouteImport.update({
   id: '/transparency',
   path: '/transparency',
@@ -243,6 +250,11 @@ const AuthedBillingRoute = AuthedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -272,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
@@ -283,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/join/apply': typeof JoinApplyRoute
   '/admin/': typeof AdminIndexRoute
   '/join/': typeof JoinIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -311,6 +325,7 @@ export interface FileRoutesByTo {
   '/secretary': typeof AuthedSecretaryRoute
   '/settings': typeof AuthedSettingsRoute
   '/transparency': typeof AuthedTransparencyRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
@@ -322,6 +337,7 @@ export interface FileRoutesByTo {
   '/join/apply': typeof JoinApplyRoute
   '/admin': typeof AdminIndexRoute
   '/join': typeof JoinIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -353,6 +369,7 @@ export interface FileRoutesById {
   '/_authed/secretary': typeof AuthedSecretaryRoute
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/transparency': typeof AuthedTransparencyRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/billing': typeof AdminBillingRoute
@@ -364,6 +381,7 @@ export interface FileRoutesById {
   '/join/apply': typeof JoinApplyRoute
   '/admin/': typeof AdminIndexRoute
   '/join/': typeof JoinIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -395,6 +413,7 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
+    | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/applications'
     | '/admin/billing'
@@ -406,6 +425,7 @@ export interface FileRouteTypes {
     | '/join/apply'
     | '/admin/'
     | '/join/'
+    | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -434,6 +454,7 @@ export interface FileRouteTypes {
     | '/secretary'
     | '/settings'
     | '/transparency'
+    | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/applications'
     | '/admin/billing'
@@ -445,6 +466,7 @@ export interface FileRouteTypes {
     | '/join/apply'
     | '/admin'
     | '/join'
+    | '/api/public/track'
   id:
     | '__root__'
     | '/'
@@ -475,6 +497,7 @@ export interface FileRouteTypes {
     | '/_authed/secretary'
     | '/_authed/settings'
     | '/_authed/transparency'
+    | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/applications'
     | '/admin/billing'
@@ -486,6 +509,7 @@ export interface FileRouteTypes {
     | '/join/apply'
     | '/admin/'
     | '/join/'
+    | '/api/public/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -503,6 +527,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   JoinApplyRoute: typeof JoinApplyRoute
   JoinIndexRoute: typeof JoinIndexRoute
+  ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -661,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_authed/transparency': {
       id: '/_authed/transparency'
       path: '/transparency'
@@ -780,6 +812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedBillingRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -827,6 +866,7 @@ const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApplicationsRoute: typeof AdminApplicationsRoute
   AdminBillingRoute: typeof AdminBillingRoute
@@ -838,6 +878,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApplicationsRoute: AdminApplicationsRoute,
   AdminBillingRoute: AdminBillingRoute,
@@ -865,17 +906,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   JoinApplyRoute: JoinApplyRoute,
   JoinIndexRoute: JoinIndexRoute,
+  ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
