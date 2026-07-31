@@ -25,7 +25,7 @@ export function Navbar() {
             <div className="font-bold tracking-tight text-sm sm:text-base truncate">Chama-OS</div>
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
+          <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground lg:flex">
             <a href="/#features" className="hover:text-foreground">Features</a>
             <a href="/#how" className="hover:text-foreground">How it works</a>
             <a href="/#pricing" className="hover:text-foreground">Pricing</a>
@@ -39,21 +39,23 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground md:hidden"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground lg:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
             {user ? (
-              <Button variant="ghost" onClick={handleSignOut} className="hidden h-10 rounded-xl md:inline-flex">
+              <Button variant="ghost" onClick={handleSignOut} className="hidden h-10 rounded-xl lg:inline-flex">
                 <LogOut className="mr-1.5 h-4 w-4" /> Sign out
               </Button>
             ) : (
-              <Button variant="ghost" asChild className="hidden h-10 rounded-xl md:inline-flex">
+              <Button variant="ghost" asChild className="hidden h-10 rounded-xl lg:inline-flex">
                 <Link to="/login">Sign in</Link>
               </Button>
             )}
-            <Button asChild className="hidden h-10 rounded-xl font-semibold md:inline-flex">
+            <Button asChild className="hidden h-10 rounded-xl font-semibold lg:inline-flex">
               <Link to="/join">
                 Create my Chama <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
@@ -62,8 +64,23 @@ export function Navbar() {
         </div>
       </header>
 
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background text-foreground">
+      {/* Overlay (tablet, where drawer covers 40%) */}
+      <div
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      {/* Slide-in menu: full width on mobile, 40% on tablet */}
+      <div
+        id="mobile-nav"
+        className={`fixed left-0 top-0 z-50 h-[100dvh] w-screen border-r border-border bg-background text-foreground shadow-2xl transition-transform duration-300 ease-out sm:w-[40vw] sm:min-w-[320px] lg:hidden ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {mobileMenuOpen && (
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-border px-4 py-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -136,8 +153,8 @@ export function Navbar() {
               Powered by Ephraim Creations
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }
