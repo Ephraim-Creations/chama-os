@@ -153,8 +153,8 @@ export function Navbar() {
               Powered by Ephraim Creations
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }
