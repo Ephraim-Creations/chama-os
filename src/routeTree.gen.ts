@@ -48,6 +48,7 @@ import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedCreateChamaRouteImport } from './routes/_authed/create-chama'
 import { Route as AuthedContributionsRouteImport } from './routes/_authed/contributions'
 import { Route as AuthedBillingRouteImport } from './routes/_authed/billing'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -243,6 +244,11 @@ const AuthedBillingRoute = AuthedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -283,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/join/apply': typeof JoinApplyRoute
   '/admin/': typeof AdminIndexRoute
   '/join/': typeof JoinIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/join/apply': typeof JoinApplyRoute
   '/admin': typeof AdminIndexRoute
   '/join': typeof JoinIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -364,6 +372,7 @@ export interface FileRoutesById {
   '/join/apply': typeof JoinApplyRoute
   '/admin/': typeof AdminIndexRoute
   '/join/': typeof JoinIndexRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -406,6 +415,7 @@ export interface FileRouteTypes {
     | '/join/apply'
     | '/admin/'
     | '/join/'
+    | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -445,6 +455,7 @@ export interface FileRouteTypes {
     | '/join/apply'
     | '/admin'
     | '/join'
+    | '/api/public/track'
   id:
     | '__root__'
     | '/'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/join/apply'
     | '/admin/'
     | '/join/'
+    | '/api/public/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -503,6 +515,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   JoinApplyRoute: typeof JoinApplyRoute
   JoinIndexRoute: typeof JoinIndexRoute
+  ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -780,6 +793,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedBillingRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -865,6 +885,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   JoinApplyRoute: JoinApplyRoute,
   JoinIndexRoute: JoinIndexRoute,
+  ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
