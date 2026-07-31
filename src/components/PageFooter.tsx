@@ -90,6 +90,9 @@ export function PageFooter() {
           <a href="/contact" className="hover:text-foreground">Contact</a>
           <a href="/#pricing" className="hover:text-foreground">Pricing</a>
           <a href="/privacy" className="hover:text-foreground">Privacy</a>
+          <button type="button" onClick={openCookieSettings} className="hover:text-foreground">
+            Cookie settings
+          </button>
           <a href="/terms" className="hover:text-foreground">Terms</a>
         </div>
       </div>
