@@ -377,7 +377,7 @@ function Pricing() {
 
 function CTA() {
   return (
-    <section className="px-4 pb-20 md:px-8">
+    <section className="px-4 py-20 md:px-8">
       <div className="mx-auto max-w-5xl rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-card to-card p-10 text-center shadow-xl md:p-16">
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-primary text-primary-foreground">
           <CheckCircle2 className="h-6 w-6" />
