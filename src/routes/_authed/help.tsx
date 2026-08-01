@@ -152,6 +152,8 @@ function HelpPage() {
         </div>
       </div>
 
+      <SupportSection />
+
       <h2 className="mt-8 text-xl font-semibold text-foreground">Frequently asked questions</h2>
       {ordered.length === 0 ? (
         <p className="mt-3 rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground shadow-sm">
