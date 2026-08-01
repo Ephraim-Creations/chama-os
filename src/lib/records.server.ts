@@ -188,8 +188,8 @@ export async function insertMeeting(
     table: "meetings",
     recordId: row.id,
     action: "create",
-    newValue: { title: input.title, scheduled_at: input.scheduledAt, location: input.location ?? null },
-    editedBy: userId,
+    next: { title: input.title, scheduled_at: input.scheduledAt, location: input.location ?? null },
+    userId,
   });
   return { ok: true };
 }
