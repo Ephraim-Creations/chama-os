@@ -187,7 +187,7 @@ export async function insertMeeting(
     chamaId,
     table: "meetings",
     recordId: row.id,
-    action: "insert",
+    action: "create",
     newValue: { title: input.title, scheduled_at: input.scheduledAt, location: input.location ?? null },
     editedBy: userId,
   });
