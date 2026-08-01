@@ -8,14 +8,14 @@ import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ksh, initialsOf } from "@/lib/mock-data";
+import { ksh } from "@/lib/mock-data";
 import { useChama } from "@/context/chama-context";
 import { useSnapshot } from "@/hooks/use-snapshot";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
@@ -223,11 +223,7 @@ function MembersPage() {
                   <TableRow key={m.id} className="text-[15px]">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border border-border">
-                          <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                            {initialsOf(m.displayName)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar name={m.displayName} path={m.avatarUrl} className="h-10 w-10" />
                         <div>
                           <div className="font-semibold text-foreground">{m.displayName}</div>
                           <div className="text-xs text-muted-foreground">

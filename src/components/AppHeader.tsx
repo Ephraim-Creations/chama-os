@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -20,15 +20,12 @@ const roleLabels: Record<string, string> = {
   chairperson: "Chairperson", treasurer: "Treasurer", secretary: "Secretary", member: "Member",
 };
 
-function initialsOf(name: string) {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
-}
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { chamas, active, setActiveId } = useChama();
-  const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null; avatar_url: string | null } | null>(null);
 
 
 
@@ -42,7 +39,7 @@ export function AppHeader() {
     const loadProfile = () => {
       void supabase
         .from("profiles")
-        .select("full_name, display_name")
+        .select("full_name, display_name, avatar_url")
         .eq("id", user.id)
         .maybeSingle()
         .then(({ data }) => {
@@ -64,7 +61,6 @@ export function AppHeader() {
     user?.email ||
     "Member";
   const firstName = fullName.split(" ")[0];
-  const initials = initialsOf(fullName) || "?";
 
 
   const handleSignOut = async () => {
@@ -128,9 +124,7 @@ export function AppHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex h-11 items-center gap-2 rounded-xl px-2 hover:bg-muted">
-            <Avatar className="h-9 w-9 border border-border">
-              <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">{initials}</AvatarFallback>
-            </Avatar>
+            <UserAvatar name={fullName} path={profile?.avatar_url} className="h-9 w-9" />
             <div className="hidden text-left leading-tight md:block">
               <div className="text-sm font-semibold text-foreground">{fullName}</div>
               <div className="text-xs text-muted-foreground">{active ? roleLabels[active.role] : ""}</div>

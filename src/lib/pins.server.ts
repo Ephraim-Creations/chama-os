@@ -51,7 +51,7 @@ export async function savePin(userId: string, pin: string) {
     );
   if (error) {
     console.error("[pins.server] savePin", error);
-    throw new Error("Could not save your PIN.");
+    throw new Error(`Could not save your PIN: ${error.message}`);
   }
   return { ok: true };
 }
