@@ -37,6 +37,20 @@ export const inviteMember = createServerFn({ method: "POST" })
 
     const { sendSetupInvite } = await import("@/lib/onboarding.server");
 
+    // Already a member of this chama?
+    const existingUserId = await findUserIdByEmail(email);
+    if (existingUserId) {
+      const { data: member } = await supabaseAdmin
+        .from("memberships")
+        .select("id")
+        .eq("chama_id", data.chamaId)
+        .eq("user_id", existingUserId)
+        .maybeSingle();
+      if (member) {
+        throw new Error(`${email} is already a member of this chama.`);
+      }
+    }
+
     const { data: existing } = await supabaseAdmin
       .from("chama_invites")
       .select("id, token")
