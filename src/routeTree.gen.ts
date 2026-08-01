@@ -24,6 +24,7 @@ import { Route as JoinIndexRouteImport } from './routes/join/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as JoinApplyRouteImport } from './routes/join/apply'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as AdminTicketsRouteImport } from './routes/admin/tickets'
 import { Route as AdminPricingRouteImport } from './routes/admin/pricing'
 import { Route as AdminNewsletterRouteImport } from './routes/admin/newsletter'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
@@ -124,6 +125,11 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/auth/reset-password',
   path: '/auth/reset-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTicketsRoute = AdminTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminPricingRoute = AdminPricingRouteImport.update({
   id: '/pricing',
@@ -292,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tickets': typeof AdminTicketsRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
   '/admin/': typeof AdminIndexRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tickets': typeof AdminTicketsRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
   '/admin': typeof AdminIndexRoute
@@ -377,6 +385,7 @@ export interface FileRoutesById {
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tickets': typeof AdminTicketsRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/join/apply': typeof JoinApplyRoute
   '/admin/': typeof AdminIndexRoute
@@ -421,6 +430,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/newsletter'
     | '/admin/pricing'
+    | '/admin/tickets'
     | '/auth/reset-password'
     | '/join/apply'
     | '/admin/'
@@ -462,6 +472,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/newsletter'
     | '/admin/pricing'
+    | '/admin/tickets'
     | '/auth/reset-password'
     | '/join/apply'
     | '/admin'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/newsletter'
     | '/admin/pricing'
+    | '/admin/tickets'
     | '/auth/reset-password'
     | '/join/apply'
     | '/admin/'
@@ -636,6 +648,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/tickets': {
+      id: '/admin/tickets'
+      path: '/tickets'
+      fullPath: '/admin/tickets'
+      preLoaderRoute: typeof AdminTicketsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/pricing': {
       id: '/admin/pricing'
@@ -874,6 +893,7 @@ interface AdminRouteChildren {
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminPricingRoute: typeof AdminPricingRoute
+  AdminTicketsRoute: typeof AdminTicketsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -886,6 +906,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMessagesRoute: AdminMessagesRoute,
   AdminNewsletterRoute: AdminNewsletterRoute,
   AdminPricingRoute: AdminPricingRoute,
+  AdminTicketsRoute: AdminTicketsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -911,13 +932,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

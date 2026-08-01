@@ -167,18 +167,30 @@ export async function insertMeeting(
   input: { title: string; agenda?: string | null; location?: string | null; scheduledAt: string },
 ) {
   await requirePermission(chamaId, userId, "meetings.manage");
-  const { error } = await supabaseAdmin.from("meetings").insert({
-    chama_id: chamaId,
-    title: input.title,
-    agenda: input.agenda ?? null,
-    location: input.location ?? null,
-    scheduled_at: input.scheduledAt,
-    created_by: userId,
-  });
+  const { data: row, error } = await supabaseAdmin
+    .from("meetings")
+    .insert({
+      chama_id: chamaId,
+      title: input.title,
+      agenda: input.agenda ?? null,
+      location: input.location ?? null,
+      scheduled_at: input.scheduledAt,
+      created_by: userId,
+    })
+    .select("id")
+    .single();
   if (error) {
     console.error("[records.server] meeting", error);
     throw new Error("Could not schedule that meeting.");
   }
+  await logChange({
+    chamaId,
+    table: "meetings",
+    recordId: row.id,
+    action: "create",
+    next: { title: input.title, scheduled_at: input.scheduledAt, location: input.location ?? null },
+    userId,
+  });
   return { ok: true };
 }
 

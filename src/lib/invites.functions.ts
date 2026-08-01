@@ -21,6 +21,21 @@ async function assertChair(chamaId: string, userId: string) {
   if (!data || data.role !== "chairperson") throw new Error("Only the chairperson can do this");
 }
 
+async function findUserIdByEmail(email: string): Promise<string | null> {
+  const target = email.trim().toLowerCase();
+  for (let page = 1; page <= 5; page++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) {
+      console.error("[invites.functions] listUsers", error);
+      return null;
+    }
+    const hit = data.users.find((u) => (u.email ?? "").toLowerCase() === target);
+    if (hit) return hit.id;
+    if (data.users.length < 200) break;
+  }
+  return null;
+}
+
 export const inviteMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -36,6 +51,20 @@ export const inviteMember = createServerFn({ method: "POST" })
     const email = data.email.trim().toLowerCase();
 
     const { sendSetupInvite } = await import("@/lib/onboarding.server");
+
+    // Already a member of this chama?
+    const existingUserId = await findUserIdByEmail(email);
+    if (existingUserId) {
+      const { data: member } = await supabaseAdmin
+        .from("memberships")
+        .select("id")
+        .eq("chama_id", data.chamaId)
+        .eq("user_id", existingUserId)
+        .maybeSingle();
+      if (member) {
+        throw new Error(`${email} is already a member of this chama.`);
+      }
+    }
 
     const { data: existing } = await supabaseAdmin
       .from("chama_invites")
@@ -82,16 +111,19 @@ export const revokeInvite = createServerFn({ method: "POST" })
     const { userId } = context;
     const { data: inv } = await supabaseAdmin
       .from("chama_invites")
-      .select("chama_id")
+      .select("chama_id, status")
       .eq("id", data.inviteId)
-      .single();
-    if (!inv) throw new Error("Invite not found");
+      .maybeSingle();
+    if (!inv) throw new Error("That invitation no longer exists.");
     await assertChair(inv.chama_id, userId);
+    if (inv.status === "accepted") {
+      throw new Error("That invitation was already accepted — remove the member instead.");
+    }
     const { error } = await supabaseAdmin
       .from("chama_invites")
-      .update({ status: "revoked" })
+      .delete()
       .eq("id", data.inviteId);
-    if (error) fail(error, "Could not revoke invite.");
+    if (error) fail(error, "Could not remove invite.");
     return { ok: true };
   });
 
