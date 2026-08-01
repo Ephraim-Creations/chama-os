@@ -1,34 +1,30 @@
-# Admin dashboard: badge counts on every tab
+# Invites: send a real email, drop the copy-paste link
 
-Add a small number badge to each tab in the platform admin nav so you can see at a glance where new activity is waiting — new contact messages, new newsletter signups, pending applications, billing problems, and new groups.
+Today the invite dialog says "Email sending is coming soon" and shows a raw
+`/login?invite=<token>` link. That message is out of date: the server already
+emails the person a sign-in / set-password link when you invite them. The
+dialog just never told you.
 
-## What each badge counts
+## What changes
 
-| Tab | Badge shows |
-| --- | --- |
-| Overview | no badge |
-| Groups | chamas created since you last opened the Groups tab |
-| Applications | chair applications still pending review |
-| Pricing | no badge |
-| Billing | subscriptions that are `past_due` or `cancelled` (needs attention) |
-| Announcements | no badge |
-| Messages | unread contact messages (`is_read = false`) |
-| Newsletter | subscribers added since you last opened the Newsletter tab |
-| Analytics | no badge |
+- After you click **Send invite**, the dialog confirms: "Invite email sent to
+  member@example.com — they'll get a link to set their password and join."
+- The raw link block is removed from the normal path. It only appears as a
+  fallback if the email could not be sent, labelled clearly as a manual backup.
+- The dialog description is corrected (it currently says "same Google email"
+  even though members sign in with email + password too).
+- Same treatment for invites seeded during chama creation, so no other screen
+  shows the "coming soon" wording.
 
-Badge styling: small pill on the right of the label, primary green for informational counts (Groups, Applications, Messages, Newsletter) and red for Billing attention items. Hidden entirely when the count is 0, capped display at `99+`.
+## Sender address
 
-## How "new" is decided
-
-Two mechanisms, chosen per tab:
-
-- **Real state** where the data already has it: Applications (status pending), Messages (`is_read`), Billing (subscription status). These clear when you actually action the item, not merely by looking.
-- **Last-seen timestamp** for Groups and Newsletter, which have no read flag. When you open that tab, the current time is stored in the browser (`localStorage`, per admin) and the badge counts rows created after it. Opening the tab clears the badge.
+Invite emails currently go out from Lovable's default sender. For branded email
+from your own domain (e.g. `invites@yourdomain.com`) and better deliverability,
+you'd need to connect a domain you own — say the word and I'll walk you
+through it. Not required for invites to work.
 
 ## Technical notes
 
-- New server function `getAdminBadgeCounts` in `src/lib/admin.functions.ts`, guarded by `requireSupabaseAuth` + `assertPlatformAdmin`, backed by a `loadBadgeCounts()` helper in `src/lib/admin.server.ts`. It runs count-only queries (`head: true, count: "exact"`) against `chamas`, `chair_applications`, `billing_subscriptions`, `contact_messages`, and `newsletter_subscribers`, and accepts the two client-held "since" timestamps as input.
-- New `src/hooks/use-admin-badges.tsx`: fetches counts on mount, refetches every 60s and on route change within `/admin`, exposes `markSeen(tabKey)` which writes the timestamp to `localStorage` and refetches.
-- `src/routes/admin.tsx`: nav items gain a `badgeKey`; the layout renders a `NavBadge` next to the label and calls `markSeen` in an effect when the active pathname matches a last-seen-based tab.
-- Small presentational `src/components/NavBadge.tsx` using existing semantic tokens (`bg-primary/10 text-primary`, `bg-destructive/10 text-destructive`) — no hardcoded colors.
-- No database migration required; all counts come from existing tables.
+- `inviteMember` already returns `emailed: boolean`; `InviteMemberDialog.tsx`
+  will branch on it instead of always rendering `lastLink`.
+- No server or database changes needed.
