@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, LayoutDashboard, Building2, Tags, Megaphone, Inbox, ArrowLeft, CreditCard, MessageSquare, Mail, BarChart3 } from "lucide-react";
+import { Loader2, LayoutDashboard, Building2, Tags, Megaphone, Inbox, ArrowLeft, CreditCard, MessageSquare, Mail, BarChart3, LifeBuoy } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAccessStatus } from "@/lib/access.functions";
 import { ThemeToggle } from "@/components/ThemeToggle";
