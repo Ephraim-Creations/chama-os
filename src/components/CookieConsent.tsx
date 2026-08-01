@@ -99,9 +99,8 @@ export function CookieConsent() {
               <div>
                 <p className="text-sm font-semibold text-foreground">We use cookies</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  We use essential cookies to keep Chama-OS working and optional analytics cookies to
-                  understand how people use our public website. You can change your preferences at any
-                  time.{" "}
+                  We use essential cookies to run Chama-OS and optional analytics cookies to improve
+                  our website. Manage your preferences anytime..
                   <a href="/privacy" className="font-medium text-primary hover:underline">
                     Read our Privacy Policy
                   </a>
