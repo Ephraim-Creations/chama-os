@@ -25,6 +25,7 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
   const [role, setRole] = useState<"member" | "treasurer" | "secretary" | "chairperson">("member");
   const [busy, setBusy] = useState(false);
   const [lastLink, setLastLink] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const invite = useServerFn(inviteMember);
@@ -34,9 +35,16 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
     setBusy(true);
     try {
       const res = await invite({ data: { chamaId, email, role } });
-      const link = `${window.location.origin}/login?invite=${res.token}`;
-      setLastLink(link);
-      toast.success(res.alreadyExisted ? "Invite already pending — link copied below." : "Invite created.");
+      const target = email.trim();
+      if (res.emailed) {
+        setSentTo(target);
+        setLastLink(null);
+        toast.success(`Invite email sent to ${target}.`);
+      } else {
+        setSentTo(null);
+        setLastLink(`${window.location.origin}/login?invite=${res.token}`);
+        toast.error("We couldn't send the email — share the backup link instead.");
+      }
       setEmail("");
       onInvited?.();
     } catch (err) {
@@ -54,7 +62,7 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setLastLink(null); }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setLastLink(null); setSentTo(null); } }}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button className="h-11 rounded-xl font-semibold">
@@ -66,7 +74,7 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
         <DialogHeader>
           <DialogTitle>Invite a member</DialogTitle>
           <DialogDescription>
-            They'll see this chama after signing in with the same Google email.
+            We'll email them a link to set their password and join this chama.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
@@ -95,10 +103,20 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
             </Select>
           </div>
 
+          {sentTo && (
+            <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>
+                Invite email sent to <span className="font-medium text-foreground">{sentTo}</span>. They'll
+                get a link to set their password and join. Ask them to check spam if it doesn't arrive.
+              </span>
+            </div>
+          )}
+
           {lastLink && (
             <div className="rounded-xl border border-border bg-muted/40 p-3">
               <div className="text-xs font-medium text-muted-foreground">
-                Email sending is coming soon. Share this link with them for now:
+                We couldn't send the email. Backup — share this link with them directly:
               </div>
               <div className="mt-2 flex items-center gap-2">
                 <code className="flex-1 truncate rounded-md bg-background px-2 py-1.5 text-xs">{lastLink}</code>
@@ -108,6 +126,7 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
               </div>
             </div>
           )}
+
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Close</Button>
