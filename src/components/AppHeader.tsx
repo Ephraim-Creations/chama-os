@@ -146,7 +146,6 @@ export function AppHeader() {
           <DropdownMenuLabel>My account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild><Link to="/settings">Profile & Settings</Link></DropdownMenuItem>
-          <DropdownMenuItem asChild><Link to="/dashboard">Switch chama</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><Link to="/help">Help Center</Link></DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
