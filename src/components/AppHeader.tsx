@@ -28,7 +28,7 @@ export function AppHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { chamas, active, setActiveId } = useChama();
-  const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null; avatar_url: string | null } | null>(null);
 
 
 
