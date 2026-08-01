@@ -111,16 +111,19 @@ export const revokeInvite = createServerFn({ method: "POST" })
     const { userId } = context;
     const { data: inv } = await supabaseAdmin
       .from("chama_invites")
-      .select("chama_id")
+      .select("chama_id, status")
       .eq("id", data.inviteId)
-      .single();
-    if (!inv) throw new Error("Invite not found");
+      .maybeSingle();
+    if (!inv) throw new Error("That invitation no longer exists.");
     await assertChair(inv.chama_id, userId);
+    if (inv.status === "accepted") {
+      throw new Error("That invitation was already accepted — remove the member instead.");
+    }
     const { error } = await supabaseAdmin
       .from("chama_invites")
-      .update({ status: "revoked" })
+      .delete()
       .eq("id", data.inviteId);
-    if (error) fail(error, "Could not revoke invite.");
+    if (error) fail(error, "Could not remove invite.");
     return { ok: true };
   });
 
