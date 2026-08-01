@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, ChevronDown, Check, Users, LogOut, Plus } from "lucide-react";
+import { Search, ChevronDown, Check, Users, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
