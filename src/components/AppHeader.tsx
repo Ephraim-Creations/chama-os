@@ -128,9 +128,7 @@ export function AppHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex h-11 items-center gap-2 rounded-xl px-2 hover:bg-muted">
-            <Avatar className="h-9 w-9 border border-border">
-              <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">{initials}</AvatarFallback>
-            </Avatar>
+            <UserAvatar name={fullName} path={profile?.avatar_url} className="h-9 w-9" />
             <div className="hidden text-left leading-tight md:block">
               <div className="text-sm font-semibold text-foreground">{fullName}</div>
               <div className="text-xs text-muted-foreground">{active ? roleLabels[active.role] : ""}</div>
