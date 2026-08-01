@@ -20,9 +20,6 @@ const roleLabels: Record<string, string> = {
   chairperson: "Chairperson", treasurer: "Treasurer", secretary: "Secretary", member: "Member",
 };
 
-function initialsOf(name: string) {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
-}
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
