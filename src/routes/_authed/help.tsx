@@ -184,3 +184,147 @@ function HelpPage() {
     </div>
   );
 }
+
+const CATEGORY_LABELS: Record<string, string> = {
+  account: "Account & access",
+  billing: "Billing & plans",
+  loans: "Loans & contributions",
+  technical: "Something is broken",
+  other: "Other",
+};
+
+const TICKET_STATUS: Record<string, string> = {
+  open: "Open",
+  in_progress: "In progress",
+  resolved: "Resolved",
+};
+
+type MyTicket = Awaited<ReturnType<typeof listMyTicketsFn>>[number];
+
+function SupportSection() {
+  const { active } = useChama();
+  const [subject, setSubject] = useState("");
+  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("other");
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [tickets, setTickets] = useState<MyTicket[] | null>(null);
+
+  const load = () =>
+    listMyTicketsFn()
+      .then((d) => setTickets(d as MyTicket[]))
+      .catch(() => setTickets([]));
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await submitTicket({
+        data: { chamaId: active?.id ?? null, subject, category, body },
+      });
+      toast.success("Request sent. The Chama-OS team will reply here.");
+      setSubject("");
+      setBody("");
+      void load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send your request.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-xl font-semibold text-foreground">Still need help?</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Send the Chama-OS team a request. You'll get the reply right here and as a notification.
+      </p>
+
+      <form
+        onSubmit={submit}
+        className="mt-3 space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="ticket-subject">Subject</Label>
+            <Input
+              id="ticket-subject"
+              required
+              minLength={3}
+              maxLength={140}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Briefly, what do you need?"
+              className="h-11 rounded-xl"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Select value={category} onValueChange={(v) => setCategory(v as typeof category)}>
+              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>{CATEGORY_LABELS[c]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="ticket-body">Describe the problem</Label>
+          <Textarea
+            id="ticket-body"
+            required
+            minLength={10}
+            maxLength={2000}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Tell us what happened and what you expected…"
+            className="min-h-[110px] rounded-xl"
+          />
+        </div>
+        <Button type="submit" disabled={busy} className="h-11 rounded-xl font-semibold">
+          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LifeBuoy className="mr-2 h-4 w-4" />}
+          {busy ? "Sending…" : "Submit request"}
+        </Button>
+      </form>
+
+      {tickets && tickets.length > 0 && (
+        <div className="mt-4 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">My requests</h3>
+          {tickets.map((t) => (
+            <div key={t.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-semibold text-foreground">{t.subject}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(t.created_at).toLocaleString()} · {CATEGORY_LABELS[t.category] ?? t.category}
+                  </div>
+                </div>
+                <Badge
+                  className={
+                    t.status === "resolved"
+                      ? "bg-primary/10 text-primary hover:bg-primary/10"
+                      : "bg-muted text-muted-foreground hover:bg-muted"
+                  }
+                >
+                  {TICKET_STATUS[t.status] ?? t.status}
+                </Badge>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{t.body}</p>
+              {t.admin_reply && (
+                <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <div className="text-xs font-semibold text-primary">Reply from Chama-OS</div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{t.admin_reply}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
