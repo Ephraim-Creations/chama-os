@@ -15,7 +15,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ksh, initialsOf } from "@/lib/mock-data";
+import { ksh } from "@/lib/mock-data";
 import { useChama } from "@/context/chama-context";
 import { useSnapshot } from "@/hooks/use-snapshot";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
