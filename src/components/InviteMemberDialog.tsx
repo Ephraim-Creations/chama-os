@@ -25,6 +25,7 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
   const [role, setRole] = useState<"member" | "treasurer" | "secretary" | "chairperson">("member");
   const [busy, setBusy] = useState(false);
   const [lastLink, setLastLink] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const invite = useServerFn(inviteMember);
@@ -34,9 +35,16 @@ export function InviteMemberDialog({ chamaId, trigger, onInvited }: Props) {
     setBusy(true);
     try {
       const res = await invite({ data: { chamaId, email, role } });
-      const link = `${window.location.origin}/login?invite=${res.token}`;
-      setLastLink(link);
-      toast.success(res.alreadyExisted ? "Invite already pending — link copied below." : "Invite created.");
+      const target = email.trim();
+      if (res.emailed) {
+        setSentTo(target);
+        setLastLink(null);
+        toast.success(`Invite email sent to ${target}.`);
+      } else {
+        setSentTo(null);
+        setLastLink(`${window.location.origin}/login?invite=${res.token}`);
+        toast.error("We couldn't send the email — share the backup link instead.");
+      }
       setEmail("");
       onInvited?.();
     } catch (err) {
