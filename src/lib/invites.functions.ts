@@ -21,6 +21,21 @@ async function assertChair(chamaId: string, userId: string) {
   if (!data || data.role !== "chairperson") throw new Error("Only the chairperson can do this");
 }
 
+async function findUserIdByEmail(email: string): Promise<string | null> {
+  const target = email.trim().toLowerCase();
+  for (let page = 1; page <= 5; page++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) {
+      console.error("[invites.functions] listUsers", error);
+      return null;
+    }
+    const hit = data.users.find((u) => (u.email ?? "").toLowerCase() === target);
+    if (hit) return hit.id;
+    if (data.users.length < 200) break;
+  }
+  return null;
+}
+
 export const inviteMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
