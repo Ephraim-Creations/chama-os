@@ -26,6 +26,7 @@ const nav = [
   { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
   { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/newsletter", label: "Newsletter", icon: Mail },
+  { to: "/admin/tickets", label: "Tickets", icon: LifeBuoy },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
