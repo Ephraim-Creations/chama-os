@@ -1,10 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Mail, Phone, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Search, Mail, Phone, ShieldCheck, Loader2, LifeBuoy } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
+import { useChama } from "@/context/chama-context";
+import { submitTicket, listMyTicketsFn, CATEGORIES } from "@/lib/support.functions";
 import { ROLE_LABELS, type Role } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_authed/help")({
