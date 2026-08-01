@@ -42,7 +42,7 @@ export function AppHeader() {
     const loadProfile = () => {
       void supabase
         .from("profiles")
-        .select("full_name, display_name")
+        .select("full_name, display_name, avatar_url")
         .eq("id", user.id)
         .maybeSingle()
         .then(({ data }) => {
