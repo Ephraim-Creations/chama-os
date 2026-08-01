@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -64,7 +64,6 @@ export function AppHeader() {
     user?.email ||
     "Member";
   const firstName = fullName.split(" ")[0];
-  const initials = initialsOf(fullName) || "?";
 
 
   const handleSignOut = async () => {
