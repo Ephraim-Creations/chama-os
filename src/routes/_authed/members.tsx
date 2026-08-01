@@ -223,11 +223,7 @@ function MembersPage() {
                   <TableRow key={m.id} className="text-[15px]">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border border-border">
-                          <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                            {initialsOf(m.displayName)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar name={m.displayName} path={m.avatarUrl} className="h-10 w-10" />
                         <div>
                           <div className="font-semibold text-foreground">{m.displayName}</div>
                           <div className="text-xs text-muted-foreground">
