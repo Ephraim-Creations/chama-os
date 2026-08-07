@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowRight, Menu, X, LogOut } from "lucide-react";
+import { ArrowRight, Menu, X, LogOut, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import logoImage from "@/assets/chama-OS-logo.png";
@@ -25,14 +25,31 @@ export function Navbar() {
             <div className="font-bold tracking-tight text-sm sm:text-base truncate">Chama-OS</div>
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground lg:flex">
+          <nav className="hidden items-center gap-5 whitespace-nowrap text-sm font-medium text-muted-foreground lg:flex xl:gap-7">
             <a href="/#features" className="hover:text-foreground">Features</a>
             <a href="/#how" className="hover:text-foreground">How it works</a>
             <a href="/#pricing" className="hover:text-foreground">Pricing</a>
-            <a href="/#solution" className="hover:text-foreground">Why Chama-OS</a>
-            <a href="/about" className="hover:text-foreground">About</a>
-            <a href="/contact" className="hover:text-foreground">Contact</a>
+            <a href="/#solution" className="hidden hover:text-foreground xl:inline">Why Chama-OS</a>
+            <a href="/about" className="hidden hover:text-foreground xl:inline">About</a>
+            <a href="/contact" className="hidden hover:text-foreground xl:inline">Contact</a>
+
+            {/* Small-desktop overflow menu */}
+            <div className="group relative xl:hidden">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 hover:text-foreground"
+                aria-haspopup="true"
+              >
+                More <ChevronDown className="h-4 w-4" />
+              </button>
+              <div className="invisible absolute right-0 top-full z-40 w-48 translate-y-1 rounded-xl border border-border bg-popover p-1.5 opacity-0 shadow-lg transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <a href="/#solution" className="block rounded-lg px-3 py-2 text-popover-foreground hover:bg-muted">Why Chama-OS</a>
+                <a href="/about" className="block rounded-lg px-3 py-2 text-popover-foreground hover:bg-muted">About</a>
+                <a href="/contact" className="block rounded-lg px-3 py-2 text-popover-foreground hover:bg-muted">Contact</a>
+              </div>
+            </div>
           </nav>
+
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
